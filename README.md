@@ -1,6 +1,7 @@
 DB 세팅
 
-
+create database dorandoran;
+use dorandoran;
 -- 🧍 USER 관련
 
 
