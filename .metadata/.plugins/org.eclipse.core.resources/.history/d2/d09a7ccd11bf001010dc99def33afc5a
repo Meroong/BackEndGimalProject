@@ -1,0 +1,16 @@
+package dto;
+
+import java.sql.Timestamp;
+
+public class MeetingDTO {
+	  	private int meetingId;         // 모임 ID (PK)
+	    private String title;          // 모임 제목
+	    private String content;        // 모임 설명
+	    private Timestamp date;        // 모임 날짜
+	    private String location;       // 장소
+	    private int maxMembers;        // 최대 인원
+	    private int currentMembers;    // 현재 인원
+	    private int cost;              // 참가비
+	    private String tag;            // 태그 (단순 텍스트)
+	    private String status;         // 상태 (모집중 / 마감 등)
+}
