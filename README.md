@@ -1,3 +1,9 @@
+구동을 위해서는 src/main/resources/config/dbConfig.properties 생성 이후 빌드패스에서 소스 탭에서 src/main/resources 폴더를 추가 
+    dbConfig.properties 작성예시는 아래와 같음 
+    DB_URL=jdbc:mysql://localhost:3306/dorandoran?serverTimezone=UTC
+    DB_USER=root
+    DB_PASSWORD=1234
+
 DB 세팅
 
 create database dorandoran;
