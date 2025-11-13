@@ -1,0 +1,33 @@
+package service;
+
+import dao.UserDAO;
+import dto.UserDTO;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+public class UserService {
+	UserDAO dao = new UserDAO();
+	//로그인 jwt토큰 방식
+	 
+	
+	//회원가입
+	public void registerUser(HttpServletRequest request) {
+		UserDTO dto = new UserDTO();
+		
+		
+		dto.setUserName(request.getParameter("name"));
+		if(dao.isNicknameDuplicate(dto.getNickname())) {
+			return "이미 존재하는 닉네임입니다.";
+		}
+		dao.insert(dto);
+		
+		
+		
+		
+	}
+	//탈퇴
+	
+	//회원정보수정
+	
+	//
+}

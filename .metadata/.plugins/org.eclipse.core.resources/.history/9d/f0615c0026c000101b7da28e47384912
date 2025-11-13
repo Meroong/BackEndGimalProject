@@ -1,0 +1,23 @@
+package dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import dto.UserDTO;
+import util.JDBCUtil;
+
+public class UserDAO {
+	Connection con = null;
+	ResultSet rs = null;
+	PreparedStatement pstmt = null;
+	
+	public void updateUser() {
+		con = JDBCUtil.jdbcCon();
+		
+		String userID = UserDTO.get();
+		
+		
+		if()
+	}
+}

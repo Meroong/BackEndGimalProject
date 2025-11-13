@@ -1,0 +1,51 @@
+package controller;
+
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import service.UserService;
+
+import java.io.IOException;
+
+@WebServlet("/user/*")
+public class UserController extends HttpServlet {
+	private UserService userService;
+	
+	public void init(ServletConfig config) throws ServletException {
+		userService = new UserService();
+	}
+
+	
+
+
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+	}
+
+	
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
+        String path = req.getPathInfo(); 
+        
+        switch (path) {
+            case "/login":
+                userService.loginUser(req, resp);
+                break;
+            case "/register":
+                userService.registerUser(req);
+                break;
+            //case "/update":
+              //  userService.updateUser(req);
+                //break;
+            default:
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
+	public void destroy() {
+		
+	}
+
+}

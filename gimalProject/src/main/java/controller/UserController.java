@@ -6,28 +6,48 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import service.UserService;
+
 import java.io.IOException;
 
-
+import dto.ResponseDTO;
+@WebServlet("/user/*")
 public class UserController extends HttpServlet {
-	
-	
-	public void init(ServletConfig config) throws ServletException {
-		
-	}
+    private UserService userService;
 
-	
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        userService = new UserService();
+        System.out.println("userController: ON");
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException, ServletException {
+
+        String path = req.getPathInfo(); 
+        ResponseDTO result = null;
+
+        switch (path) {
+            case "/login":
+                result = userService.loginUser(req, resp);
+                break;
+            case "/register":
+                result = userService.registerUser(req);
+                break;
+            default:
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+        }
+
+        // 응답 JSON 출력
+        resp.setContentType("application/json; charset=UTF-8");
+        resp.getWriter().write(
+            "{ \"status\": \"" + result.getStatus() + "\", \"message\": \"" + result.getMessage() + "\" }"
+        );
+    }
 
 
-	
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-	}
-
-	
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-	}
 	public void destroy() {
 		
 	}

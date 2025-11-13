@@ -1,0 +1,21 @@
+package util;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+public class AuthConfig{
+	private static Properties props = new Properties();
+
+    static {
+        try (InputStream input = AuthConfig.class.getClassLoader().getResourceAsStream("authConfig.properties")) {
+            props.load(input);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static long getJWTExp() { return props.getProperty("JWT_EXPIRATION"); }
+    public static String getJWTSec() { return props.getProperty("JWT_SECRET"); }
+}
+

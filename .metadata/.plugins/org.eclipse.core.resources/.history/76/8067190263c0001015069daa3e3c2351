@@ -1,0 +1,27 @@
+package util;
+
+import java.io.InputStream;
+import java.util.Properties;
+
+public class DbConfig {
+    private static Properties props = new Properties();
+
+    static {
+        try {
+            // ClassLoader로 클래스패스 기준 파일 읽기
+            InputStream inStream = DbConfig.class.getClassLoader()
+                    .getResourceAsStream("config/dbConfig.properties");
+            if (inStream == null) {
+                throw new RuntimeException("dbConfig.properties 파일을 찾을 수 없습니다.");
+            }
+            props.load(inStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("DB 설정 로드 실패", e);
+        }
+    }
+
+    public static String getUrl() { return props.getProperty("DB_URL"); }
+    public static String getUser() { return props.getProperty("DB_USER"); }
+    public static String getPassword() { return props.getProperty("DB_PASSWORD"); }
+}

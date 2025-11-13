@@ -1,0 +1,63 @@
+package dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+
+import dto.UserDTO;
+import util.JDBCUtil;
+
+public class UserDAO {
+	Connection con = null;
+	ResultSet rs = null;
+	PreparedStatement pstmt = null;
+	
+	public void updateUser(UserDTO dto) {
+		con = JDBCUtil.jdbcCon();
+		
+		ArrayList<Object> params = new ArrayList<Object>();
+		
+		int autoId = dto.getAutoId();
+		String userId = dto.getUserId();
+		String userPassword = dto.getUserPassword();
+		String userName = dto.getUserName();
+		String nickname = dto.getNickname();
+		int trustScore = dto.getTrustScore();
+		int addressId = dto.getAddressId();
+		String addressDetail = dto.getAddressDetail();
+		Timestamp updatedAt = dto.getUpdatedAt();
+		
+		String sql = "Update user Set";
+		
+		if(dto.getUserId(); != null) {
+			sql += " user_id = ?,";
+			params.add(dto.getUserId(););
+		}
+		if(userPassword != null) {
+			sql += " userPassword = ?,";
+			params.add(userPassword);
+		}
+		if(userName != null) {
+			sql += " user_id = ?,";
+			params.add(userId);
+		}
+		if(userId != null) {
+			sql += " user_id = ?,";
+			params.add(userId);
+		}
+		if(userId != null) {
+			sql += " user_id = ?,";
+			params.add(userId);
+		}
+		if(userId != null) {
+			sql += " user_id = ?,";
+			params.add(userId);
+		}
+		
+		pstmt = con.prepareStatement(sql);
+		
+
+	}
+}

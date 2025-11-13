@@ -1,0 +1,62 @@
+package util;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Properties;
+
+public class JDBCUtil {
+	static Connection con = null;
+	ResultSet rs = null;
+	InputStream input = null;
+	
+	
+	public static Connection jdbcCon() {
+		try {
+			
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			String user = DbConfig.getUser();
+			String url = DbConfig.getUrl();
+			String password = DbConfig.getPassword();
+			
+			con = DriverManager.getConnection(url, user, password);
+			
+			
+		} catch (ClassNotFoundException | SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return con;
+		
+		
+		
+		
+	}
+	public void close(Connection con, ResultSet rs, PreparedStatement pstmt) {
+		try {
+			pstmt.close();
+			rs.close();
+			con.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	public void close(Connection con, PreparedStatement pstmt) {
+		try {
+			pstmt.close();
+			con.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+		
+}

@@ -1,0 +1,43 @@
+package util;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Properties;
+
+public class JDBCUtil {
+	Connection con = null;
+	ResultSet rs = null;
+	InputStream input = null;
+	
+	
+	public Connection jdbcCon() {
+		try {
+			input = new FileInputStream("/src/config/config.properties");
+			if (input == null) {
+                throw new RuntimeException("⚠️ config.properties 파일을 찾을 수 없습니다.");
+            }
+			Class.forName("com.mysql.jdbc.Driver");
+			String user = DbConfig.getUser();
+			String url = DbConfig.getUrl();
+			String password = DbConfig.getPassword();
+			
+			con = DriverManager.getConnection(url, user, password);
+			
+			
+		} catch (ClassNotFoundException | SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		
+		
+	}
+		
+}

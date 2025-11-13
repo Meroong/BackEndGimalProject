@@ -1,0 +1,74 @@
+package dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+
+import dto.UserDTO;
+import util.JDBCUtil;
+
+public class UserDAO {
+	Connection con = null;
+	ResultSet rs = null;
+	PreparedStatement pstmt = null;
+	
+	public void updateUser(UserDTO dto) {
+		con = JDBCUtil.jdbcCon();
+		
+		ArrayList<Object> params = new ArrayList<Object>();
+		
+		String sql = "Update user Set";
+		
+		if(dto.getUserId() != null) {
+			sql += " user_id = ?,";
+			params.add(dto.getUserId());
+		}
+		if(dto.getUserPassword() != null) {
+			sql += " userPassword = ?,";
+			params.add(dto.getUserPassword());
+		}
+		if(dto.getNickname() != null) {
+			sql += " nickname = ?,";
+			params.add(dto.getNickname());
+		}
+		if(dto.getTrustScore() != 0) {
+			sql += " trust_score = ?,";
+			params.add(dto.getTrustScore());
+		}
+		if (dto.getAddressId() != 0) {
+		    sql += " address_id = ?, ";
+		    params.add(dto.getAddressId());
+		}
+		if (dto.getAddressDetail() != null) {
+		    sql += "address_detail = ?, ";
+		    params.add(dto.getAddressDetail());
+		}
+		if (dto.getUpdatedAt() != null) {
+		    sql += "updated_at = ?, ";
+		    params.add(dto.getUpdatedAt());
+		}
+		
+		if (sql.endsWith(", ")) {
+		    sql = sql.substring(0, sql.length() - 2);
+		}
+		
+		try {
+			pstmt = con.prepareStatement(sql);
+			
+			for(int i=0; i< params.size(); i++) {
+				pstmt.setObject(i+1, params.get(i));
+			}
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("success update: \nSql: "+sql+"\nParams: "+params);
+		
+
+	}
+}

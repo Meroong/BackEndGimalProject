@@ -1,0 +1,54 @@
+package auth;
+
+
+import java.security.Key;
+import java.util.Date;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+
+public class Authentification {
+
+    // 서명용 비밀키 (실제 운영 환경에서는 외부 config에서 관리)
+    private static final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+    // 토큰 만료 시간 (예: 1시간)
+    private static final long EXPIRATION_TIME = 60 * 60 * 1000;
+
+    // JWT 생성
+    public static String generateToken(String userId, int autoId, String role) {
+        return Jwts.builder()
+                .setSubject(userId)            // 로그인 ID
+                .claim("autoId", autoId)       // DB PK
+                .claim("role", role)           // 권한
+                .setIssuedAt(new Date())       // 발급 시간
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // 만료 시간
+                .signWith(key)                 // 서명
+                .compact();
+    }
+
+    // JWT 검증 및 Claims 추출
+    public static Claims validateToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody(); // 유효하지 않으면 예외 발생
+    }
+
+    // 토큰에서 사용자 정보 가져오기
+    public static String getUserId(String token) {
+        return validateToken(token).getSubject();
+    }
+
+    public static int getAutoId(String token) {
+        return (Integer) validateToken(token).get("autoId");
+    }
+
+    public static String getRole(String token) {
+        return (String) validateToken(token).get("role");
+    }
+}
+

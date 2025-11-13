@@ -1,0 +1,217 @@
+package dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+
+import dto.UserDTO;
+import util.JDBCUtil;
+
+public class UserDAO {
+	Connection con = null;
+	ResultSet rs = null;
+	PreparedStatement pstmt = null;
+	String sql;
+	public void updateUser(UserDTO dto) {
+		con = JDBCUtil.jdbcCon();
+		
+		ArrayList<Object> params = new ArrayList<Object>();
+		
+		sql = "Update user Set";
+		
+		if(dto.getUserId() != null) {
+			sql += " user_id = ?,";
+			params.add(dto.getUserId());
+		}
+		if(dto.getUserPassword() != null) {
+			sql += " userPassword = ?,";
+			params.add(dto.getUserPassword());
+		}
+		if(dto.getNickname() != null) {
+			sql += " nickname = ?,";
+			params.add(dto.getNickname());
+		}
+		if(dto.getTrustScore() != 0) {
+			sql += " trust_score = ?,";
+			params.add(dto.getTrustScore());
+		}
+		if (dto.getAddressId() != 0) {
+		    sql += " address_id = ?, ";
+		    params.add(dto.getAddressId());
+		}
+		if (dto.getAddressDetail() != null) {
+		    sql += "address_detail = ?, ";
+		    params.add(dto.getAddressDetail());
+		}
+		if (dto.getUpdatedAt() != null) {
+		    sql += "updated_at = ?, ";
+		    params.add(dto.getUpdatedAt());
+		}
+		
+		if (sql.endsWith(", ")) {
+		    sql = sql.substring(0, sql.length() - 2);
+		}
+		
+		sql += " where auto_id = ?";
+		params.add(dto.getAutoId());
+		
+		try {
+			pstmt = con.prepareStatement(sql);
+			
+			for(int i=0; i< params.size(); i++) {
+				pstmt.setObject(i+1, params.get(i));
+			}
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("success update!\nSql: "+sql+"\nParams: "+params);
+	}
+	
+	public boolean insert(UserDTO dto) {
+		sql = "insert into user ("
+				+ "user_id, "
+				+ "user_password, "
+				+ "user_name, "
+				+ "nickname, "
+				+ "role, "
+				+ "address_id, "
+				+ "address_detail "
+				+ ") VALUES (?, ?, ?, ?, ?, ?, ?)";
+		
+		try {
+			pstmt = con.prepareStatement(sql);
+			
+			pstmt.setString(1, dto.getUserId());
+	        pstmt.setString(2, dto.getUserPassword());
+	        pstmt.setString(3, dto.getUserName());
+	        pstmt.setString(4, dto.getNickname());
+	        pstmt.setString(5, dto.getRole());
+	        pstmt.setInt(6, dto.getAddressId());
+	        pstmt.setString(7, dto.getAddressDetail());
+	        
+	        int result =pstmt.executeUpdate();
+	        
+	        return result > 0;
+	        
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+		
+	}
+	
+	public UserDTO searchForLogin(String userId, String userPassword) {
+		UserDTO dto = new UserDTO();
+		sql = "select * from user where auto_id ";
+		
+		con = JDBCUtil.jdbcCon();
+		try {
+			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, autoId);
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+	            dto = new UserDTO();
+	            dto.setAutoId(autoId);
+	            dto.setUserId(rs.getString("user_id"));
+	            dto.setUserPassword(rs.getString("user_password"));
+	            dto.setUserName(rs.getString("user_name"));
+	            dto.setNickname(rs.getString("nickname"));
+	            dto.setTrustScore(rs.getInt("trust_score"));
+	            dto.setRole(rs.getString("role"));
+	            dto.setAddressId(rs.getInt("address_id"));
+	            dto.setAddressDetail(rs.getString("address_detail"));
+	            dto.setUpdatedAt(rs.getTimestamp("updated_at"));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return dto;
+	}
+	
+	public UserDTO searchByAutoId(int autoId) {
+		UserDTO dto = new UserDTO();
+		sql = "select * from user where auto_id ";
+		
+		con = JDBCUtil.jdbcCon();
+		try {
+			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, autoId);
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+	            dto = new UserDTO();
+	            dto.setAutoId(autoId);
+	            dto.setUserId(rs.getString("user_id"));
+	            dto.setUserPassword(rs.getString("user_password"));
+	            dto.setUserName(rs.getString("user_name"));
+	            dto.setNickname(rs.getString("nickname"));
+	            dto.setTrustScore(rs.getInt("trust_score"));
+	            dto.setRole(rs.getString("role"));
+	            dto.setAddressId(rs.getInt("address_id"));
+	            dto.setAddressDetail(rs.getString("address_detail"));
+	            dto.setUpdatedAt(rs.getTimestamp("updated_at"));
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return dto;
+	}
+	public void delete(int autoId) {
+		sql = "delete from user where auto_id = ?;";
+		
+		try {
+			pstmt = con.prepareStatement(sql);
+			pstmt.setInt(1, autoId);
+			pstmt.executeQuery();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("success delete!\nSql: "+sql+"\nParams: "+autoId);
+	}
+	
+	 public boolean isUserIdDuplicate(String userId) {
+	        String sql = "SELECT COUNT(*) FROM user WHERE user_id = ?";
+	        try (Connection con = JDBCUtil.jdbcCon();
+	             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+	            pstmt.setString(1, userId);
+	            ResultSet rs = pstmt.executeQuery();
+	            if (rs.next()) {
+	                return rs.getInt(1) > 0; // 0보다 크면 중복
+	            }
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	        return false;
+	    }
+
+	    public boolean isNicknameDuplicate(String nickname) {
+	        String sql = "SELECT COUNT(*) FROM user WHERE nickname = ?";
+	        try (
+	            PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+	            pstmt.setString(1, nickname);
+	            ResultSet rs = pstmt.executeQuery();
+	            if (rs.next()) {
+	                return rs.getInt(1) > 0;
+	            }
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	        }
+	        return false;
+	    }
+	
+	
+}

@@ -1,0 +1,63 @@
+package service;
+
+import org.apache.catalina.authenticator.SpnegoAuthenticator.AuthenticateAction;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+
+import auth.JwtAuth;
+import dao.UserDAO;
+import dto.ResponseDTO;
+import dto.UserDTO;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+public class UserService {
+	UserDAO dao = new UserDAO();
+	UserDTO dto = new UserDTO();
+	//로그인 jwt토큰 방식
+	public ResponseDTO loginUser (HttpServletRequest request, HttpServletResponse response) {
+		String id = request.getParameter("name");
+		String password = request.getParameter("password");
+		
+		if(id == null) {
+			return new ResponseDTO("fail", "아이디를 입력해주세요.");
+		}
+		if(password == null) {
+			return new ResponseDTO("fail", "비밀번호를 입력해주세요.");
+		}
+		dto.setUserId(id);
+		dto.setUserPassword(password);
+		dto = dao.searchForLogin(id, password);
+		
+		if(dto != null) {
+			JwtAuth auth = new JwtAuth();
+		}
+		
+		return  new ResponseDTO("","");
+	}
+	 
+	
+	//회원가입 //status와 메시지를 반환
+	public ResponseDTO registerUser(HttpServletRequest request) {
+		UserDTO dto = new UserDTO();
+		
+				
+		if(dao.isNicknameDuplicate(dto.getNickname())) {
+			return new ResponseDTO("fail", "이미 존재하는 닉네임입니다.");
+		}
+		if(dao.isUserIdDuplicate(dto.getUserId())) {
+			return new ResponseDTO("fail", "이미 존재하는 아이디입니다.");
+		}
+		
+		boolean  result = dao.insert(dto);
+		
+		
+		return result ?  
+				new ResponseDTO("success", "회원가입 성공"): new ResponseDTO("fail", "회원가입 실패");
+		
+	}
+	//탈퇴
+	
+	//회원정보수정
+	
+	//
+}

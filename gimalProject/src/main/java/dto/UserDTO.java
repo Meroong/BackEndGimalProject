@@ -3,55 +3,75 @@ package dto;
 import java.sql.Timestamp;
 
 public class UserDTO {
-	 	private int userId;           // 사용자 고유 ID (PK)
-	    private String username;      // 사용자 아이디 (로그인용)
-	    private String password;      // 비밀번호 (암호화 저장 권장)
-	    private String name;          // 이름
-	    private String email;         // 이메일
-	    private String phone;         // 전화번호
-	    private String role;          // 권한 (admin / user 등)
 
-	    // 상태 및 메타 정보
-	    private boolean active;       // 계정 활성 상태
-	    private Timestamp createdAt;  // 가입일
-	    private Timestamp updatedAt;  // 정보 수정일
+	   	private int autoId;            // 유저 고유 식별자 (PK)
+	    private String userId;          // 로그인용 아이디
+	    private String userPassword;    // 암호화된 비밀번호
+	    private String userName;        // 실명
+	    private String nickname;        // 닉네임 (중복 불가)
+	    private int trustScore;         // 신뢰도 점수
+	    private String role;            // 권한 (USER / ADMIN)
+	    private int addressId;         // 주소 참조키
+	    private String addressDetail;   // 상세 주소
+	    private Timestamp createdAt;    // 가입일시
+	    private Timestamp updatedAt;    // 정보 수정일시
+	    
+	    public UserDTO() {}
+	    
+	    public UserDTO(int autoId, String userId, String userPassword, String userName,
+                	String nickname, int trustScore, String role,
+                	int addressId, String addressDetail,
+                	Timestamp createdAt, Timestamp updatedAt) 
+	    {
+		     this.autoId = autoId;
+		     this.userId = userId;
+		     this.userPassword = userPassword;
+		     this.userName = userName;
+		     this.nickname = nickname;
+		     this.trustScore = trustScore;
+		     this.role = role;
+		     this.addressId = addressId;
+		     this.addressDetail = addressDetail;
+		     this.createdAt = createdAt;
+		     this.updatedAt = updatedAt;
+ }
 	    
 	    
-		public int getUserId() {
+		public int getAutoId() {
+			return autoId;
+		}
+		public void setAutoId(int autoId) {
+			this.autoId = autoId;
+		}
+		public String getUserId() {
 			return userId;
 		}
-		public void setUserId(int userId) {
+		public void setUserId(String userId) {
 			this.userId = userId;
 		}
-		public String getUsername() {
-			return username;
+		public String getUserPassword() {
+			return userPassword;
 		}
-		public void setUsername(String username) {
-			this.username = username;
+		public void setUserPassword(String userPassword) {
+			this.userPassword = userPassword;
 		}
-		public String getPassword() {
-			return password;
+		public String getUserName() {
+			return userName;
 		}
-		public void setPassword(String password) {
-			this.password = password;
+		public void setUserName(String userName) {
+			this.userName = userName;
 		}
-		public String getName() {
-			return name;
+		public String getNickname() {
+			return nickname;
 		}
-		public void setName(String name) {
-			this.name = name;
+		public void setNickname(String nickname) {
+			this.nickname = nickname;
 		}
-		public String getEmail() {
-			return email;
+		public int getTrustScore() {
+			return trustScore;
 		}
-		public void setEmail(String email) {
-			this.email = email;
-		}
-		public String getPhone() {
-			return phone;
-		}
-		public void setPhone(String phone) {
-			this.phone = phone;
+		public void setTrustScore(int trustScore) {
+			this.trustScore = trustScore;
 		}
 		public String getRole() {
 			return role;
@@ -59,11 +79,17 @@ public class UserDTO {
 		public void setRole(String role) {
 			this.role = role;
 		}
-		public boolean isActive() {
-			return active;
+		public int getAddressId() {
+			return addressId;
 		}
-		public void setActive(boolean active) {
-			this.active = active;
+		public void setAddressId(int addressId) {
+			this.addressId = addressId;
+		}
+		public String getAddressDetail() {
+			return addressDetail;
+		}
+		public void setAddressDetail(String addressDetail) {
+			this.addressDetail = addressDetail;
 		}
 		public Timestamp getCreatedAt() {
 			return createdAt;
@@ -78,7 +104,22 @@ public class UserDTO {
 			this.updatedAt = updatedAt;
 		}
 	    
-	    
+		@Override
+		public String toString() {
+		    return "UserDTO{" +
+		                "autoId=" + autoId +
+		                ", userId='" + userId + '\'' +
+		                ", userName='" + userName + '\'' +
+		                ", nickname='" + nickname + '\'' +
+		                ", trustScore=" + trustScore +
+		                ", role='" + role + '\'' +
+		                ", addressId=" + addressId +
+		                ", addressDetail='" + addressDetail + '\'' +
+		                ", createdAt=" + createdAt +
+		                ", updatedAt=" + updatedAt +
+		                '}';
+		    }
+		
 	    
 
 }

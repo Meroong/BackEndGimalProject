@@ -1,0 +1,85 @@
+package service;
+
+import org.apache.catalina.authenticator.SpnegoAuthenticator.AuthenticateAction;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+
+import auth.JwtAuth;
+import dao.UserDAO;
+import dto.ResponseDTO;
+import dto.UserDTO;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
+public class UserService {
+	UserDAO dao = new UserDAO();
+	UserDTO dto = new UserDTO();
+	//로그인 jwt토큰 방식
+	public ResponseDTO loginUser (HttpServletRequest request, HttpServletResponse response) {
+		String id = request.getParameter("userId");
+		String password = request.getParameter("userPassword");
+		
+		if(id == null) {
+			return new ResponseDTO("fail", "아이디를 입력해주세요.");
+		}
+		if(password == null) {
+			return new ResponseDTO("fail", "비밀번호를 입력해주세요.");
+		}
+		dto.setUserId(id);
+		dto.setUserPassword(password);
+		dto = dao.searchForLogin(id, password);
+		
+		if(dto != null) {
+			JwtAuth auth = new JwtAuth();
+			String jwt = auth.generateToken(dto.getUserId(), dto.getAutoId(), dto.getRole());
+			response.setHeader("Authorization", "Bearer "+jwt);
+		}
+		
+		return  new ResponseDTO("success","로그인 성공!");
+	}
+	 
+	
+	public ResponseDTO registerUser(HttpServletRequest request) {
+	    String userId = request.getParameter("userId");
+	    String password = request.getParameter("userPassword");
+	    String nickname = request.getParameter("nickname");
+	    //
+	    System.out.println("registerUser 호출: userId=" + dto.getUserId() 
+        + ", password=" + dto.getUserPassword() 
+        + ", nickname=" + dto.getNickname() 
+        + ", addressId=" + dto.getAddressId());
+
+	    
+	    System.out.println("registerUser 호출: userId=" + userId + ", password=" + password + ", nickname=" + nickname);
+
+	    if (userId == null || password == null) {
+	        System.out.println("파라미터 누락!");
+	        return new ResponseDTO("fail", "아이디 또는 비밀번호 누락");
+	    }
+
+	    if(dao.isNicknameDuplicate(nickname)) {
+	        System.out.println("닉네임 중복");
+	        return new ResponseDTO("fail", "이미 존재하는 닉네임입니다.");
+	    }
+	    if(dao.isUserIdDuplicate(userId)) {
+	        System.out.println("아이디 중복");
+	        return new ResponseDTO("fail", "이미 존재하는 아이디입니다.");
+	    }
+	    dto.setUserId(userId);
+	    dto.setUserPassword(password);
+	    dto.setNickname(nickname);
+	    
+	    System.out.println("userId: " + dto.getUserId());
+	    System.out.println("addressId: " + dto.getAddressId());
+
+
+	    boolean result = dao.insert(dto);
+	    System.out.println("회원가입 결과: " + result);
+	    return result ? new ResponseDTO("success", "회원가입 성공") : new ResponseDTO("fail", "회원가입 실패");
+	}
+
+	//탈퇴
+	
+	//회원정보수정
+	
+	//
+}
