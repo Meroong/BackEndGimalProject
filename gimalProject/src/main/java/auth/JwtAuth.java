@@ -32,17 +32,24 @@ public class JwtAuth {
 
     // JWT 검증 및 Claims 추출
     public static Claims validateToken(String token) {
-    	
-    	if(token !=null && token.startsWith("Bearer ")) {
-    		token = token.substring(7);
-    	}
-    	
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody(); // 유효하지 않으면 예외 발생
+        try {
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+        } catch (Exception e) {
+            // SignatureException, ExpiredJwtException, MalformedJwtException 등 모두 포함
+        	System.out.println("유효하지않은 토큰 | 토큰이 없습니다.");
+            return null;   // 유효하지 않으면 null 반환
+        }
     }
+
 
     // 토큰에서 사용자 정보 가져오기
     public static String getUserId(String token) {

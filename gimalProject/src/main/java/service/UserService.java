@@ -1,5 +1,7 @@
 package service;
 
+import java.net.http.HttpRequest;
+
 import org.apache.catalina.authenticator.SpnegoAuthenticator.AuthenticateAction;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 
@@ -7,41 +9,14 @@ import auth.JwtAuth;
 import dao.UserDAO;
 import dto.ResponseDTO;
 import dto.UserDTO;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 public class UserService {
-
-	//로그인 jwt토큰 방식
-	public ResponseDTO loginUser (HttpServletRequest request, HttpServletResponse response) {
-		UserDAO dao = new UserDAO();
-		UserDTO dto = new UserDTO();
-		String id = request.getParameter("userId");
-		String password = request.getParameter("userPassword");
-		
-		if(id == null) {
-			return new ResponseDTO("fail", "아이디를 입력해주세요.");
-		}
-		if(password == null) {
-			return new ResponseDTO("fail", "비밀번호를 입력해주세요.");
-		}
-		dto.setUserId(id);
-		dto.setUserPassword(password);
-		dto = dao.searchForLogin(id, password);
-		
-		if(dto != null) {
-			JwtAuth auth = new JwtAuth();
-			String jwt = auth.generateToken(dto.getUserId(), dto.getAutoId(), dto.getRole());
-			response.setHeader("Authorization", "Bearer "+jwt);
-			System.out.println("로그인 성공");
-			return  new ResponseDTO("success","로그인 성공!");
-		}
-		else return  new ResponseDTO("fail","로그인 실패!");
-		
-		
-	}
-	 
 	
+	//회원가입
 	public ResponseDTO registerUser(HttpServletRequest request) {
 		UserDAO dao = new UserDAO();
 	    String userId = request.getParameter("userId");
@@ -94,11 +69,63 @@ public class UserService {
 	                  : new ResponseDTO("fail", "회원가입 실패");
 	}
 
+	//로그인 jwt토큰 방식
+	public ResponseDTO loginUser (HttpServletRequest request, HttpServletResponse response) {
+		UserDAO dao = new UserDAO();
+		UserDTO dto = new UserDTO();
+		HttpSession session =  request.getSession();
+		
+		String id = request.getParameter("userId");
+		String password = request.getParameter("userPassword");
+		
+		if(id == null) {
+			return new ResponseDTO("fail", "아이디를 입력해주세요.");
+		}
+		if(password == null) {
+			return new ResponseDTO("fail", "비밀번호를 입력해주세요.");
+		}
+		dto.setUserId(id);
+		dto.setUserPassword(password);
+		dto = dao.searchForLogin(id, password);
+		
+		if(dto != null) {
+			JwtAuth auth = new JwtAuth();
+			String jwt = auth.generateToken(dto.getUserId(), dto.getAutoId(), dto.getRole());
+			session.setAttribute("Authorization", "Bearer "+jwt);
+			System.out.println("로그인 성공");
+			return  new ResponseDTO("success","로그인 성공!");
+		}
+		else return  new ResponseDTO("fail","로그인 실패!");
+		
+		
+	}
+
 
 	//탈퇴
 	
 	//회원정보수정
 	
+	public ResponseDTO updateUser(HttpServletRequest request) {
+		UserDAO dao = new UserDAO();
+		UserDTO dto = new UserDTO();
+		JwtAuth auth = new JwtAuth();
+		HttpSession session =  request.getSession();
+		String jwtToken = (String) session.getAttribute("Authorization");
+		
+		Claims claims =  auth.validateToken(jwtToken);
+		
+		if(claims == null) {
+			return new ResponseDTO("fail", "invalid JWT Token..");
+		}
+		
+		
+		
+		
+		
+		
+		
+		return new ResponseDTO("success", "회원정보 수정성공");
+	}
 	
 	//
 }
