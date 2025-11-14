@@ -34,9 +34,11 @@ public class UserService {
 			String jwt = auth.generateToken(dto.getUserId(), dto.getAutoId(), dto.getRole());
 			response.setHeader("Authorization", "Bearer "+jwt);
 			System.out.println("로그인 성공");
+			return  new ResponseDTO("success","로그인 성공!");
 		}
+		else return  new ResponseDTO("fail","로그인 실패!");
 		
-		return  new ResponseDTO("success","로그인 성공!");
+		
 	}
 	 
 	
@@ -96,6 +98,7 @@ public class UserService {
 	//탈퇴
 	
 	//회원정보수정
+	
 	
 	//
 }

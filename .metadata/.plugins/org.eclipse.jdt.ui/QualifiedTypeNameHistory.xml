@@ -24,6 +24,8 @@
     <fullyQualifiedTypeName name="org.apache.tomcat.util.net.openssl.ciphers.Authentication"/>
     <fullyQualifiedTypeName name="auth.JwtAuth"/>
     <fullyQualifiedTypeName name="jakarta.servlet.annotation.WebServlet"/>
-    <fullyQualifiedTypeName name="dto.ResponseDTO"/>
     <fullyQualifiedTypeName name="util.JDBCUtil"/>
+    <fullyQualifiedTypeName name="jakarta.servlet.ServletContextListener"/>
+    <fullyQualifiedTypeName name="jakarta.servlet.ServletContextEvent"/>
+    <fullyQualifiedTypeName name="dto.ResponseDTO"/>
 </qualifiedTypeNameHistroy>
