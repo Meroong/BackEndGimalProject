@@ -17,23 +17,18 @@ import jakarta.servlet.http.HttpSession;
 public class UserService {
 	
 	//회원가입
-	public ResponseDTO registerUser(HttpServletRequest request) {
+	public ResponseDTO registerUser(String userId, String password, String nickName, String userName, String addressIdStr, String addressDetail) {
 		UserDAO dao = new UserDAO();
-	    String userId = request.getParameter("userId");
-	    String password = request.getParameter("userPassword");
-	    String nickname = request.getParameter("nickname");
-	    String userName = request.getParameter("userName"); // 회원 이름
-	    String addressIdStr = request.getParameter("addressId"); // 문자열로 받아옴
-	    String addressDetail = request.getParameter("addressDetail");
 
-	    System.out.println("registerUser 호출: userId=" + userId + ", password=" + password + ", nickname=" + nickname);
+
+	    System.out.println("registerUser 호출: userId=" + userId + ", password=" + password + ", nickname=" + nickName);
 
 	    if (userId == null || password == null || userName == null) {
 	        System.out.println("파라미터 누락!");
 	        return new ResponseDTO("fail", "아이디, 비밀번호 또는 이름 누락");
 	    }
 
-	    if(dao.isNicknameDuplicate(nickname)) {
+	    if(dao.isNicknameDuplicate(nickName)) {
 	        System.out.println("닉네임 중복");
 	        return new ResponseDTO("fail", "이미 존재하는 닉네임입니다.");
 	    }
@@ -44,10 +39,10 @@ public class UserService {
 	    }
 
 	    UserDTO dto = new UserDTO();
-	    dto.setUserId(request.getParameter("userId"));          
-	    dto.setUserPassword(request.getParameter("userPassword")); 
-	    dto.setUserName(request.getParameter("userName"));      
-	    dto.setNickname(request.getParameter("nickname"));      
+	    dto.setUserId(userId);          
+	    dto.setUserPassword(password); 
+	    dto.setUserName(userName);      
+	    dto.setNickname(nickName);      
 	    dto.setRole("USER");                                    
 	    dto.setAddressId(1);                                    // 기본값 디비 방법 정하고 추후 수정 예정
 
@@ -70,13 +65,9 @@ public class UserService {
 	}
 
 	//로그인 jwt토큰 방식
-	public ResponseDTO loginUser (HttpServletRequest request, HttpServletResponse response) {
+	public ResponseDTO loginUser (String id, String password, HttpSession session) {
 		UserDAO dao = new UserDAO();
 		UserDTO dto = new UserDTO();
-		HttpSession session =  request.getSession();
-		
-		String id = request.getParameter("userId");
-		String password = request.getParameter("userPassword");
 		
 		if(id == null) {
 			return new ResponseDTO("fail", "아이디를 입력해주세요.");
@@ -104,6 +95,7 @@ public class UserService {
 	//탈퇴
 	
 	//회원정보수정
+	//HttpServletRequest request 서비스에서 이렇게 처리하지 않고 컨트롤러에서 하도록 http 객체 의존으로 인한 아키텍처 위반
 	
 	public ResponseDTO updateUser(HttpServletRequest request) {
 		UserDAO dao = new UserDAO();
@@ -127,5 +119,5 @@ public class UserService {
 		return new ResponseDTO("success", "회원정보 수정성공");
 	}
 	
-	//
+	//회원정보조회
 }

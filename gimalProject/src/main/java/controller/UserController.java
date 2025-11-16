@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import service.UserService;
 
 import java.io.IOException;
@@ -25,27 +26,40 @@ public class UserController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
 
-        String path = req.getPathInfo(); 
+        String path = req.getPathInfo();
         ResponseDTO result = null;
 
         switch (path) {
             case "/login":
-                result = userService.loginUser(req, resp);
+                String id = req.getParameter("userId");
+                String pw = req.getParameter("userPassword");
+                HttpSession session = req.getSession();
+                result = userService.loginUser(id, pw, session);
                 break;
+
             case "/register":
-                result = userService.registerUser(req);
+        	    String userId = req.getParameter("userId");
+        	    String password = req.getParameter("userPassword");
+        	    String nickName = req.getParameter("nickName");
+        	    String userName = req.getParameter("userName"); // 회원 이름
+        	    String addressIdStr = req.getParameter("addressId"); // 문자열로 받아옴
+        	    String addressDetail = req.getParameter("addressDetail");
+            	
+                result = userService.registerUser(userId, password, nickName, userName, addressIdStr, addressDetail); // 필요하면 register도 request 없애는 게 좋음
                 break;
+
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
         }
 
-        // 응답 JSON 출력
         resp.setContentType("application/json; charset=UTF-8");
-        resp.getWriter().write(
-            "{ \"status\": \"" + result.getStatus() + "\", \"message\": \"" + result.getMessage() + "\" }"
-        );
+
+        // Gson으로 JSON 출력 (수동 문자열 X)
+        String json = new Gson().toJson(result);
+        resp.getWriter().write(json);
     }
+
 
 
 	public void destroy() {
