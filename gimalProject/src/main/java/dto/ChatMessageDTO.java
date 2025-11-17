@@ -1,24 +1,44 @@
 package dto;
 
+import java.sql.Timestamp;
+
 public class ChatMessageDTO {
-    private long id;            // 메시지 식별자
-    private long roomId;        // 채팅방 ID
-    private long senderId;      // 보낸 사람 ID
-    private String content;     // 메시지 내용
-    private String sentAt;      // 전송 시각
+    private Long messageId;
+    private Long roomId;
+    private Long senderId;
+    private String content;
+    private Timestamp sentAt;
+	public Long getMessageId() {
+		return messageId;
+	}
+	public void setMessageId(Long messageId) {
+		this.messageId = messageId;
+	}
+	public Long getRoomId() {
+		return roomId;
+	}
+	public void setRoomId(Long roomId) {
+		this.roomId = roomId;
+	}
+	public Long getSenderId() {
+		return senderId;
+	}
+	public void setSenderId(Long senderId) {
+		this.senderId = senderId;
+	}
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
+	public Timestamp getSentAt() {
+		return sentAt;
+	}
+	public void setSentAt(Timestamp sentAt) {
+		this.sentAt = sentAt;
+	}
 
-    public long getId() { return id; }
-    public void setId(long id) { this.id = id; }
 
-    public long getRoomId() { return roomId; }
-    public void setRoomId(long roomId) { this.roomId = roomId; }
 
-    public long getSenderId() { return senderId; }
-    public void setSenderId(long senderId) { this.senderId = senderId; }
-
-    public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
-
-    public String getSentAt() { return sentAt; }
-    public void setSentAt(String sentAt) { this.sentAt = sentAt; }
 }

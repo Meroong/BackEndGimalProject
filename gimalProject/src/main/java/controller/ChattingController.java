@@ -1,8 +1,8 @@
 package controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
-import dto.ResponseDTO;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -11,62 +11,88 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import service.ChattingService;
-
+import dto.ChatRoomDTO;
+import auth.JwtAuth;
+import io.jsonwebtoken.Claims;
 
 @WebServlet("/chat/*")
 public class ChattingController extends HttpServlet {
-	ChattingService service;
+    ChattingService service;
 
-
-	
-	public void init(ServletConfig config) throws ServletException {
-        service  = new ChattingService();
+    public void init(ServletConfig config) throws ServletException {
+        service = new ChattingService();
         System.out.println("ChattingController: ON");
-	}
-
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = req.getPathInfo();
-        ResponseDTO result = null;
-        switch (path) {
-        case "/rooms": //채팅방 조회
-       
-            result = service.loginUser(id, pw, session);
-            break;
-
-        case "/register":
-    	    String userId = req.getParameter("userId");
-    	    String password = req.getParameter("userPassword");
-    	    String nickName = req.getParameter("nickName");
-    	    String userName = req.getParameter("userName"); // 회원 이름
-    	    String addressIdStr = req.getParameter("addressId"); // 문자열로 받아옴
-    	    String addressDetail = req.getParameter("addressDetail");
-        	
-            result = service.
-            break;
-
-        default:
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-            return;
     }
 
-    resp.setContentType("application/json; charset=UTF-8");
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
-    // Gson으로 JSON 출력 (수동 문자열 X)
-    String json = new Gson().toJson(result);
-    resp .getWriter().write(json);
+        String path = req.getPathInfo();   // /rooms, /roomDelete/12
+
+        // ---------- 로그인 검증 ----------
+        HttpSession session = req.getSession();
+        String jwt = (String) session.getAttribute("Authorization");
+
+        JwtAuth auth = new JwtAuth();
+        Claims claims = auth.validateToken(jwt);
+
+        if (claims == null) {
+            req.setAttribute("error", "Invalid Token");
+            req.getRequestDispatcher("/error.jsp").forward(req, resp);
+            return;
+        }
+
+        int autoId = (Integer) claims.get("autoId");
+
+        // ---------- 채팅방 리스트 ----------
+        if ("/rooms".equals(path)) {
+
+            ArrayList<ChatRoomDTO> chatRooms = service.getRoomList(autoId);
+            req.setAttribute("chatList", chatRooms);
+            req.getRequestDispatcher("/chat/chatRoomList.jsp").forward(req, resp);
+            return;
+        }
+
+        // ---------- 채팅방 삭제 ----------
+        else if (path.startsWith("/roomDelete/")) {
+
+            String[] parts = path.split("/");   // ["", "roomDelete", "12"]
+            if (parts.length != 3) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Room ID Missing");
+                return;
+            }
+
+            Long roomId = Long.valueOf(parts[2]);
+            service.deleteRoom(roomId, autoId);
+
+            resp.sendRedirect(req.getContextPath() + "/chat/rooms");
+            return;
+        }
+
+        resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+    }
+
+    
+    // POST 영역: /roomMake 채팅방 생성
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        String path = req.getPathInfo(); // /roomMake
+
+        if ("/roomMake".equals(path)) {
+
+            String title = req.getParameter("title");
+            long itemId = Long.parseLong(req.getParameter("itemId"));
+            String roomType = req.getParameter("roomType");
+            long hostId = Long.parseLong(req.getParameter("hostId"));
+
+            service.makeRoom(title, itemId, roomType, hostId);
+            
+            resp.sendRedirect(req.getContextPath() + "/chat/rooms");
+            return;
+        }
+
+        resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+    }
+
+
+    public void destroy() {}
 }
-
-
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-	}
-
-}
-
-
-	public void destroy() {
-		
-	}
-
-}
-
