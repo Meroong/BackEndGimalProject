@@ -1,2 +1,0 @@
-jwt.secret = "dongyangGimalProject"; 
-jwt.expiration=3600000
