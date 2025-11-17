@@ -100,15 +100,6 @@ public class UserService {
 	public ResponseDTO updateUser(HttpServletRequest request) {
 		UserDAO dao = new UserDAO();
 		UserDTO dto = new UserDTO();
-		JwtAuth auth = new JwtAuth();
-		HttpSession session =  request.getSession();
-		String jwtToken = (String) session.getAttribute("Authorization");
-		
-		Claims claims =  auth.validateToken(jwtToken);
-		
-		if(claims == null) {
-			return new ResponseDTO("fail", "invalid JWT Token..");
-		}
 		
 		
 		
