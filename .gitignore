@@ -4,3 +4,4 @@ dbConfig.properties
 /.classpath
 .project
 .settings/
+/.metadata
