@@ -1,9 +1,0 @@
-INDEX VERSION 1.134
-C:\Users\sonjo\eclipse-workspace\BackEndGimalProject\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\1963825557.index
-\gimalProject\src\main\java
-C:\Users\sonjo\eclipse-workspace\BackEndGimalProject\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\127077830.index
-\gimalProject\src\main\java
-C:\Users\sonjo\eclipse-workspace\BackEndGimalProject\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\770574735.index
-\gimalProject\src\main\java
-C:\Users\sonjo\eclipse-workspace\BackEndGimalProject\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\1165472494.index
-\gimalProject\src\main\java
