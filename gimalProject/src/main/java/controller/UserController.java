@@ -47,7 +47,7 @@ public class UserController extends HttpServlet {
             	
                 result = userService.registerUser(userId, password, nickName, userName, addressIdStr, addressDetail); // 필요하면 register도 request 없애는 게 좋음
                 break;
-
+            case "/update:
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
