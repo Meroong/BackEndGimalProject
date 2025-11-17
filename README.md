@@ -262,5 +262,4 @@ CREATE TABLE report (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
     FOREIGN KEY (reporter_id) REFERENCES user(auto_id),
     FOREIGN KEY (target_user_id) REFERENCES user(auto_id)
-) COMMENT='신고';
 ) COMMENT='유저/게시글/모임 신고 관리 테이블';
