@@ -37,8 +37,8 @@ public class ChatMessageDAO {
     	}
     	return messageList;
 	}
-	public void sendMessage() {
-		
+	public void sendMessage(ChatMessageDTO dto) {
+		String sql = "insert into chat_message values("
 
 	}
 }
