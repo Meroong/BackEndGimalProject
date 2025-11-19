@@ -25,17 +25,17 @@ public class UserService {
 
 	    if (userId == null || password == null || userName == null) {
 	        System.out.println("파라미터 누락!");
-	        return new ResponseDTO("fail", "아이디, 비밀번호 또는 이름 누락");
+	        return new ResponseDTO(false, "아이디, 비밀번호 또는 이름 누락");
 	    }
 
 	    if(dao.isNicknameDuplicate(nickName)) {
 	        System.out.println("닉네임 중복");
-	        return new ResponseDTO("fail", "이미 존재하는 닉네임입니다.");
+	        return new ResponseDTO(false, "이미 존재하는 닉네임입니다.");
 	    }
 
 	    if(dao.isUserIdDuplicate(userId)) {
 	        System.out.println("아이디 중복");
-	        return new ResponseDTO("fail", "이미 존재하는 아이디입니다.");
+	        return new ResponseDTO(false, "이미 존재하는 아이디입니다.");
 	    }
 
 	    UserDTO dto = new UserDTO();
@@ -60,8 +60,8 @@ public class UserService {
 	    boolean result = dao.insert(dto);
 	    System.out.println("회원가입 결과: " + result);
 
-	    return result ? new ResponseDTO("success", "회원가입 성공") 
-	                  : new ResponseDTO("fail", "회원가입 실패");
+	    return result ? new ResponseDTO(true, "회원가입 성공") 
+	                  : new ResponseDTO(false, "회원가입 실패");
 	}
 
 	//로그인 jwt토큰 방식
@@ -70,10 +70,10 @@ public class UserService {
 		UserDTO dto = new UserDTO();
 		
 		if(id == null) {
-			return new ResponseDTO("fail", "아이디를 입력해주세요.");
+			return new ResponseDTO(false, "아이디를 입력해주세요.");
 		}
 		if(password == null) {
-			return new ResponseDTO("fail", "비밀번호를 입력해주세요.");
+			return new ResponseDTO(false, "비밀번호를 입력해주세요.");
 		}
 		dto.setUserId(id);
 		dto.setUserPassword(password);
@@ -84,9 +84,9 @@ public class UserService {
 			String jwt = auth.generateToken(dto.getUserId(), dto.getAutoId(), dto.getRole());
 			session.setAttribute("Authorization", "Bearer "+jwt);
 			System.out.println("로그인 성공");
-			return  new ResponseDTO("success","로그인 성공!");
+			return  new ResponseDTO(true,"로그인 성공!");
 		}
-		else return  new ResponseDTO("fail","로그인 실패!");
+		else return  new ResponseDTO(false,"로그인 실패!");
 		
 		
 	}
@@ -107,7 +107,7 @@ public class UserService {
 		
 		
 		
-		return new ResponseDTO("success", "회원정보 수정성공");
+		return new ResponseDTO(true, "회원정보 수정성공");
 	}
 	
 	//회원정보조회
