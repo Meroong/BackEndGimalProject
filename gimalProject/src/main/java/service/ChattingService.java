@@ -28,11 +28,11 @@ public class ChattingService {
     	
     	if(affectedRow >0) {
     		System.out.println("개설 성공");
-    		return new ResponseDTO("success", "채팅방이 개설되었습니다.", affectedRow);
+    		return new ResponseDTO(true, "채팅방이 개설되었습니다.");
     	}
     	else {
     		System.out.println("이미 존재하는 채팅방 혹은 오류");
-    		return new ResponseDTO("fail", "채팅방 개설 실패", affectedRow);
+    		return new ResponseDTO(false, "채팅방 개설 실패");
     		//jsp에서 1과 0 값으로 메시지와 페이지 세팅 >0은 성공 아니면 실패 
     	}
     	
@@ -58,9 +58,9 @@ public class ChattingService {
     public ResponseDTO getMessage (long roomId) {
     	ArrayList <ChatMessageDTO> messageList = messageDao.getMessageByRoomId(roomId);
     	if(messageList.isEmpty()) {
-    		return new ResponseDTO("fail", "채팅목록이 없습니다.");
+    		return new ResponseDTO(false, "채팅목록이 없습니다.");
     	}
-    	else return new ResponseDTO("success", "채팅목록을 가져왔습니다.");
+    	else return new ResponseDTO(true, "채팅목록을 가져왔습니다.");
     }
     
     
@@ -70,13 +70,19 @@ public class ChattingService {
     	
     	if(affectedRow >0) {
     		System.out.println("삭제 성공");
-    		return new ResponseDTO("success", "삭제 성공", affectedRow);
+    		return new ResponseDTO(true, "삭제 성공");
     	}
     	else {
     		System.out.println("삭제할 데이터가 없습니다.");
-    		return new ResponseDTO("fail", "삭제 실패", affectedRow);
+    		return new ResponseDTO(false, "삭제 실패");
     		//jsp에서 1과 0 값으로 메시지와 페이지 세팅 >0은 성공 아니면 실패 
     	}
     }
     
+    //채팅 보내기 
+    public ResponseDTO chattingWithUserAndRoomId() {
+    	ChatMessageDTO dto = new ChatMessageDTO();
+    	
+    	return new ResponseDTO(true, "채팅성공");
+}
 }
