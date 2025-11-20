@@ -8,6 +8,7 @@ DB 세팅
 
 create database dorandoran;
 use dorandoran;
+
 -- 💬 채팅메시지
 DROP TABLE IF EXISTS chat_message;
 
@@ -262,4 +263,79 @@ CREATE TABLE report (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
     FOREIGN KEY (reporter_id) REFERENCES user(auto_id),
     FOREIGN KEY (target_user_id) REFERENCES user(auto_id)
-) COMMENT='유저/게시글/모임 신고 관리 테이블';
+) COMMENT='신고';
+
+-- 간이 데이터 
+-- 📍 지역정보
+INSERT INTO address (sido_code, sigungu_code, dong_code, sido_name, sigungu_name, dong_name)
+VALUES
+(11, 101, 1, '서울특별시', '은평구', '역촌동'),
+(11, 102, 2, '서울특별시', '강남구', '삼성동');
+
+-- 🧍 USER
+INSERT INTO user (user_id, user_password, user_name, nickname, role, address_id, address_detail)
+VALUES
+('admin01', '1234', '관리자', '관리자닉', 'ADMIN', 1, '성산동 123-45'),
+('test01', '1234', '테스트', '닉테스트', 'USER', 2, '삼성동 456-78');
+
+-- 🏷️ 유저 태그
+INSERT INTO user_tag (user_id, tag_name)
+VALUES
+(2, '운동 좋아함'),
+(2, '강아지 사랑');
+
+-- 💾 이미지
+INSERT INTO image (src, type, target_id)
+VALUES
+('user1.png','USER',1),
+('item1.png','ITEM',1);
+
+-- 💬 중고/대여 상품 게시판
+INSERT INTO item (seller_id, category_id, title, content, price, trade_type, status)
+VALUES
+(2, 1, '자전거 판매', '좋은 자전거 팝니다', 100000, 'SALE', 'AVAILABLE'),
+(2, 1, '책 대여', '프로그래밍 책 대여합니다', 5000, 'RENTAL', 'AVAILABLE');
+
+-- 🔁 대여 상세정보
+INSERT INTO rental_info (item_id, deposit, daily_rate, rental_period, return_date)
+VALUES
+(2, 1000, 500, 7, '2025-11-24');
+
+-- ❤️ 찜 목록
+INSERT INTO wishlist (user_id, item_id)
+VALUES
+(1, 1);
+
+-- 💳 거래기록
+INSERT INTO transaction (item_id, buyer_id, seller_id, status)
+VALUES
+(1, 1, 2, 'IN_PROGRESS');
+
+-- ⭐ 리뷰
+INSERT INTO review (reviewer_id, reviewee_id, item_id, rating_manner, content)
+VALUES
+(1, 2, 1, 5, '좋은 판매자입니다!');
+
+-- 🤝 모임 게시판
+INSERT INTO meeting (title, content, date, location, max_members, current_members, cost, tag, status)
+VALUES
+('조깅 모임', '매주 토요일 조깅', '2025-11-22 09:00:00', '한강공원', 10, 2, 0, '운동', 'OPEN');
+
+-- 👥 모임참여자 관리
+INSERT INTO meeting_participant (meeting_id, user_id, paid)
+VALUES
+(1, 1, TRUE),
+(1, 2, FALSE);
+
+-- 📢 공지게시판
+INSERT INTO notice (title, content)
+VALUES
+('서버 점검 안내', '2025-11-20 00:00 ~ 02:00 서버 점검 예정');
+
+
+
+-- 🚨 신고
+INSERT INTO report (reporter_id, target_user_id, target_type, reason)
+VALUES
+(1, 2, 'USER', '스팸 메시지 발송');
+
