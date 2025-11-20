@@ -1,145 +1,45 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>도란도란 - 우리 동네 유아·애견 커넥트</title>
-    <link rel="stylesheet" href="home.css">
+    <title>메인 페이지</title>
+    <style>
+        body {
+            font-family: 'Arial';
+            background-color: #f9f9f9;
+            text-align: center;
+            margin-top: 100px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
 
-    <%-- 헤더 --%>
-	<header>
-	    <div class="logo">
-	        <img src="resources/images/logo.png" alt="logo">
-	        도란도란
-	    </div>
-	
-	    <div class="header-buttons">
-	        <% 
-	            Object loginUser = session.getAttribute("loginUser"); 
-	            if (loginUser != null) { 
-	        %>
-	            <!-- 로그인 상태: 메시지 + 로그아웃 -->
-	            <button class="msg-btn" onclick="location.href='views/chat/chat.jsp'">메시지</button>
-	            <button class="log-btn" onclick="location.href='/user/logout'">Log out</button>
+    <h1>Welcome to GimalProject 👋</h1>
+    <p>회원 관련 기능을 선택하세요</p>
 
-	        <% 
-	            } else { 
-	        %>
-	            <!-- 비로그인 상태: 로그인 버튼만 -->
-	            <button class="log-btn" onclick="location.href='views/user/login.jsp'">Log in</button>
-	        <% 
-	            } 
-	        %>
-	    </div>
-	</header>
+    <!-- 로그인 페이지 이동 -->
+    <form action="<%= request.getContextPath() %>/views/user/login.jsp" method="get">
+        <button type="submit">로그인</button>
+    </form>
 
+    <!-- 회원가입 페이지 이동 -->
+    <form action="<%= request.getContextPath() %>/views/user/register.jsp" method="get">
+        <button type="submit">회원가입</button>
+    </form>
 
-    <%-- 검색 영역 --%>
-    <section class="search-section">
-        <div class="search-row">
-            <select>
-                <option>구로동</option>
-                <option>가리봉동</option>
-                <option>고척동</option>
-            </select>
-
-            <select>
-                <option>모임</option>
-                <option>교환</option>
-                <option>드림</option>
-            </select>
-
-            <input type="text" placeholder="검색어를 입력해주세요">
-            <button class="search-btn">검색</button>
-        </div>
-
-        <div class="title-main">날씨가 쌀쌀하니 겉옷 꼭 챙기세요!</div>
-        <div class="title-sub">오늘의 추천활동은 실내 모임이에요 😊</div>
-    </section>
-
-    <%-- 메인 추천 영역 --%>
-    <section class="main-box">
-        <div class="box-title">우리 동네 기반 맞춤 추천</div>
-
-        <div class="grid-3">
-
-            <%-- 지도 영역 --%>
-            <div class="map-card">
-                <img src="resources/images/map.png" alt="map">
-            </div>
-
-            <%-- 가운데: 오늘의 인기 모임 --%>
-            <div class="center-card">
-                <div class="center-title">오늘의 인기 모임 🔥</div>
-                <div class="center-desc">지금 우리 동네에서 가장 활발한 모임을 소개해드릴게요!</div>
-
-                <div class="popular-grid">
-
-                    <div class="popular-card">
-                        <img src="resources/images/kidsPlay.jpg" alt="pop1">
-                        <div class="pop-info">
-                            <h3>주말 실내 키즈 플레이라운지</h3>
-                            <p>구로 · 5명 참여중</p>
-                        </div>
-                    </div>
-
-                    <div class="popular-card">
-                        <img src="resources/images/dogWalking.jpg" alt="pop2">
-                        <div class="pop-info">
-                            <h3>강아지 소형견 산책 모임</h3>
-                            <p>고척 · 3명 참여중</p>
-                        </div>
-                    </div>
-
-                    <div class="popular-card">
-                        <img src="resources/images/baby.jpg" alt="pop3">
-                        <div class="pop-info">
-                            <h3>첫 육아 부모 대화방</h3>
-                            <p>가리봉 · 12명 활성</p>
-                        </div>
-                    </div>
-
-                    <div class="popular-card">
-                        <img src="resources/images/doggroup.jpg" alt="pop4">
-                        <div class="pop-info">
-                            <h3>초보 펫돌보미 공유 모임</h3>
-                            <p>구로 · 7명 참여중</p>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
-            <%-- 날씨 + 활동 카드 --%>
-            <div>
-                <div class="weather-card">
-                    <div class="weather-title">현재 구로동 날씨</div>
-                    <div class="weather-temp">14.5°C</div>
-                    <div class="weather-status">맑음 • 미세먼지 좋음</div>
-                </div>
-
-                <div class="activities">
-                    <div class="activity-card">
-                        <img src="resources/images/meeting.jpg" alt="meet">
-                        <span>모임</span>
-                    </div>
-                    <div class="activity-card">
-                        <img src="resources/images/trade.jpg" alt="friend">
-                        <span>교환</span>
-                    </div>
-                    <div class="activity-card">
-                        <img src="resources/images/giving.jpg" alt="chat">
-                        <span>드림</span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </section>
-
-</div>
 </body>
 </html>

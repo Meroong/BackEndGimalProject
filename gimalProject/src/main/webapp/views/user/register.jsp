@@ -25,7 +25,7 @@
 		    <input type="text" name="userName" required>
 		
 		    <label>닉네임</label>
-		    <input type="text" name="nickName" required>
+		    <input type="text" name="nickname" required>
 		
 		    <button type="submit">회원가입</button>
 		</form>

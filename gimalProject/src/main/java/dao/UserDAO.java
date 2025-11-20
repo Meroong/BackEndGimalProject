@@ -63,7 +63,7 @@ public class UserDAO {
             pstmt.setString(3, dto.getUserName());
             pstmt.setString(4, dto.getNickname());
             pstmt.setString(5, dto.getRole());
-            pstmt.setLong(6, dto.getAddressId());
+            pstmt.setInt(6, dto.getAddressId());
             pstmt.setString(7, dto.getAddressDetail());
 
             int result = pstmt.executeUpdate();
