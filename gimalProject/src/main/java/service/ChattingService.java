@@ -1,5 +1,6 @@
 package service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import auth.JwtAuth;
@@ -80,9 +81,23 @@ public class ChattingService {
     }
     
     //채팅 보내기 
-    public ResponseDTO chattingWithUserAndRoomId() {
+    public ResponseDTO chattingWithUserAndRoomId(long autoId, long roomId, String content) {
     	ChatMessageDTO dto = new ChatMessageDTO();
+    	ChatMessageDAO dao = new ChatMessageDAO();
     	
-    	return new ResponseDTO(true, "채팅성공");
+    	//메시지 아이디와 보낸시점은 디비에서 세팅 
+        dto.setSenderId(autoId);
+        dto.setRoomId(roomId);
+        dto.setContent(content);
+        
+        //디비 인서트 결과를 어펙티드로우로 저장 
+    	int affectedRow = dao.sendMessage(dto);
+    	
+    	if(affectedRow > 0) {
+    		return new ResponseDTO(true, "채팅 전송 성공");
+    	}
+    	else {
+    		return new ResponseDTO(false, "채팅전송 실패");
+    	}
 }
 }

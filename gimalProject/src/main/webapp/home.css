@@ -24,6 +24,27 @@ header {
     padding-top: 10px; /* 약간 위쪽 여백 */
 }
 
+.header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.msg-btn {
+    background: #5271FF;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.msg-btn:hover {
+    background: #3A50D8;
+}
+
+
 .logo {
     display: flex;
     align-items: center;

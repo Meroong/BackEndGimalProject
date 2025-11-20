@@ -1,5 +1,6 @@
 package service;
 
+import java.io.IOException;
 import java.net.http.HttpRequest;
 
 import org.apache.catalina.authenticator.SpnegoAuthenticator.AuthenticateAction;
@@ -49,7 +50,7 @@ public class UserService {
 
 	    // addressId 유효한 값으로 설정
 	    try {
-	        int addressId = (addressIdStr != null && !addressIdStr.isEmpty()) ? Integer.parseInt(addressIdStr) : 1; 
+	        long addressId = (addressIdStr != null && !addressIdStr.isEmpty()) ? Integer.parseInt(addressIdStr) : 1; 
 	        dto.setAddressId(addressId);
 	    } catch (NumberFormatException e) {
 	        dto.setAddressId(1); // 기본값 1로 처리
@@ -84,6 +85,8 @@ public class UserService {
 			String jwt = auth.generateToken(dto.getUserId(), dto.getAutoId(), dto.getRole());
 			session.setAttribute("Authorization", "Bearer "+jwt);
 			System.out.println("로그인 성공");
+			HttpServletResponse res;
+			res.sendRedirect(path + "/views/index.jsp");
 			return  new ResponseDTO(true,"로그인 성공!");
 		}
 		else return  new ResponseDTO(false,"로그인 실패!");
@@ -111,4 +114,18 @@ public class UserService {
 	}
 	
 	//회원정보조회
+	//로그아웃
+	public void logoutUser (HttpServletRequest request, HttpServletResponse response) {
+		request.getSession().invalidate();
+		String path = request.getContextPath();
+
+		try {
+			response.sendRedirect(path + "/views/index.jsp");
+			System.out.println("로그아웃 성공!!");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("로그아웃 실패!!");
+			e.printStackTrace();
+		}
+	}
 }
