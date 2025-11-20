@@ -220,10 +220,12 @@ CREATE TABLE notice (
 CREATE TABLE chat_room (
     room_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     item_id BIGINT COMMENT '상품 ID (거래 채팅일 경우)',
+    meeting_id BIGINT COMMENT '모임 ID',
     room_type ENUM('PRIVATE', 'GROUP') DEFAULT 'PRIVATE',
     host_id BIGINT NOT NULL COMMENT '방장 user_id',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (host_id) REFERENCES user(auto_id)
+    FOREIGN KEY (host_id) REFERENCES user(auto_id),
+    FOREIGN KEY (meeting_id) REFERENCES meeting(id)
 ) COMMENT='거래 및 모임용 채팅방';
 
 
@@ -331,6 +333,62 @@ VALUES
 INSERT INTO notice (title, content)
 VALUES
 ('서버 점검 안내', '2025-11-20 00:00 ~ 02:00 서버 점검 예정');
+
+
+
+-- 🚨 신고
+INSERT INTO report (reporter_id, target_user_id, target_type, reason)
+VALUES
+(1, 2, 'USER', '스팸 메시지 발송');
+
+-- -------------------------------
+-- 💬 채팅방 (chat_room)
+-- -------------------------------
+
+INSERT INTO chat_room (item_id, meeting_id, room_type, host_id)
+VALUES
+-- 거래용 채팅방: item_id=1, host=2 (판매자)
+(1, NULL, 'PRIVATE', 2),
+-- 거래용 채팅방: item_id=2, host=2 (판매자)
+(2, NULL, 'PRIVATE', 2),
+-- 모임용 채팅방: meeting_id=1, host=1
+(NULL, 1, 'GROUP', 1);
+
+-- -------------------------------
+-- 💭 채팅방 참여자 (chat_room_user)
+-- -------------------------------
+INSERT INTO chat_room_user (room_id, user_id)
+VALUES
+-- 거래방 1 참여자: 구매자 1, 판매자 2
+(1, 1),
+(1, 2),
+-- 거래방 2 참여자: 구매자 1, 판매자 2
+(2, 1),
+(2, 2),
+-- 모임방 참여자: 유저 1, 2
+(3, 1),
+(3, 2);
+
+-- -------------------------------
+-- 💭 채팅 메시지 (chat_message)
+-- -------------------------------
+INSERT INTO chat_message (room_id, sender_id, content)
+VALUES
+-- 거래방 1
+(1, 1, '안녕하세요, 자전거 구매하고 싶습니다.'),
+(1, 2, '안녕하세요! 가격 흥정 가능해요.'),
+(1, 1, '좋습니다. 그럼 언제 만날까요?'),
+-- 거래방 2
+(2, 1, '책 대여 가능할까요?'),
+(2, 2, '네, 일주일 대여 가능합니다.'),
+(2, 1, '좋아요, 내일 수령할게요.'),
+-- 모임방
+(3, 1, '이번 주 토요일 모임 몇 시에 시작하나요?'),
+(3, 2, '오전 9시에 한강공원에서 시작합니다.'),
+(3, 1, '좋아요, 그때 봬요!');
+
+select * from user;
+select * from chat_room;
 
 
 
