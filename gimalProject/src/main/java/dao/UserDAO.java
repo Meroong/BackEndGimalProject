@@ -38,9 +38,9 @@ public class UserDAO {
                 if (dto.getUserPassword() != null) pstmt.setString(index++, dto.getUserPassword());
                 if (dto.getNickname() != null) pstmt.setString(index++, dto.getNickname());
                 if (dto.getTrustScore() != 0) pstmt.setInt(index++, dto.getTrustScore());
-                if (dto.getAddressId() != 0) pstmt.setInt(index++, dto.getAddressId());
+                if (dto.getAddressId() != 0) pstmt.setLong(index++, dto.getAddressId());
                 if (dto.getAddressDetail() != null) pstmt.setString(index++, dto.getAddressDetail());
-                pstmt.setInt(index, dto.getAutoId());
+                pstmt.setLong(index, dto.getAutoId());
 
                 pstmt.executeUpdate();
             }

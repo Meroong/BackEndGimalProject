@@ -12,7 +12,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import service.ChattingService;
+import dto.ChatMessageDTO;
 import dto.ChatRoomDTO;
+import dto.ResponseDTO;
 import auth.JwtAuth;
 import io.jsonwebtoken.Claims;
 
@@ -45,29 +47,41 @@ public class ChattingController extends HttpServlet {
         long autoId = (Integer) claims.get("autoId");
 
         // ---------- 채팅방 리스트 ----------
-        if ("/rooms".equals(path)) {
+        if ("/roomList".equals(path)) {
 
-            ArrayList<ChatRoomDTO> chatRooms = service.getRoomList(autoId);
+            ArrayList<ChatRoomDTO> chatRooms = (ArrayList<ChatRoomDTO>) service.getRoomList(autoId).getData(); //리스폰스 디티오의 오브젝트를 변환
             req.setAttribute("chatList", chatRooms);
-            req.getRequestDispatcher("/chat/chatRoomList.jsp").forward(req, resp);
+            req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
             return;
         }
-
-        // ---------- 채팅방 삭제 ----------
-        else if (path.startsWith("/roomDelete/")) {
-
-            String[] parts = path.split("/");   // ["", "roomDelete", "12"]
+        
+        // ---------- 선택한 채팅방 메시지 ----------  보안에 신경썼다 어필 해커가 url로 접근해도 검증을 거치기 때문에 좀 더 안전하다.
+        else if (path != null && path.startsWith("/room/")) {
+        	System.out.println("ChattingController doGet pathInfo = " + req.getPathInfo());
+            String[] parts = path.split("/"); // ["", "room", "15"]
             if (parts.length != 3) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Room ID Missing");
                 return;
             }
 
             Long roomId = Long.valueOf(parts[2]);
-            service.deleteRoomById(autoId, roomId);
 
-            resp.sendRedirect(req.getContextPath() + "/chat/rooms");
+            // 로그인 유저가 이 방에 속하는지 체크
+            boolean allowed = service.checkUserInRoom(autoId, roomId);
+            if (!allowed) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Not allowed");
+                return;
+            }
+
+            // 채팅 메시지 조회
+            ArrayList<ChatMessageDTO> messages = (ArrayList<ChatMessageDTO>) service.getMessage(roomId).getData();
+            req.setAttribute("messages", messages);
+            req.setAttribute("selectedRoomId", roomId);
+
+            req.getRequestDispatcher("/views/chat/chatting.jsp").forward(req, resp);
             return;
         }
+
 
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
@@ -93,16 +107,29 @@ public class ChattingController extends HttpServlet {
 
         long autoId = (Integer) claims.get("autoId");
 
-        if ("/roomMake".equals(path)) {
-
-            String title = req.getParameter("title");
+        if ("/pRoomMake".equals(path)) {
             long itemId = Long.parseLong(req.getParameter("itemId"));
-            String roomType = req.getParameter("roomType");
+            long hostId = Long.parseLong(req.getParameter("hostId"));
+            long receiverId = Long.parseLong(req.getParameter("receiverId"));
+
+            // 개인용 채팅방 생성
+            ResponseDTO response = service.makePrivateRoom(itemId, "PRIVATE", hostId, receiverId);
+
+            // 성공/실패에 따라 리다이렉트 혹은 메시지 표시
+            req.setAttribute("message", response.getMessage());
+            req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
+            return;
+        }
+        if ("/gRoomMake".equals(path)) {
+            long meetingId = Long.parseLong(req.getParameter("meetingId"));
             long hostId = Long.parseLong(req.getParameter("hostId"));
 
-            service.makeRoom(title, itemId, roomType, hostId);
-            
-            resp.sendRedirect(req.getContextPath() + "/chat/rooms");
+            // 개인용 채팅방 생성
+            ResponseDTO response = service.makeGroupRoom(meetingId, "Group", hostId);
+
+            // 성공/실패에 따라 리다이렉트 혹은 메시지 표시
+            req.setAttribute("message", response.getMessage());
+            req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
             return;
         }
         if("/sendChat".equals(path)) {
@@ -111,6 +138,24 @@ public class ChattingController extends HttpServlet {
             String content = req.getParameter("content");
             
             service.chattingWithUserAndRoomId(autoId, roomId,content);
+            
+            resp.sendRedirect(req.getContextPath() + "/chat/room/" + roomId);
+            return;
+        }
+        // ---------- 채팅방 삭제 ----------
+        else if (path.startsWith("/roomDelete/")) {
+
+            String[] parts = path.split("/");   // ["", "roomDelete", "12"]
+            if (parts.length != 3) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Room ID Missing");
+                return;
+            }
+
+            Long roomId = Long.valueOf(parts[2]);
+            service.deleteRoomById(autoId, roomId);
+
+            resp.sendRedirect(req.getContextPath() + "/chat/roomList");
+            return;
         }
 
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);
