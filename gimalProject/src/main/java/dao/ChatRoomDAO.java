@@ -77,7 +77,7 @@ public class ChatRoomDAO {
     	}
     }
     
-    // 채팅방 삭제
+    //채팅방 삭제 (일단 냅두기)
     public int deleteChatRoom(long host_id, long room_id) {
     	String sql = "delete from chat_room where host_id = ? and room_id = ?;";
     	

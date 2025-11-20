@@ -117,7 +117,7 @@ public class ChattingService {
     }
     
     
-    // 채팅방 삭제 
+    // 채팅방 삭제 (일단 냅두기 ? 관리자용?)
     public ResponseDTO deleteRoomById(long hostId, long roomId ) {
     	int affectedRow = roomDao.deleteChatRoom(hostId, roomId);
     	
@@ -128,6 +128,19 @@ public class ChattingService {
     	else {
     		System.out.println("삭제할 데이터가 없습니다.");
     		return new ResponseDTO(false, "삭제 실패");
+    		//jsp에서 1과 0 값으로 메시지와 페이지 세팅 >0은 성공 아니면 실패 
+    	}
+    }
+    public ResponseDTO quitRoomById(long userId, long roomId) {
+    	int affectedRow = roomUserDao.quitRoom(userId, roomId);
+    	
+    	if(affectedRow >0) {
+    		System.out.println("삭제 성공");
+    		return new ResponseDTO(true, "채팅방 나오기 성공");
+    	}
+    	else {
+    		System.out.println("삭제할 데이터가 없습니다.");
+    		return new ResponseDTO(false, "채팅방 나오기 실패");
     		//jsp에서 1과 0 값으로 메시지와 페이지 세팅 >0은 성공 아니면 실패 
     	}
     }

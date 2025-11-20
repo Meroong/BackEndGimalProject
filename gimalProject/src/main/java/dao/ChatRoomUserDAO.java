@@ -31,11 +31,29 @@ public class ChatRoomUserDAO {
 		
 		return idList;
 	}
-	 public boolean isUserInRoom(long userId, long roomId) {
-		 	String sql = "select * from chat_room_user where user_id = ? and room_id = ?"; 
+	public int quitRoom(long userId, long roomId) {
+		String sql = "delete from chat_room_user where user_id =? and room_id = ?; ";
+        try (Connection con = JDBCUtil.jdbcCon();
+	         PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+	            pstmt.setLong(1, userId);
+	            pstmt.setLong(2, roomId);
+
+	         
+	            return pstmt.executeUpdate(); //affectedRow
+	            
+
+	        } catch (SQLException e) {
+	            e.printStackTrace();
+	            return 0;
+	        }
+	}
+	
+	public boolean isUserInRoom(long userId, long roomId) {
+		 	String sql = "select * from chat_room_user where user_id = ? and room_id = ?;"; 
 		 
 	        try (Connection con = JDBCUtil.jdbcCon();
-		             PreparedStatement pstmt = con.prepareStatement(sql)) {
+		         PreparedStatement pstmt = con.prepareStatement(sql)) {
 
 		            pstmt.setLong(1, userId);
 		            pstmt.setLong(2, roomId);

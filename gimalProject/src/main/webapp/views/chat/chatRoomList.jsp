@@ -25,10 +25,16 @@
             ${room.roomType} 방 #${room.roomId}
         </a>
 
-        <form method="post" 
+<%--         <form method="post" 
               action="${pageContext.request.contextPath}/chat/roomDelete/${room.roomId}"
               style="display:inline;">
             <button type="submit">삭제</button>
+        </form> --%>
+        
+        <form method="post" 
+              action="${pageContext.request.contextPath}/chat/roomQuit/${room.roomId}"
+              style="display:inline;">
+            <button type="submit">방 나오기</button>
         </form>
     </div>
 </c:forEach>
