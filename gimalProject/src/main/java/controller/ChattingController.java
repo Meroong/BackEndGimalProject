@@ -1,6 +1,7 @@
 package controller;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import jakarta.servlet.ServletConfig;
@@ -41,7 +42,7 @@ public class ChattingController extends HttpServlet {
             return;
         }
 
-        int autoId = (Integer) claims.get("autoId");
+        long autoId = (Integer) claims.get("autoId");
 
         // ---------- 채팅방 리스트 ----------
         if ("/rooms".equals(path)) {
@@ -76,6 +77,21 @@ public class ChattingController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
         String path = req.getPathInfo(); // /roomMake
+        
+        // ---------- 로그인 검증 ----------
+        HttpSession session = req.getSession();
+        String jwt = (String) session.getAttribute("Authorization");
+
+        JwtAuth auth = new JwtAuth();
+        Claims claims = auth.validateToken(jwt);
+
+        if (claims == null) {
+            req.setAttribute("error", "Invalid Token");
+            req.getRequestDispatcher("/error.jsp").forward(req, resp);
+            return;
+        }
+
+        long autoId = (Integer) claims.get("autoId");
 
         if ("/roomMake".equals(path)) {
 
@@ -88,6 +104,15 @@ public class ChattingController extends HttpServlet {
             
             resp.sendRedirect(req.getContextPath() + "/chat/rooms");
             return;
+        }
+        if("/sendChat".equals(path)) {
+        	
+            long messageId = Long.parseLong(req.getParameter("messageId"));
+            long roomId = Long.parseLong(req.getParameter("roomId"));
+            String content = req.getParameter("content");
+            Timestamp sentAt = Timestamp.valueOf(req.getParameter("sentAt"));
+            
+            service.chattingWithUserAndRoomId(autoId, roomId, messageId, content, sentAt);
         }
 
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);

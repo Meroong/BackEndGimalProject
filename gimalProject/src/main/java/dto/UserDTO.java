@@ -4,14 +4,14 @@ import java.sql.Timestamp;
 
 public class UserDTO {
 
-	   	private int autoId;            // 유저 고유 식별자 (PK)
+	   	private long autoId;            // 유저 고유 식별자 (PK)
 	    private String userId;          // 로그인용 아이디
 	    private String userPassword;    // 암호화된 비밀번호
 	    private String userName;        // 실명
 	    private String nickname;        // 닉네임 (중복 불가)
 	    private int trustScore;         // 신뢰도 점수
 	    private String role;            // 권한 (USER / ADMIN)
-	    private int addressId;         // 주소 참조키
+	    private long addressId;         // 주소 참조키
 	    private String addressDetail;   // 상세 주소
 	    private Timestamp createdAt;    // 가입일시
 	    private Timestamp updatedAt;    // 정보 수정일시
@@ -79,10 +79,10 @@ public class UserDTO {
 		public void setRole(String role) {
 			this.role = role;
 		}
-		public int getAddressId() {
+		public long getAddressId() {
 			return addressId;
 		}
-		public void setAddressId(int addressId) {
+		public void setAddressId(long addressId) {
 			this.addressId = addressId;
 		}
 		public String getAddressDetail() {

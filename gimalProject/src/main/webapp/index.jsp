@@ -10,13 +10,32 @@
 <div class="container">
 
     <%-- 헤더 --%>
-    <header>
-        <div class="logo">
-            <img src="resources/images/logo.png" alt="logo">
-            도란도란
-        </div>
-        <button class="logout-btn">Log out</button>
-    </header>
+	<header>
+	    <div class="logo">
+	        <img src="resources/images/logo.png" alt="logo">
+	        도란도란
+	    </div>
+	
+	    <div class="header-buttons">
+	        <% 
+	            Object loginUser = session.getAttribute("loginUser"); 
+	            if (loginUser != null) { 
+	        %>
+	            <!-- 로그인 상태: 메시지 + 로그아웃 -->
+	            <button class="msg-btn" onclick="location.href='views/chat/chat.jsp'">메시지</button>
+	            <button class="log-btn" onclick="location.href='/user/logout'">Log out</button>
+
+	        <% 
+	            } else { 
+	        %>
+	            <!-- 비로그인 상태: 로그인 버튼만 -->
+	            <button class="log-btn" onclick="location.href='views/user/login.jsp'">Log in</button>
+	        <% 
+	            } 
+	        %>
+	    </div>
+	</header>
+
 
     <%-- 검색 영역 --%>
     <section class="search-section">

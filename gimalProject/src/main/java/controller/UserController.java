@@ -48,13 +48,16 @@ public class UserController extends HttpServlet {
                 result = userService.registerUser(userId, password, nickName, userName, addressIdStr, addressDetail); // 필요하면 register도 request 없애는 게 좋음
                 break;
             case "/update":
-        	    String userId = req.getParameter("userId");
-        	    String password = req.getParameter("userPassword");
-        	    String nickName = req.getParameter("nickName");
-        	    String userName = req.getParameter("userName"); // 회원 이름
-        	    String addressIdStr = req.getParameter("addressId"); // 문자열로 받아옴
-        	    String addressDetail = req.getParameter("addressDetail");
+        	    String updateId = req.getParameter("userId");
+        	    String updatePw= req.getParameter("userPassword");
+        	    String updateNickName = req.getParameter("nickName");
+        	    String updateName = req.getParameter("userName"); // 회원 이름
+        	    String updateAddressIdStr = req.getParameter("addressId"); // 문자열로 받아옴
+        	    String updateAddressDetail = req.getParameter("addressDetail");
             	return;
+            case "/logout":
+                userService.logoutUser(req, resp);
+                return; // 바로 리턴 (이미 redirect 했기 때문에)
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
@@ -63,8 +66,8 @@ public class UserController extends HttpServlet {
         resp.setContentType("application/json; charset=UTF-8");
 
         // Gson으로 JSON 출력 (수동 문자열 X)
-        String json = new Gson().toJson(result);
-        resp.getWriter().write(json);
+        //String json = new Gson().toJson(result);
+        //resp.getWriter().write(json);
     }
 
 

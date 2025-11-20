@@ -1,5 +1,6 @@
 package dao;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,13 +11,16 @@ import dto.ChatMessageDTO;
 import util.JDBCUtil;
 
 public class ChatMessageDAO {
+	
+	//채팅방  삭제 dao
 	public ArrayList<ChatMessageDTO> getMessageByRoomId(long roomId){
 		ArrayList<ChatMessageDTO> messageList = new ArrayList<ChatMessageDTO>();
 		ResultSet rs = null;
 		String sql = "select * from chat_message where room_id = ?;";
     	
-    	try {
-    		PreparedStatement pstmt = JDBCUtil.jdbcCon().prepareStatement(sql);
+    	try(Connection con = JDBCUtil.jdbcCon();
+    		PreparedStatement pstmt = con.prepareStatement(sql);) {
+ 
     		pstmt.setLong(1, roomId);
     		
     		rs= pstmt.executeQuery();
@@ -32,13 +36,32 @@ public class ChatMessageDAO {
 
     		}
     	} catch (SQLException e) {
-    		System.out.println("채팅방 삭제 중 에러!");
+    		System.out.println("채팅방 삭제 디비 쿼리 중 에러!");
     		e.printStackTrace();
     	}
     	return messageList;
 	}
-	public void sendMessage(ChatMessageDTO dto) {
-		String sql = "insert into chat_message values("
+	
+	//채팅 전송 dao
+	public int sendMessage(ChatMessageDTO dto) {
+		String sql = "insert into chat_message(room_id, sender_id, content) values(?, ?, ?);";
+		
+		try(Connection con = JDBCUtil.jdbcCon();
+	    	PreparedStatement pstmt = con.prepareStatement(sql);) {
+			
+			pstmt.setLong(1, dto.getRoomId());
+			pstmt.setLong(2, dto.getSenderId());
+			pstmt.setString(3, dto.getContent());
+			
+			//디비 쿼리 결과 영향받은 행 수를 반환
+			return pstmt.executeUpdate();
+			
+		}catch (SQLException e) {
+			System.out.println("채팅 전송 디비 쿼리 중 에러!");
+			e.printStackTrace();
+			return 0;
+		}
+		
 
 	}
 }
