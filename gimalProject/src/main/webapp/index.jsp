@@ -1,4 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="auth.JwtAuth" %>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -16,27 +18,42 @@
 	        도란도란
 	    </div>
 	
-	    <div class="header-buttons">
-	        <% 
-	            Object loginUser = session.getAttribute("Authorization"); 
-	            if (loginUser != null) { 
-	        %>
-	            <!-- 로그인 상태: 메시지 + 로그아웃 -->
-	            <button class="msg-btn" onclick="location.href='views/chat/chat.jsp'">메시지</button>
-	            <form action="<%= request.getContextPath() %>/user/logout" method="get" style="display:inline;">
-    				<button type="submit" class="log-btn">Log out</button>
-				</form>
+	        <div class="header-buttons">
+        <%
+            Object loginUser = session.getAttribute("Authorization");
+            if (loginUser != null) {
 
+                // 토큰에서 role 꺼내오기
+                String token = (String) loginUser;
+                String role = JwtAuth.getRole(token);
+        %>
+            <!-- 로그인 상태: 메시지 + (관리자일 경우 관리자 버튼) + 로그아웃 -->
+            <button class="msg-btn" onclick="location.href='views/chat/chat.jsp'">메시지</button>
 
-	        <% 
-	            } else { 
-	        %>
-	            <!-- 비로그인 상태: 로그인 버튼만 -->
-	            <button class="log-btn" onclick="location.href='views/user/login.jsp'">Log in</button>
-	        <% 
-	            } 
-	        %>
-	    </div>
+            <%-- 관리자 계정일 때만 보이는 버튼 --%>
+            <% if ("ADMIN".equals(role)) { %>
+                <button class="log-btn"
+                        onclick="location.href='<%=request.getContextPath()%>/admin'">
+                    관리자
+                </button>
+            <% } %>
+
+            <form action="<%= request.getContextPath() %>/user/logout"
+                  method="get" style="display:inline;">
+                <button type="submit" class="log-btn">Log out</button>
+            </form>
+
+        <%
+            } else {
+        %>
+            <!-- 비로그인 상태: 로그인 버튼만 -->
+            <button class="log-btn"
+                    onclick="location.href='views/user/login.jsp'">Log in</button>
+        <%
+            }
+        %>
+    </div>
+
 	</header>
 
 

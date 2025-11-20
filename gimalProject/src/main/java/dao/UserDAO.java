@@ -198,5 +198,36 @@ public class UserDAO {
         }
         return false;
     }
+    // 전체 회원 목록 조회
+    public java.util.List<UserDTO> findAllUsers() {
+        java.util.List<UserDTO> list = new java.util.ArrayList<>();
+
+        String sql = "SELECT auto_id, user_id, user_name, nickname, trust_score, role, created_at " +
+                     "FROM user ORDER BY auto_id";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                UserDTO dto = new UserDTO();
+                dto.setAutoId(rs.getLong("auto_id"));
+                dto.setUserId(rs.getString("user_id"));
+                dto.setUserName(rs.getString("user_name"));
+                dto.setNickname(rs.getString("nickname"));
+                dto.setTrustScore(rs.getInt("trust_score"));
+                dto.setRole(rs.getString("role"));
+                dto.setCreatedAt(rs.getTimestamp("created_at"));
+
+                list.add(dto);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("전체 회원 조회 중 오류");
+        }
+
+        return list;
+    }
 
 }
