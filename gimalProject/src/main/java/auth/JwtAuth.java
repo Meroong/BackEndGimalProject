@@ -19,7 +19,7 @@ public class JwtAuth {
     private static final long EXPIRATION_TIME = util.AuthConfig.getJWTExp();
 
     // JWT 생성
-    public static String generateToken(String userId, int autoId, String role) {
+    public static String generateToken(String userId, long autoId, String role) {
         return Jwts.builder()
                 .setSubject(userId)            // 로그인 ID
                 .claim("autoId", autoId)       // DB PK
@@ -56,8 +56,8 @@ public class JwtAuth {
         return validateToken(token).getSubject();
     }
 
-    public static int getAutoId(String token) {
-        return (Integer) validateToken(token).get("autoId");
+    public static long getAutoId(String token) {
+        return (long) validateToken(token).get("autoId");
     }
 
     public static String getRole(String token) {

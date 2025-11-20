@@ -63,7 +63,7 @@ public class ChattingController extends HttpServlet {
             }
 
             Long roomId = Long.valueOf(parts[2]);
-            service.deleteRoom(roomId, autoId);
+            service.deleteRoomById(autoId, roomId);
 
             resp.sendRedirect(req.getContextPath() + "/chat/rooms");
             return;
@@ -107,12 +107,10 @@ public class ChattingController extends HttpServlet {
         }
         if("/sendChat".equals(path)) {
         	
-            long messageId = Long.parseLong(req.getParameter("messageId"));
             long roomId = Long.parseLong(req.getParameter("roomId"));
             String content = req.getParameter("content");
-            Timestamp sentAt = Timestamp.valueOf(req.getParameter("sentAt"));
             
-            service.chattingWithUserAndRoomId(autoId, roomId, messageId, content, sentAt);
+            service.chattingWithUserAndRoomId(autoId, roomId,content);
         }
 
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);

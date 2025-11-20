@@ -18,12 +18,15 @@
 	
 	    <div class="header-buttons">
 	        <% 
-	            Object loginUser = session.getAttribute("loginUser"); 
+	            Object loginUser = session.getAttribute("Authorization"); 
 	            if (loginUser != null) { 
 	        %>
 	            <!-- 로그인 상태: 메시지 + 로그아웃 -->
 	            <button class="msg-btn" onclick="location.href='views/chat/chat.jsp'">메시지</button>
-	            <button class="log-btn" onclick="location.href='/user/logout'">Log out</button>
+	            <form action="<%= request.getContextPath() %>/user/logout" method="get" style="display:inline;">
+    				<button type="submit" class="log-btn">Log out</button>
+				</form>
+
 
 	        <% 
 	            } else { 

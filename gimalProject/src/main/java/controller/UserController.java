@@ -8,20 +8,37 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import service.UserService;
+import dto.ResponseDTO;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 
-import dto.ResponseDTO;
 @WebServlet("/user/*")
 public class UserController extends HttpServlet {
     private UserService userService;
+    private Gson gson = new Gson();
 
     @Override
     public void init(ServletConfig config) throws ServletException {
+        super.init(config);
         userService = new UserService();
         System.out.println("userController: ON");
     }
 
+    	
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        String path = req.getPathInfo();
+
+        if ("/logout".equals(path)) {
+            userService.logoutUser(req.getSession());
+            resp.sendRedirect(req.getContextPath() + "/index.jsp"); // 로그아웃 후 메인으로 이동
+            return;
+        }
+
+        resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+    }
+    
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
@@ -35,45 +52,38 @@ public class UserController extends HttpServlet {
                 String pw = req.getParameter("userPassword");
                 HttpSession session = req.getSession();
                 result = userService.loginUser(id, pw, session);
+
+                if(result.isSuccess()) {
+                    // 로그인 성공 시 index.jsp로 redirect
+                    resp.sendRedirect(req.getContextPath() + "/index.jsp");
+                    return;
+                } 
                 break;
 
             case "/register":
-        	    String userId = req.getParameter("userId");
-        	    String password = req.getParameter("userPassword");
-        	    String nickName = req.getParameter("nickName");
-        	    String userName = req.getParameter("userName"); // 회원 이름
-        	    String addressIdStr = req.getParameter("addressId"); // 문자열로 받아옴
-        	    String addressDetail = req.getParameter("addressDetail");
-            	
-                result = userService.registerUser(userId, password, nickName, userName, addressIdStr, addressDetail); // 필요하면 register도 request 없애는 게 좋음
+                String userId = req.getParameter("userId");
+                String password = req.getParameter("userPassword");
+                String nickName = req.getParameter("nickName");
+                String userName = req.getParameter("userName");
+                String addressIdStr = req.getParameter("addressId");
+                String addressDetail = req.getParameter("addressDetail");
+
+                result = userService.registerUser(userId, password, nickName, userName, addressIdStr, addressDetail);
                 break;
+
             case "/update":
-        	    String updateId = req.getParameter("userId");
-        	    String updatePw= req.getParameter("userPassword");
-        	    String updateNickName = req.getParameter("nickName");
-        	    String updateName = req.getParameter("userName"); // 회원 이름
-        	    String updateAddressIdStr = req.getParameter("addressId"); // 문자열로 받아옴
-        	    String updateAddressDetail = req.getParameter("addressDetail");
-            	return;
-            case "/logout":
-                userService.logoutUser(req, resp);
-                return; // 바로 리턴 (이미 redirect 했기 때문에)
+                // 서비스에 맞춰 DTO 만들어서 updateUser 호출
+                // 예: UserDTO dto = new UserDTO();
+                // result = userService.updateUser(dto);
+                break;
+
             default:
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
         }
 
+        // JSON 응답 처리
         resp.setContentType("application/json; charset=UTF-8");
-
-        // Gson으로 JSON 출력 (수동 문자열 X)
-        //String json = new Gson().toJson(result);
-        //resp.getWriter().write(json);
+        resp.getWriter().write(gson.toJson(result));
     }
-
-
-
-	public void destroy() {
-		
-	}
-
 }

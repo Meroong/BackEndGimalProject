@@ -18,7 +18,7 @@ public class ResponseDTO {
         this.data = data;
     }
 
-    // getter / setter
+    // 기존 getter / setter
     public boolean getStatus() { return status; }
     public void setStatus(boolean status) { this.status = status; }
 
@@ -27,4 +27,9 @@ public class ResponseDTO {
 
     public Object getData() { return data; }
     public void setData(Object data) { this.data = data; }
+
+    // 추가: 상태를 쉽게 확인할 수 있는 메서드
+    public boolean isSuccess() {
+        return status != null && status;
+    }
 }

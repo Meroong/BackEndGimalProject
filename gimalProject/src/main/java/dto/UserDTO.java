@@ -37,7 +37,7 @@ public class UserDTO {
  }
 	    
 	    
-		public int getAutoId() {
+		public long getAutoId() {
 			return autoId;
 		}
 		public void setAutoId(int autoId) {
