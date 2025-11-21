@@ -50,18 +50,5 @@ public class JwtAuth {
         }
     }
 
-
-    // 토큰에서 사용자 정보 가져오기
-    public static String getUserId(String token) {
-        return validateToken(token).getSubject();
-    }
-
-    public static long getAutoId(String token) {
-        return (long) validateToken(token).get("autoId");
-    }
-
-    public static String getRole(String token) {
-        return (String) validateToken(token).get("role");
-    }
 }
 
