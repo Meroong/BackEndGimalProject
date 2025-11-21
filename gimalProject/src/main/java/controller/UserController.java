@@ -13,14 +13,14 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 
-@WebServlet("/user/*")
+@WebServlet("/user/*") //    /user/이하로 들어오는 모든 url 요청을 처리 /user는 딱 /user만 가능하게 함
 public class UserController extends HttpServlet {
     private UserService userService;
     private Gson gson = new Gson();
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-        super.init(config);
+        super.init(config); 
         userService = new UserService();
         System.out.println("userController: ON");
     }
@@ -29,9 +29,14 @@ public class UserController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String path = req.getPathInfo();
-
+        
+        //로그아웃 요청을 get요청으로 처리 
         if ("/logout".equals(path)) {
+        	
+        	//유저 서비스내에 로그아웃 로직처리 인자는 세션
             userService.logoutUser(req.getSession());
+            
+            //로그아웃 서비스 처리 후 index.jsp 페이지로 리다이렉트  
             resp.sendRedirect(req.getContextPath() + "/index.jsp"); // 로그아웃 후 메인으로 이동
             return;
         }
