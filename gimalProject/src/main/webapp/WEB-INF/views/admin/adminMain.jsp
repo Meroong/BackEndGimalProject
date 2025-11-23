@@ -61,7 +61,7 @@
                 </div>
             </div>
 
-            <div class="meeting-card" style="cursor:pointer;"
+            <div class="meeting-card"  style="cursor:pointer;"
                  onclick="location.href='<%=request.getContextPath()%>/admin/reports'">
                 <div class="meeting-info">
                     <h3>신고 관리</h3>
