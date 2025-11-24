@@ -40,7 +40,6 @@ public class UserController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/index.jsp"); // 로그아웃 후 메인으로 이동
             return;
         }
-
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
     
@@ -56,10 +55,16 @@ public class UserController extends HttpServlet {
                 String id = req.getParameter("userId");
                 String pw = req.getParameter("userPassword");
                 HttpSession session = req.getSession();
-                result = userService.loginUser(id, pw, session);
+                result = userService.loginUser(id, pw);
 
                 if(result.isSuccess()) {
                     // 로그인 성공 시 index.jsp로 redirect
+                	String jwt = (String) result.getData();
+                	
+                	//Jwt를 리스폰스 바디에 보낼 필요가 없음 
+                	result.setData(null);
+                	
+        			session.setAttribute("Authorization", "Bearer " + jwt);
                     resp.sendRedirect(req.getContextPath() + "/index.jsp");
                     return;
                 } 

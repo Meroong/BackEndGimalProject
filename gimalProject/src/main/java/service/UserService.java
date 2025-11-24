@@ -53,7 +53,7 @@ public class UserService {
 	}
 
 	// 로그인(jwt 토큰 방식)
-	public ResponseDTO loginUser(String id, String password, HttpSession session) {
+	public ResponseDTO loginUser(String id, String password) {
 		UserDAO dao = new UserDAO();
 		UserDTO dto = dao.searchForLogin(id, password);
 
@@ -67,9 +67,8 @@ public class UserService {
 		if(dto != null) {
 			JwtAuth auth = new JwtAuth();
 			String jwt = auth.generateToken(dto.getUserId(), dto.getAutoId(), dto.getRole());
-			session.setAttribute("Authorization", "Bearer " + jwt);
 			System.out.println("로그인 성공");
-			return new ResponseDTO(true, "로그인 성공!");
+			return new ResponseDTO(true, "로그인 성공!", jwt);
 		} else {
 			return new ResponseDTO(false, "로그인 실패!");
 		}

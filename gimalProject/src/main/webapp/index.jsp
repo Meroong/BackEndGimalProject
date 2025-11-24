@@ -22,7 +22,8 @@
 	            if (loginUser != null) { 
 	        %>
 	            <!-- 로그인 상태: 메시지 + 로그아웃 -->
-	            <button class="msg-btn" onclick="location.href='views/chat/chat.jsp'">메시지</button>
+	            <button class="msg-btn" onclick="location.href='<%= request.getContextPath() %>/chat/roomList'">메시지</button>
+	            
 	            <form action="<%= request.getContextPath() %>/user/logout" method="get" style="display:inline;">
     				<button type="submit" class="log-btn">Log out</button>
 				</form>

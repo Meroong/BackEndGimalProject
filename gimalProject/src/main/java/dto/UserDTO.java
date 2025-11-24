@@ -18,7 +18,7 @@ public class UserDTO {
 	    
 	    public UserDTO() {}
 	    
-	    public UserDTO(int autoId, String userId, String userPassword, String userName,
+	    public UserDTO(Long autoId, String userId, String userPassword, String userName,
                 	String nickname, int trustScore, String role,
                 	int addressId, String addressDetail,
                 	Timestamp createdAt, Timestamp updatedAt) 
@@ -40,7 +40,7 @@ public class UserDTO {
 		public long getAutoId() {
 			return autoId;
 		}
-		public void setAutoId(int autoId) {
+		public void setAutoId(Long autoId) {
 			this.autoId = autoId;
 		}
 		public String getUserId() {

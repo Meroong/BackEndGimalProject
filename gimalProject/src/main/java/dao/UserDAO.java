@@ -38,9 +38,9 @@ public class UserDAO {
                 if (dto.getUserPassword() != null) pstmt.setString(index++, dto.getUserPassword());
                 if (dto.getNickname() != null) pstmt.setString(index++, dto.getNickname());
                 if (dto.getTrustScore() != 0) pstmt.setInt(index++, dto.getTrustScore());
-                if (dto.getAddressId() != 0) pstmt.setInt(index++, dto.getAddressId());
+                if (dto.getAddressId() != 0) pstmt.setLong(index++, dto.getAddressId());
                 if (dto.getAddressDetail() != null) pstmt.setString(index++, dto.getAddressDetail());
-                pstmt.setInt(index, dto.getAutoId());
+                pstmt.setLong(index, dto.getAutoId());
 
                 pstmt.executeUpdate();
             }
@@ -103,13 +103,13 @@ public class UserDAO {
     }
 
     // auto_id로 회원 검색
-    public UserDTO searchByAutoId(int autoId) {
+    public UserDTO searchByAutoId(long autoId) {
         String sql = "SELECT * FROM user WHERE auto_id = ?";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
 
-            pstmt.setInt(1, autoId);
+            pstmt.setLong(1, autoId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     UserDTO dto = new UserDTO();
