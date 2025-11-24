@@ -40,7 +40,7 @@ public class UserDTO {
 		public long getAutoId() {
 			return autoId;
 		}
-		public void setAutoId(int autoId) {
+		public void setAutoId(long autoId) {
 			this.autoId = autoId;
 		}
 		public String getUserId() {

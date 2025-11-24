@@ -1,4 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="java.util.List" %>
 <%@ page import="dto.ReportDTO" %>
 <!DOCTYPE html>
@@ -11,7 +11,6 @@
 <body>
 <div class="container">
 
-    <%-- 상단 헤더 (간단 버전) --%>
     <header>
         <div class="logo">
             <img src="<%=request.getContextPath()%>/resources/images/logo.png" alt="logo">
@@ -32,27 +31,22 @@
     <section class="main-box">
         <div class="box-title">신고 관리</div>
 
-        <p style="margin-bottom: 12px; color:#555;">
-            유저들이 등록한 신고 내역을 조회하고, 처리 상태를 변경하는 페이지입니다.
-            (지금은 조회만, 나중에 처리 기능 추가 예정)
-        </p>
-
         <table border="1" style="width:100%; border-collapse:collapse; text-align:center;">
             <thead>
             <tr style="background:#f3f4f6;">
-                <th>신고 ID</th>
-                <th>신고자 ID</th>
-                <th>대상자 ID</th>
-                <th>대상 유형</th>
+                <th>ID</th>
+                <th>신고자</th>
+                <th>대상자</th>
+                <th>타입</th>
                 <th>사유</th>
                 <th>상태</th>
-                <th>신고일</th>
+                <th>등록일시</th>
             </tr>
             </thead>
             <tbody>
             <%
-                // 나중에 서블릿에서 "reportList"라는 이름으로 List<ReportDTO>를 넣어줄 겁니다.
-                List<ReportDTO> reportList = (List<ReportDTO>) request.getAttribute("reportList");
+                List<ReportDTO> reportList =
+                        (List<ReportDTO>) request.getAttribute("reportList");
 
                 if (reportList == null || reportList.isEmpty()) {
             %>
