@@ -6,8 +6,7 @@
     <title>도란도란 관리자 페이지</title>
 
     <!-- 메인 화면이 쓰는 home.css 그대로 사용 -->
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/home.css">
-
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/resources/css/admin.css">
 </head>
 <body>
 <div class="container">

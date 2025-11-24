@@ -28,4 +28,22 @@ public class AdminUserDAO {
 
         return 0;
     }
+ // 회원 삭제 (탈퇴 처리)
+    public int deleteUser(long autoId) {
+        String sql = "DELETE FROM user WHERE auto_id = ?";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, autoId);
+            return pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("관리자 - 회원 삭제 중 오류");
+        }
+
+        return 0;
+    }
+
 }

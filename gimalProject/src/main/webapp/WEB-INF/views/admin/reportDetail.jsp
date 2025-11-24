@@ -10,8 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <title>도란도란 - 신고 상세보기</title>
-   <link rel="stylesheet" href="<%=request.getContextPath()%>/home.css">
-
+   <link rel="stylesheet" href="<%=request.getContextPath()%>/resources/css/admin.css">
 </head>
 <body>
 

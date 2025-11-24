@@ -1,0 +1,203 @@
+@charset "UTF-8";
+
+/* ================================
+   공통 기본값 – 홈이랑 톤 맞추기
+================================ */
+body {
+    margin: 0;
+    padding: 0;
+    background: #F5F6FA;
+    font-family: 'Pretendard', sans-serif;
+    color: #222;
+}
+
+/* 컨테이너 : 관리자 페이지는 카드 느낌 */
+.container {
+    width: 1200px;
+    margin: 40px auto;
+    padding: 28px 40px;
+    background: #FFFFFF;
+    border-radius: 26px;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* ================================
+   헤더 / 로고 / 상단 버튼
+================================ */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-top: 4px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #ECEEF5;
+    padding-bottom: 14px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 26px;
+    font-weight: 800;
+    color: #FF7C40;
+}
+
+.logo img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* 메세지/로그아웃 버튼 느낌 그대로 사용 */
+.msg-btn,
+.log-btn,
+.logout-btn,
+button {
+    background: #5271FF;
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: 0.15s;
+}
+
+.logout-btn {
+    background: #222;
+}
+
+.msg-btn:hover,
+.log-btn:hover,
+button:hover {
+    background: #3A50D8;
+}
+
+.logout-btn:hover {
+    background: #000;
+}
+
+/* ================================
+   메인 박스 / 제목 / 설명
+================================ */
+
+.main-box {
+    margin-top: 22px;
+    background: #FFFFFF;
+    padding: 26px 26px 30px;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+}
+
+.box-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.main-box p {
+    margin: 4px 0 14px;
+    font-size: 14px;
+    color: #666;
+}
+
+/* ================================
+   테이블 공통 스타일 (회원/신고/공지/통계)
+================================ */
+
+.main-box table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background: #FFFFFF;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.main-box thead th {
+    background: #F5F6FA;
+    border-bottom: 2px solid #E0E4F0;
+    padding: 10px 8px;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+}
+
+.main-box tbody td {
+    border-bottom: 1px solid #ECEEF5;
+    padding: 9px 8px;
+    text-align: center;
+}
+
+/* 짝수 줄 줄무늬 */
+.main-box tbody tr:nth-child(even) {
+    background: #FAFBFF;
+}
+
+/* 행 호버 효과 */
+.main-box tbody tr:hover {
+    background: #EEF3FF;
+}
+
+/* 링크(상세보기, 수정, 삭제 등) */
+.main-box a {
+    color: #5271FF;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.main-box a:hover {
+    text-decoration: underline;
+}
+
+/* ================================
+   상태 뱃지 (신고 상태, 권한 등)
+================================ */
+
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+
+.badge-pending {
+    background: #FFF4C2;
+    color: #9A6A00;
+}
+
+.badge-resolved {
+    background: #D9F7D9;
+    color: #1B7A36;
+}
+
+.badge-admin {
+    background: #E3E7FF;
+    color: #2C3ACF;
+}
+
+.badge-user {
+    background: #F3F4F6;
+    color: #555;
+}
+
+/* ================================
+   기타 유틸
+================================ */
+
+.text-right {
+    text-align: right;
+}
+
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }

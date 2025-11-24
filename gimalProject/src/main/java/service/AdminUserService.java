@@ -34,4 +34,8 @@ public class AdminUserService {
     public boolean unblockUser(long id) {
         return adminUserDAO.updateRole(id, "USER") > 0;
     }
+    public int deleteUser(long autoId) {
+        return adminUserDAO.deleteUser(autoId);
+    }
+
 }

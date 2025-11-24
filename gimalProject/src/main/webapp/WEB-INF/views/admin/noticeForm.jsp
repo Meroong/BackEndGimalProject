@@ -2,8 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link rel="stylesheet" href="<%=request.getContextPath()%>/home.css">
-
+<link rel="stylesheet" href="<%=request.getContextPath()%>/resources/css/admin.css">
     <title>${empty notice ? '공지 작성' : '공지 수정'}</title>
     <meta charset="UTF-8">
     <style>
