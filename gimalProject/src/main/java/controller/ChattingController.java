@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import service.ChattingService;
+import util.AuthUtil;
 import dto.ChatMessageDTO;
 import dto.ChatRoomDTO;
 import dto.ResponseDTO;
@@ -31,20 +32,13 @@ public class ChattingController extends HttpServlet {
 
         String path = req.getPathInfo();   // /rooms, /roomDelete/12
 
-        // ---------- 로그인 검증 ----------
-        HttpSession session = req.getSession();
-        String jwt = (String) session.getAttribute("Authorization");
-
-        JwtAuth auth = new JwtAuth();
-        Claims claims = auth.validateToken(jwt);
-
-        if (claims == null) {
-            req.setAttribute("error", "Invalid Token");
-            req.getRequestDispatcher("/error.jsp").forward(req, resp);
-            return;
+        // ---------- 로그인 검증 ----------  /util/authUtil.java 에 넣어둠 JwtAuth는 토큰 생성 검증만 하는게 좋아서
+        Long autoId = AuthUtil.getAutoId(req);
+        
+        if(autoId == -1) {
+        	resp.sendRedirect("/views/user/login.jsp");
+        	return;
         }
-
-        long autoId = (Integer) claims.get("autoId");
 
         // ---------- 채팅방 리스트 ----------
         if ("/roomList".equals(path)) {
@@ -55,7 +49,7 @@ public class ChattingController extends HttpServlet {
             return;
         }
         
-        // ---------- 선택한 채팅방 메시지 ----------  보안에 신경썼다 어필 해커가 url로 접근해도 검증을 거치기 때문에 좀 더 안전하다.
+        // !!---------- 선택한 채팅방 메시지 ----------  
         else if (path != null && path.startsWith("/room/")) {
         	System.out.println("room/요청");
             String[] parts = path.split("/"); // ["", "room", "15"]
@@ -66,7 +60,7 @@ public class ChattingController extends HttpServlet {
 
             Long roomId = Long.valueOf(parts[2]);
 
-            // 로그인 유저가 이 방에 속하는지 체크
+            // 로그인 유저가 이 방에 속하는지 체크          보안에 신경썼다  해커가 url로 접근해도 검증을 거치기 때문에 좀 더 안전하다.
             boolean allowed = service.checkUserInRoom(autoId, roomId);
             if (!allowed) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Not allowed");
@@ -93,20 +87,14 @@ public class ChattingController extends HttpServlet {
         String path = req.getPathInfo(); // /roomMake
         
         // ---------- 로그인 검증 ----------
-        HttpSession session = req.getSession();
-        String jwt = (String) session.getAttribute("Authorization");
-
-        JwtAuth auth = new JwtAuth();
-        Claims claims = auth.validateToken(jwt);
-
-        if (claims == null) {
-            req.setAttribute("error", "Invalid Token");
-            req.getRequestDispatcher("/error.jsp").forward(req, resp);
-            return;
+        Long autoId = AuthUtil.getAutoId(req);
+        
+        if(autoId == -1) {
+        	resp.sendRedirect("/views/user/login.jsp");
+        	return;
         }
-
-        long autoId = (Integer) claims.get("autoId");
-
+        
+        // !! 개인 거래채팅방 개설
         if ("/pRoomMake".equals(path)) {
         	System.out.println("/pRoomMake 요청");
             long itemId = Long.parseLong(req.getParameter("itemId"));
@@ -121,6 +109,7 @@ public class ChattingController extends HttpServlet {
             req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
             return;
         }
+        // !! 모임용 채팅방 개설
         if ("/gRoomMake".equals(path)) {
         	System.out.println("gRoomMake 요청");
             long meetingId = Long.parseLong(req.getParameter("meetingId"));
@@ -134,6 +123,8 @@ public class ChattingController extends HttpServlet {
             req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
             return;
         }
+        
+        // !! 채팅 보내기 기능
         if("/sendChat".equals(path)) {
         	System.out.println("sendChat 요청");
             long roomId = Long.parseLong(req.getParameter("roomId"));
@@ -144,7 +135,7 @@ public class ChattingController extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/chat/room/" + roomId);
             return;
         }
-        // ---------- 채팅방 삭제 ---------- //일단 냅두기로 관리자용도 있어도 되니까
+        // !! 채팅방 삭제  //일단 냅두기로 관리자용도 있어도 되니까
         if (path.startsWith("/roomDelete/")) {
         	System.out.println("roomDelte 요청");
             String[] parts = path.split("/");   // ["", "roomDelete", "12"]
@@ -160,7 +151,7 @@ public class ChattingController extends HttpServlet {
             return;
         }
         
-        // 채팅방 나오기
+        // !! 채팅방 나오기
         if (path.startsWith("/roomQuit/")) {
         	System.out.println("roomQuit 요청");
         	String[] parts = path.split("/");

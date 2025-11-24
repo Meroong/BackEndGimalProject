@@ -103,13 +103,13 @@ public class UserDAO {
     }
 
     // auto_id로 회원 검색
-    public UserDTO searchByAutoId(int autoId) {
+    public UserDTO searchByAutoId(long autoId) {
         String sql = "SELECT * FROM user WHERE auto_id = ?";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
 
-            pstmt.setInt(1, autoId);
+            pstmt.setLong(1, autoId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     UserDTO dto = new UserDTO();
