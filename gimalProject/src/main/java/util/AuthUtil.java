@@ -13,7 +13,7 @@ public class AuthUtil {
 	public static Claims getClaim(HttpServletRequest req) {
 		HttpSession session = req.getSession(false);	
 		if(session != null) {
-			String token = (String) session.getAttribute("Authorizaion");
+			String token = (String) session.getAttribute("Authorization");
 			return JwtAuth.validateToken(token);
 		}
 		return null;

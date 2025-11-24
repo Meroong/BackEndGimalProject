@@ -1,12 +1,234 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-    pageEncoding="UTF-8"%>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="dto.UserDTO" %>
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
+
+<% //널 체크용 콘솔
+    UserDTO user = (UserDTO) session.getAttribute("userInfo");
+
+    if(user != null) {
+        System.out.println("===== userInfo 세션 확인 =====");
+        System.out.println("AutoId: " + user.getAutoId());
+        System.out.println("UserId: " + user.getUserId());
+        System.out.println("UserName: " + user.getUserName());
+        System.out.println("Nickname: " + user.getNickname());
+        System.out.println("AddressId: " + user.getAddressId());
+        System.out.println("AddressDetail: " + user.getAddressDetail());
+        System.out.println("==============================");
+    } else {
+        System.out.println("userInfo 세션이 존재하지 않음 (null)");
+    }
+%>
+
+    <meta charset="UTF-8">
+    <title>마이페이지 - 도란도란</title>
+    <style>
+        /* ===================== 전체 스타일 ===================== */
+        body {
+            margin: 0;
+            padding: 0;
+            background: #F5F6FA;
+            font-family: 'Pretendard', sans-serif;
+            color: #222;
+        }
+        .container {
+            width: 1400px;
+            margin: 0 auto;
+            padding: 20px 40px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-top: 10px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 28px;
+            font-weight: 800;
+            color: #FF7C40;
+        }
+        .logo img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .log-btn, .mypage-btn, .update-btn, .delete-btn {
+            padding: 8px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+        .log-btn {
+            background: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+        }
+        .log-btn:hover {
+            background: #e0e0e0;
+        }
+        .mypage-btn, .update-btn {
+            background: #FF6600;
+            color: white;
+        }
+        .mypage-btn:hover, .update-btn:hover {
+            background: #e65c00;
+        }
+        .delete-btn {
+            background: #FF4444;
+            color: white;
+        }
+        .delete-btn:hover {
+            background: #cc3333;
+        }
+        .main-box {
+            margin-top: 50px;
+            background: white;
+            padding: 45px;
+            border-radius: 24px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+        }
+        .box-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1.2fr 1.8fr 1fr;
+            gap: 32px;
+        }
+        .center-card, .map-card, .weather-card {
+            background: #FCFBFE;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+        }
+        .center-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .center-desc {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 5px 0 15px 0;
+            border-radius: 12px;
+            border: 1px solid #DDD;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        form button {
+            width: 100%;
+            padding: 12px 0;
+            border-radius: 12px;
+            font-size: 15px;
+        }
+        h2, h3 {
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
+<div class="container">
 
+    <%-- 헤더 --%>
+    <header>
+        <div class="logo">
+            <img src="<%= request.getContextPath() %>/resources/images/logo.png" alt="logo">
+            도란도란
+        </div>
+        <div class="header-buttons">
+            <form action="<%= request.getContextPath() %>/user/logout" method="get">
+                <button type="submit" class="log-btn">Log out</button>
+            </form>
+        </div>
+    </header>
+
+    <%-- 로그인 체크 --%>
+    <%
+        user = (UserDTO) session.getAttribute("userInfo");
+        if (user != null) {
+    %>
+
+    <section class="main-box">
+        <div class="box-title">마이페이지</div>
+
+        <div class="grid-3">
+
+            <%-- 왼쪽: 회원 정보 수정 --%>
+            <div class="center-card">
+                <div class="center-title">내 정보</div>
+                <div class="center-desc">회원님의 정보를 확인하고 수정할 수 있습니다.</div>
+
+                <form action="<%= request.getContextPath() %>/user/update" method="post">
+                    <input type="hidden" name="autoId" value="<%= user.getAutoId() %>">
+
+                    <label>이름</label>
+                    <input type="text" value="<%= user.getUserName() %>" disabled>
+
+                    <label>닉네임</label>
+                    <input type="text" name="newNickname" value="<%= user.getNickname() %>">
+
+                    <label>비밀번호</label>
+                    <input type="password" name="newPassword" placeholder="변경할 비밀번호">
+
+                    <label>주소 ID</label>
+                    <input type="text" name="addressId" value="<%= user.getAddressId() %>">
+
+                    <label>상세 주소</label>
+                    <input type="text" name="addressDetail" value="<%= user.getAddressDetail() %>">
+
+                    <button type="submit" class="update-btn">정보 수정</button>
+                </form>
+
+                <form action="<%= request.getContextPath() %>/user/delete" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까?');" style="margin-top:15px;">
+                    <input type="hidden" name="autoId" value="<%= user.getAutoId() %>">
+                    <button type="submit" class="delete-btn">회원 탈퇴</button>
+                </form>
+            </div>
+
+            <%-- 가운데: 예비 영역 --%>
+            <div class="map-card" style="display:flex; justify-content:center; align-items:center; color:#666;">
+                추가 통계 또는 최근 활동 영역
+            </div>
+
+            <%-- 오른쪽: 예비 영역 --%>
+            <div class="weather-card" style="display:flex; justify-content:center; align-items:center; color:#666;">
+                알림 및 추천 활동 영역
+            </div>
+
+        </div>
+    </section>
+
+    <% } else { %>
+        <div class="main-box" style="text-align:center;">
+            <p>로그인이 필요합니다. <a href="<%= request.getContextPath() %>/views/user/login.jsp">로그인 페이지로 이동</a></p>
+        </div>
+    <% } %>
+
+</div>
 </body>
 </html>

@@ -1,89 +1,162 @@
 package service;
 
-import auth.JwtAuth;
 import dao.UserDAO;
 import dto.ResponseDTO;
 import dto.UserDTO;
 import jakarta.servlet.http.HttpSession;
 
 public class UserService {
-	
-	//회원가입
-	public ResponseDTO registerUser(String userId, String password, String nickName, String userName, String addressIdStr, String addressDetail) {
-		UserDAO dao = new UserDAO();
 
-	    System.out.println("registerUser 호출: userId=" + userId + ", password=" + password + ", nickname=" + nickName);
+    private final UserDAO userDAO = new UserDAO();
 
-	    if (userId == null || password == null || userName == null) {
-	        System.out.println("파라미터 누락!");
-	        return new ResponseDTO(false, "아이디, 비밀번호 또는 이름 누락");
-	    }
+    // =============================
+    // 회원가입
+    // =============================
+    public ResponseDTO registerUser(
+            String userId,
+            String password,
+            String nickname,
+            String userName,
+            String addressIdStr,
+            String addressDetail
+    ) {
+        System.out.println("registerUser 호출: userId=" + userId + ", password=" + password + ", nickname=" + nickname);
 
-	    if(dao.isNicknameDuplicate(nickName)) {
-	        System.out.println("닉네임 중복");
-	        return new ResponseDTO(false, "이미 존재하는 닉네임입니다.");
-	    }
+        if (userId == null || password == null || userName == null) {
+            return new ResponseDTO(false, "아이디, 비밀번호 또는 이름 누락");
+        }
 
-	    if(dao.isUserIdDuplicate(userId)) {
-	        System.out.println("아이디 중복");
-	        return new ResponseDTO(false, "이미 존재하는 아이디입니다.");
-	    }
+        if (nickname != null && !nickname.trim().isEmpty() && userDAO.isNicknameDuplicate(nickname)) {
+            return new ResponseDTO(false, "이미 존재하는 닉네임입니다.");
+        }
 
-	    UserDTO dto = new UserDTO();
-	    dto.setUserId(userId);          
-	    dto.setUserPassword(password); 
-	    dto.setUserName(userName);      
-	    dto.setNickname(nickName);      
-	    dto.setRole("USER");                                    
-	    dto.setAddressId(1);  // 기본값 디비 방법 정하고 추후 수정 예정
+        if (userDAO.isUserIdDuplicate(userId)) {
+            return new ResponseDTO(false, "이미 존재하는 아이디입니다.");
+        }
 
-	    // addressId 유효한 값으로 설정
-	    try {
-	        long addressId = (addressIdStr != null && !addressIdStr.isEmpty()) ? Integer.parseInt(addressIdStr) : 1; 
-	        dto.setAddressId(addressId);
-	    } catch (NumberFormatException e) {
-	        dto.setAddressId(1); // 기본값 1로 처리
-	    }
+        UserDTO dto = new UserDTO();
+        dto.setUserId(userId);
+        dto.setUserPassword(password);
+        dto.setUserName(userName);
+        dto.setNickname(nickname);
+        dto.setRole("USER");
 
-	    boolean result = dao.insert(dto);
-	    System.out.println("회원가입 결과: " + result);
+        try {
+            long addrId = (addressIdStr != null && !addressIdStr.trim().isEmpty())
+                    ? Integer.parseInt(addressIdStr)
+                    : 1;
+            dto.setAddressId(addrId);
+        } catch (NumberFormatException e) {
+            dto.setAddressId(1);
+        }
 
-	    return result ? new ResponseDTO(true, "회원가입 성공") 
-	                  : new ResponseDTO(false, "회원가입 실패");
-	}
+        dto.setAddressDetail(addressDetail);
 
-	// 로그인(jwt 토큰 방식)
-	public ResponseDTO loginUser(String id, String password) {
-		UserDAO dao = new UserDAO();
-		UserDTO dto = dao.searchForLogin(id, password);
+        boolean result = userDAO.insert(dto);
 
-		if(id == null) {
-			return new ResponseDTO(false, "아이디를 입력해주세요.");
-		}
-		if(password == null) {
-			return new ResponseDTO(false, "비밀번호를 입력해주세요.");
-		}
+        return result
+                ? new ResponseDTO(true, "회원가입 성공")
+                : new ResponseDTO(false, "회원가입 실패");
+    }
 
-		if(dto != null) {
-			JwtAuth auth = new JwtAuth();
-			String jwt = auth.generateToken(dto.getUserId(), dto.getAutoId(), dto.getRole());
-			System.out.println("로그인 성공");
-			return new ResponseDTO(true, "로그인 성공!", jwt);
-		} else {
-			return new ResponseDTO(false, "로그인 실패!");
-		}
-	}
+    // =============================
+    // 로그인 (DTO 반환, 세션/JWT는 컨트롤러에서 처리)
+    // =============================
+    public UserDTO loginUser(String id, String password) {
+        if (id == null || id.trim().isEmpty()) return null;
+        if (password == null || password.trim().isEmpty()) return null;
 
-	// 회원정보수정
-	public ResponseDTO updateUser(UserDTO dto) {
-		UserDAO dao = new UserDAO();
-		// 실제 업데이트 로직 필요
-		return new ResponseDTO(true, "회원정보 수정성공");
-	}
-	
-	// 로그아웃
-	public void logoutUser(HttpSession session) {
-		session.invalidate();
-		System.out.println("로그아웃 성공!!");
-	}
+        UserDTO dto = userDAO.searchForLogin(id, password);
+        System.out.println(dto);
+        
+        if (dto != null) {
+            dto.setUserPassword(null); // 보안 목적
+            return dto;
+        }
+        return null;
+    }
+
+    // =============================
+    // 내 정보 조회
+    // =============================
+    public UserDTO getMyInfo(int autoId) {
+        return userDAO.searchByAutoId(autoId);
+    }
+
+    // =============================
+    // 회원 탈퇴
+    // =============================
+    public boolean deleteUser(int autoId) {
+        try {
+            userDAO.delete(autoId);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // =============================
+    // 회원 정보 수정
+    // =============================
+    public ResponseDTO updateUser(
+            long autoId,
+            String newPassword,
+            String newNickname,
+            String addressIdStr,
+            String addressDetail
+    ) {
+        UserDTO dto = new UserDTO();
+        dto.setAutoId(autoId);
+        boolean hasUpdates = false;
+
+        if (newPassword != null && !newPassword.trim().isEmpty()) {
+            dto.setUserPassword(newPassword);
+            hasUpdates = true;
+        }
+
+        if (newNickname != null && !newNickname.trim().isEmpty()) {
+            UserDTO current = userDAO.searchByAutoId(autoId);
+            if (current != null && !newNickname.equals(current.getNickname())) {
+                if (userDAO.isNicknameDuplicate(newNickname)) {
+                    return new ResponseDTO(false, "이미 사용 중인 닉네임입니다.");
+                }
+            }
+            dto.setNickname(newNickname);
+            hasUpdates = true;
+        }
+
+        if (addressIdStr != null && !addressIdStr.trim().isEmpty()) {
+            try {
+                int addr = Integer.parseInt(addressIdStr);
+                dto.setAddressId(addr);
+                hasUpdates = true;
+            } catch (NumberFormatException e) {
+                return new ResponseDTO(false, "잘못된 주소 형식입니다.");
+            }
+        }
+
+        if (addressDetail != null) {
+            dto.setAddressDetail(addressDetail);
+            hasUpdates = true;
+        }
+
+        if (!hasUpdates) return new ResponseDTO(false, "수정할 정보를 입력해주세요.");
+
+        try {
+            userDAO.updateUser(dto);
+            return new ResponseDTO(true, "회원정보 수정성공");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseDTO(false, "회원정보 수정 중 오류가 발생했습니다.");
+        }
+    }
+
+    // =============================
+    // 로그아웃 (컨트롤러에서 세션 invalidate)
+    // =============================
+    public void logoutUser(HttpSession session) {
+        session.invalidate();
+        System.out.println("로그아웃 성공!!");
+    }
 }

@@ -20,30 +20,9 @@ body {
 header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start; /* 🔥 핵심: 상단 기준 정렬 */
-    padding-top: 10px; /* 약간 위쪽 여백 */
+    align-items: flex-start; /* 상단 기준 정렬 */
+    padding-top: 10px;
 }
-
-.header-buttons {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.msg-btn {
-    background: #5271FF;
-    color: white;
-    padding: 8px 20px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    font-weight: 600;
-}
-
-.msg-btn:hover {
-    background: #3A50D8;
-}
-
 
 .logo {
     display: flex;
@@ -60,14 +39,70 @@ header {
     object-fit: contain;
 }
 
-.logout-btn {
-    background: #222;
+/* 헤더 버튼 컨테이너 */
+.header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* 메시지 버튼 */
+.msg-btn {
+    background: #5271FF;
     color: white;
     padding: 8px 20px;
     border-radius: 10px;
     border: none;
     cursor: pointer;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
+}
+
+.msg-btn:hover {
+    background: #3A50D8;
+    transform: translateY(-2px);
+}
+
+/* 마이페이지 버튼 */
+.mypage-btn {
+    background: #FF6600;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
+}
+
+.mypage-btn:hover {
+    background: #e65c00;
+    transform: translateY(-2px);
+}
+
+/* 로그아웃/로그인 버튼 */
+.log-btn {
+    background: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 8px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
+}
+
+.log-btn:hover {
+    background: #e0e0e0;
 }
 
 /* 검색 영역 */

@@ -76,7 +76,7 @@ public class UserDAO {
         return false;
     }
 
-    // 로그인용 검색
+ // 로그인용 검색 (패스워드 제외, 세션에 저장용 전체 정보 조회)
     public UserDTO searchForLogin(String userId, String userPassword) {
         String sql = "SELECT * FROM user WHERE user_id = ? AND user_password = ?";
         try (Connection con = JDBCUtil.jdbcCon();
@@ -88,9 +88,21 @@ public class UserDAO {
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     UserDTO dto = new UserDTO();
-                    dto.setAutoId(rs.getLong("auto_id"));
-                    dto.setUserId(rs.getString("user_id"));
-                    dto.setRole(rs.getString("role"));
+                    
+                    dto.setAutoId(rs.getLong("auto_id"));        // 인증/권한용
+                    dto.setUserId(rs.getString("user_id"));     // 로그인 ID
+                    
+                    // 세션에 저장할 사용자 정보
+                    dto.setUserName(rs.getString("user_name"));
+                    dto.setNickname(rs.getString("nickname"));
+                    dto.setAddressId(rs.getInt("address_id"));
+                    dto.setAddressDetail(rs.getString("address_detail"));
+                    dto.setTrustScore(rs.getInt("trust_score"));
+                    dto.setRole(rs.getString("role"));          // JWT에 넣을 인증/권한용
+                    
+                    dto.setCreatedAt(rs.getTimestamp("created_at"));
+                    dto.setUpdatedAt(rs.getTimestamp("updated_at"));
+
                     return dto;
                 }
             }

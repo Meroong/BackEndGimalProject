@@ -16,28 +16,26 @@
 	        도란도란
 	    </div>
 	
-	    <div class="header-buttons">
-	        <% 
-	            Object loginUser = session.getAttribute("Authorization"); 
-	            if (loginUser != null) { 
-	        %>
-	            <!-- 로그인 상태: 메시지 + 로그아웃 -->
-	            <button class="msg-btn" onclick="location.href='<%= request.getContextPath() %>/chat/roomList'">메시지</button>
-	            
-	            <form action="<%= request.getContextPath() %>/user/logout" method="get" style="display:inline;">
-    				<button type="submit" class="log-btn">Log out</button>
-				</form>
-
-
-	        <% 
-	            } else { 
-	        %>
-	            <!-- 비로그인 상태: 로그인 버튼만 -->
-	            <button class="log-btn" onclick="location.href='views/user/login.jsp'">Log in</button>
-	        <% 
-	            } 
-	        %>
-	    </div>
+		<div class="header-buttons">
+		    <% 
+		        Object loginUser = session.getAttribute("Authorization"); 
+		        if (loginUser != null) { 
+		    %>
+		        <!-- 로그인 상태: 메시지 + 마이페이지 + 로그아웃 -->
+		        <button class="msg-btn" onclick="location.href='<%= request.getContextPath() %>/chat/roomList'">메시지</button>
+		        <button class="mypage-btn" onclick="location.href='<%= request.getContextPath() %>/views/user/mypage.jsp'">마이페이지</button>
+		        <form action="<%= request.getContextPath() %>/user/logout" method="get" style="display:inline;">
+		            <button type="submit" class="log-btn">Log out</button>
+		        </form>
+		    <% 
+		        } else { 
+		    %>
+		        <!-- 비로그인 상태: 로그인 버튼만 -->
+		        <button class="log-btn" onclick="location.href='views/user/login.jsp'">Log in</button>
+		    <% 
+		        } 
+		    %>
+		</div>
 	</header>
 
 

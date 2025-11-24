@@ -7,69 +7,94 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+
 import service.UserService;
 import dto.ResponseDTO;
+import dto.UserDTO;
 import com.google.gson.Gson;
+import auth.JwtAuth;
 
 import java.io.IOException;
 
-@WebServlet("/user/*") //    /user/이하로 들어오는 모든 url 요청을 처리 /user는 딱 /user만 가능하게 함
+@WebServlet("/user/*")
 public class UserController extends HttpServlet {
+
     private UserService userService;
     private Gson gson = new Gson();
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-        super.init(config); 
+        super.init(config);
         userService = new UserService();
         System.out.println("userController: ON");
     }
 
-    	
+    // =============================
+    // GET 요청 처리
+    // =============================
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String path = req.getPathInfo();
-        
-        //로그아웃 요청을 get요청으로 처리 
+
         if ("/logout".equals(path)) {
-        	
-        	//유저 서비스내에 로그아웃 로직처리 인자는 세션
-            userService.logoutUser(req.getSession());
-            
-            //로그아웃 서비스 처리 후 index.jsp 페이지로 리다이렉트  
-            resp.sendRedirect(req.getContextPath() + "/index.jsp"); // 로그아웃 후 메인으로 이동
+            // 로그아웃 처리
+            HttpSession session = req.getSession(false);
+            if (session != null) {
+                userService.logoutUser(session);
+            }
+            resp.sendRedirect(req.getContextPath() + "/index.jsp");
             return;
         }
+
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
-    
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-            throws IOException, ServletException {
 
+    // =============================
+    // POST 요청 처리
+    // =============================
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException, ServletException {
         String path = req.getPathInfo();
         ResponseDTO result = null;
 
         switch (path) {
+            // -----------------------------
+            // 로그인
+            // -----------------------------
             case "/login":
                 String id = req.getParameter("userId");
                 String pw = req.getParameter("userPassword");
                 HttpSession session = req.getSession();
-                result = userService.loginUser(id, pw);
 
-                if(result.isSuccess()) {
-                    // 로그인 성공 시 index.jsp로 redirect
-                	String jwt = (String) result.getData();
-                	
-                	//Jwt를 리스폰스 바디에 보낼 필요가 없음 
-                	result.setData(null);
-                	
-        			session.setAttribute("Authorization", "Bearer " + jwt);
+                // 서비스에서 DTO 반환
+                UserDTO dto = userService.loginUser(id, pw);
+
+                if (dto != null) {
+                    // 화면용 세션 저장
+                    UserDTO sessionUser = new UserDTO();
+                    sessionUser.setAutoId(dto.getAutoId());
+                    sessionUser.setUserName(dto.getUserName());
+                    sessionUser.setNickname(dto.getNickname());
+                    sessionUser.setAddressId(dto.getAddressId());
+                    sessionUser.setAddressDetail(dto.getAddressDetail());
+                    session.setAttribute("userInfo", sessionUser);
+
+                    // JWT 생성
+                    String jwt = JwtAuth.generateToken(dto.getUserId(), dto.getAutoId(), dto.getRole());
+                    session.setAttribute("Authorization", "Bearer " + jwt);
+
+                    // 로그인 성공 후 메인 페이지 이동
                     resp.sendRedirect(req.getContextPath() + "/index.jsp");
                     return;
-                } 
-                break;
+                } else {
+                    req.setAttribute("errorMsg", "아이디 또는 비밀번호를 확인해주세요.");
+                    req.getRequestDispatcher("/views/user/login.jsp").forward(req, resp);
+                    return;
+                }
 
+            // -----------------------------
+            // 회원가입
+            // -----------------------------
             case "/register":
                 String userId = req.getParameter("userId");
                 String password = req.getParameter("userPassword");
@@ -81,10 +106,48 @@ public class UserController extends HttpServlet {
                 result = userService.registerUser(userId, password, nickName, userName, addressIdStr, addressDetail);
                 break;
 
+            // -----------------------------
+            // 회원 정보 수정
+            // -----------------------------
             case "/update":
-                // 서비스에 맞춰 DTO 만들어서 updateUser 호출
-                // 예: UserDTO dto = new UserDTO();
-                // result = userService.updateUser(dto);
+                long autoId = Long.parseLong(req.getParameter("autoId"));
+                String newPassword = req.getParameter("newPassword");
+                String newNickname = req.getParameter("newNickname");
+                String addrIdStr = req.getParameter("addressId");
+                String addrDetail = req.getParameter("addressDetail");
+
+                result = userService.updateUser(autoId, newPassword, newNickname, addrIdStr, addrDetail);
+
+                if (result.isSuccess()) {
+                    // 세션 갱신
+                    UserDTO updatedUser = userService.getMyInfo((int) autoId);
+                    req.getSession().setAttribute("userInfo", updatedUser);
+
+                    // 수정 성공 시 마이페이지로 리다이렉트
+                    resp.sendRedirect(req.getContextPath() + "/views/user/mypage.jsp");
+                    return;
+                } else {
+                    req.setAttribute("errorMsg", result.getMessage());
+                    req.getRequestDispatcher("/views/user/mypage.jsp").forward(req, resp);
+                    return;
+                }
+
+            // -----------------------------
+            // 회원 탈퇴
+            // -----------------------------
+            case "/delete":
+                long delAutoId = Long.parseLong(req.getParameter("autoId"));
+                boolean deleteResult = userService.deleteUser((int) delAutoId);
+
+                result = deleteResult
+                        ? new ResponseDTO(true, "회원 탈퇴 성공")
+                        : new ResponseDTO(false, "회원 탈퇴 실패");
+
+                if (deleteResult) {
+                    req.getSession().invalidate();
+                    resp.sendRedirect(req.getContextPath() + "/index.jsp");
+                    return;
+                }
                 break;
 
             default:
