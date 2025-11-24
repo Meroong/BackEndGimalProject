@@ -1,38 +1,58 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="dto.AdminStatsDTO" %>
+
+<%
+    AdminStatsDTO stats = (AdminStatsDTO) request.getAttribute("stats");
+%>
+
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-    <title>관리자 통계</title>
     <meta charset="UTF-8">
-    <style>
-        body { font-family: sans-serif; padding: 20px; }
-        h2 { margin-bottom: 20px; }
-        .stats-wrap { display: flex; gap: 20px; }
-        .stat-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 16px 24px;
-            min-width: 180px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        .stat-label { color: #666; font-size: 14px; margin-bottom: 8px; }
-        .stat-value { font-size: 24px; font-weight: bold; }
-    </style>
+    <title>도란도란 - 관리자 통계</title>
+    <link rel="stylesheet" href="<%=request.getContextPath()%>/home.css">
+
 </head>
 <body>
 
-<h2>관리자 통계</h2>
+<div class="container">
 
-<div class="stats-wrap">
-    <div class="stat-card">
-        <div class="stat-label">전체 회원 수</div>
-        <div class="stat-value">${stats.totalUsers}</div>
-    </div>
+    <header>
+        <div class="logo">
+            <img src="<%=request.getContextPath()%>/resources/images/logo.png" alt="logo">
+            도란도란 관리자
+        </div>
+        <div class="header-buttons">
+            <button class="log-btn"
+                    onclick="location.href='<%=request.getContextPath()%>/admin'">
+                관리자 메인
+            </button>
+        </div>
+    </header>
 
-    <div class="stat-card">
-        <div class="stat-label">전체 신고 수</div>
-        <div class="stat-value">${stats.totalReports}</div>
-    </div>
+    <section class="main-box">
+        <div class="box-title">관리자 통계</div>
+
+        <table border="1" style="width:100%; border-collapse:collapse; text-align:center;">
+            <tr style="background:#f3f4f6;">
+                <th>지표</th>
+                <th>값</th>
+            </tr>
+            <tr>
+                <td>전체 회원 수</td>
+                <td><%= (stats != null) ? stats.getTotalUsers() : 0 %></td>
+            </tr>
+            <tr>
+                <td>전체 신고 수</td>
+                <td><%= (stats != null) ? stats.getTotalReports() : 0 %></td>
+            </tr>
+        </table>
+
+        <p style="margin-top:16px; color:#555;">
+            * 통계 값은 AdminStatsDAO.getStats() 결과를 기반으로 합니다.
+        </p>
+    </section>
+
 </div>
 
 </body>

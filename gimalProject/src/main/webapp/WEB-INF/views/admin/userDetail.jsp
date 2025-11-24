@@ -11,6 +11,7 @@
     <meta charset="UTF-8">
     <title>도란도란 - 회원 상세보기</title>
     <link rel="stylesheet" href="<%=request.getContextPath()%>/home.css">
+
 </head>
 <body>
 <div class="container">

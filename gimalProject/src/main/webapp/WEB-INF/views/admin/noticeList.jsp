@@ -8,6 +8,7 @@
     <meta charset="UTF-8" />
     <title>도란도란 - 공지사항 목록</title>
     <link rel="stylesheet" href="<%=request.getContextPath()%>/home.css">
+
 </head>
 <body>
 

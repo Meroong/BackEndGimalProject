@@ -7,6 +7,7 @@
 
     <!-- 메인 화면이 쓰는 home.css 그대로 사용 -->
     <link rel="stylesheet" href="<%=request.getContextPath()%>/home.css">
+
 </head>
 <body>
 <div class="container">

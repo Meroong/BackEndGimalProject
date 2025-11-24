@@ -14,20 +14,19 @@ import service.AdminStatsService;
 public class AdminStatsServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-
-    private AdminStatsService adminStatsService = new AdminStatsService();
+    private AdminStatsService statsService = new AdminStatsService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1) 서비스에서 통계 값 조회
-        AdminStatsDTO stats = adminStatsService.getStats();
+        // 통계 데이터 한 번에 조회
+        AdminStatsDTO stats = statsService.getStats();
 
-        // 2) JSP에서 사용할 이름으로 저장
+        // JSP에서 사용할 이름으로 전달
         request.setAttribute("stats", stats);
 
-        // 3) 화면으로 포워드
+        // 통계 JSP로 포워드
         request.getRequestDispatcher("/WEB-INF/views/admin/stats.jsp")
                .forward(request, response);
     }
