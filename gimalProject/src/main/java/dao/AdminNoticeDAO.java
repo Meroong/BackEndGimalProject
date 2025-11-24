@@ -14,10 +14,11 @@ public class AdminNoticeDAO {
 
     // 공지 전체 목록 조회
     public List<AdminNoticeDTO> findAll() {
-    	
+
         List<AdminNoticeDTO> list = new ArrayList<>();
 
-        String sql = "SELECT id, title, content, writer, created_at, hit " +
+        // DB 테이블에 맞게 writer, hit 제거
+        String sql = "SELECT id, title, content, created_at " +
                      "FROM notice " +
                      "ORDER BY id DESC";
 
@@ -30,9 +31,12 @@ public class AdminNoticeDAO {
                 dto.setId(rs.getLong("id"));
                 dto.setTitle(rs.getString("title"));
                 dto.setContent(rs.getString("content"));
-                dto.setWriter(rs.getString("writer"));
                 dto.setCreatedAt(rs.getTimestamp("created_at"));
-                dto.setHit(rs.getInt("hit"));
+
+                // DB에는 없지만 DTO에는 있는 필드 → 기본값으로 두기
+                dto.setWriter(null);
+                dto.setHit(0);
+
                 list.add(dto);
             }
 
@@ -42,17 +46,19 @@ public class AdminNoticeDAO {
 
         return list;
     }
- // 공지 등록
+
+    // 공지 등록
     public int insert(AdminNoticeDTO dto) {
-        String sql = "INSERT INTO notice (title, content, writer, created_at, hit) " +
-                     "VALUES (?, ?, ?, NOW(), 0)";
+
+        // DB 테이블에 맞게 writer, hit 제거
+        String sql = "INSERT INTO notice (title, content) " +
+                     "VALUES (?, ?)";
 
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
             pstmt.setString(1, dto.getTitle());
             pstmt.setString(2, dto.getContent());
-            pstmt.setString(3, dto.getWriter());
 
             return pstmt.executeUpdate();
 
@@ -62,7 +68,8 @@ public class AdminNoticeDAO {
 
         return 0;
     }
- // 공지 수정
+
+    // 공지 수정
     public int update(AdminNoticeDTO dto) {
         String sql = "UPDATE notice SET title = ?, content = ? WHERE id = ?";
 
@@ -80,7 +87,8 @@ public class AdminNoticeDAO {
 
         return 0;
     }
- // 공지 삭제
+
+    // 공지 삭제
     public int delete(long id) {
         String sql = "DELETE FROM notice WHERE id = ?";
 
@@ -96,5 +104,4 @@ public class AdminNoticeDAO {
 
         return 0;
     }
-
 }

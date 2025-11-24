@@ -25,5 +25,6 @@ public class AdminNoticeService {
     public boolean deleteNotice(long id) {
         return adminNoticeDAO.delete(id) > 0;
     }
+    
 
 }

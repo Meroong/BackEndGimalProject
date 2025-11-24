@@ -1,7 +1,6 @@
 package com.controller.admin;
 
 import java.io.IOException;
-import java.util.List;
 
 import dto.ReportDTO;
 import jakarta.servlet.ServletException;
@@ -11,8 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import service.AdminReportService;
 
-@WebServlet("/admin/reports")
-public class AdminReportListServlet extends HttpServlet {
+@WebServlet("/admin/reports/detail")
+public class AdminReportDetailServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
@@ -22,14 +21,13 @@ public class AdminReportListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 서비스에서 실제 신고 목록 가져오기
-        List<ReportDTO> reportList = adminReportService.getReportList();
+        long id = Long.parseLong(request.getParameter("id"));
 
-        // JSP에서 쓸 이름으로 세팅
-        request.setAttribute("reportList", reportList);
+        ReportDTO report = adminReportService.getReportById(id);
 
-        // 신고 목록 JSP로 포워드
-        request.getRequestDispatcher("/WEB-INF/views/admin/reportList.jsp")
+        request.setAttribute("report", report);
+
+        request.getRequestDispatcher("/WEB-INF/views/admin/reportDetail.jsp")
                .forward(request, response);
     }
 }

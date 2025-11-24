@@ -35,12 +35,13 @@
             <thead>
             <tr style="background:#f3f4f6;">
                 <th>ID</th>
-                <th>신고자</th>
-                <th>대상자</th>
+                <th>신고자 ID</th>
+                <th>대상자 ID</th>
                 <th>타입</th>
                 <th>사유</th>
                 <th>상태</th>
                 <th>등록일시</th>
+                <th>상세</th>
             </tr>
             </thead>
             <tbody>
@@ -65,6 +66,11 @@
                     <td><%= r.getReason() %></td>
                     <td><%= r.getStatus() %></td>
                     <td><%= r.getCreatedAt() %></td>
+                    <td>
+        			<a href="<%=request.getContextPath()%>/admin/reports/detail?id=<%= r.getId() %>">
+            			상세보기
+       				 </a>
+    </td>	
                 </tr>
             <%
                     }

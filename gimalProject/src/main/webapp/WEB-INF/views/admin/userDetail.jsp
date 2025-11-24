@@ -50,10 +50,27 @@
 
         <br>
 
+        <%-- 관리자 계정(ADMIN)은 정지/해제 버튼 숨김 --%>
+        <% if (!"ADMIN".equals(u.getRole())) { %>
+
+            <button class="log-btn"
+                    onclick="location.href='<%=request.getContextPath()%>/admin/users/block?id=<%= u.getAutoId() %>'">
+                계정 정지
+            </button>
+
+            <button class="log-btn"
+                    onclick="location.href='<%=request.getContextPath()%>/admin/users/unblock?id=<%= u.getAutoId() %>'">
+                정지 해제
+            </button>
+
+            <br><br>
+        <% } %>
+
         <button class="log-btn"
                 onclick="location.href='<%=request.getContextPath()%>/admin/users'">
             목록으로
         </button>
+
     </section>
 
 </div>
