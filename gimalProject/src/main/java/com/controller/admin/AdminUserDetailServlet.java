@@ -1,7 +1,6 @@
 package com.controller.admin;
 
 import java.io.IOException;
-import java.util.List;
 
 import dto.UserDTO;
 import jakarta.servlet.ServletException;
@@ -11,8 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import service.AdminUserService;
 
-@WebServlet("/admin/users")
-public class AdminUserListServlet extends HttpServlet {
+@WebServlet("/admin/users/detail")
+public class AdminUserDetailServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
@@ -22,14 +21,16 @@ public class AdminUserListServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 서비스에서 회원 목록 가져오기
-        List<UserDTO> userList = adminUserService.getUserList();
+        // URL에서 id 가져오기
+        long id = Long.parseLong(request.getParameter("id"));
 
-        // JSP에서 그대로 쓰도록 세팅
-        request.setAttribute("userList", userList);
+        // 서비스에서 회원정보 가져오기
+        UserDTO user = adminUserService.getUserById(id);
 
-        // 원래 있던 userList.jsp로 포워드 (경로만 정확하면 OK)
-        request.getRequestDispatcher("/WEB-INF/views/admin/userList.jsp")
+        request.setAttribute("user", user);
+
+        // JSP로 이동
+        request.getRequestDispatcher("/WEB-INF/views/admin/userDetail.jsp")
                .forward(request, response);
     }
 }

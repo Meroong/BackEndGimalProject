@@ -46,6 +46,13 @@
                 <td>${n.writer}</td>
                 <td>${n.createdAt}</td>
                 <td>${n.hit}</td>
+                <td>
+ 		           <a href="${pageContext.request.contextPath}/admin/notices/edit?id=${n.id}">수정</a>
+    
+    			   <a href="${pageContext.request.contextPath}/admin/notices/delete?id=${n.id}"
+                     onclick="return confirm('정말 삭제하시겠습니까?');">삭제</a>
+			   </td>
+                
             </tr>
         </c:forEach>
 

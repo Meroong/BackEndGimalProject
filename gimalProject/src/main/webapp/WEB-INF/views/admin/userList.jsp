@@ -46,6 +46,7 @@
                 <th>권한</th>
                 <th>신뢰도</th>
                 <th>가입일</th>
+                <th>상세</th>
             </tr>
             </thead>
             <tbody>
@@ -70,6 +71,12 @@
                     <td><%= u.getRole() %></td>
                     <td><%= u.getTrustScore() %></td>
                     <td><%= u.getCreatedAt() %></td>
+                    <td>
+    				<a href="<%=request.getContextPath()%>/admin/users/detail?id=<%= u.getAutoId() %>">
+        				상세보기
+   				    </a>
+					</td>
+                    
                 </tr>
             <%
                     }

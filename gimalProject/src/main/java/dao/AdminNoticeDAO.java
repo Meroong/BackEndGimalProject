@@ -14,6 +14,7 @@ public class AdminNoticeDAO {
 
     // 공지 전체 목록 조회
     public List<AdminNoticeDTO> findAll() {
+    	
         List<AdminNoticeDTO> list = new ArrayList<>();
 
         String sql = "SELECT id, title, content, writer, created_at, hit " +
@@ -41,4 +42,59 @@ public class AdminNoticeDAO {
 
         return list;
     }
+ // 공지 등록
+    public int insert(AdminNoticeDTO dto) {
+        String sql = "INSERT INTO notice (title, content, writer, created_at, hit) " +
+                     "VALUES (?, ?, ?, NOW(), 0)";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setString(1, dto.getTitle());
+            pstmt.setString(2, dto.getContent());
+            pstmt.setString(3, dto.getWriter());
+
+            return pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+ // 공지 수정
+    public int update(AdminNoticeDTO dto) {
+        String sql = "UPDATE notice SET title = ?, content = ? WHERE id = ?";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setString(1, dto.getTitle());
+            pstmt.setString(2, dto.getContent());
+            pstmt.setLong(3, dto.getId());
+
+            return pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+ // 공지 삭제
+    public int delete(long id) {
+        String sql = "DELETE FROM notice WHERE id = ?";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, id);
+            return pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
 }
