@@ -88,7 +88,7 @@ public class UserDAO {
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     UserDTO dto = new UserDTO();
-                    dto.setAutoId(rs.getInt("auto_id"));
+                    dto.setAutoId(rs.getLong("auto_id"));
                     dto.setUserId(rs.getString("user_id"));
                     dto.setRole(rs.getString("role"));
                     return dto;
