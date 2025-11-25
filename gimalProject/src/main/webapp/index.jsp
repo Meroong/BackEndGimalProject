@@ -1,4 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="util.AuthUtil" %>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -15,27 +17,61 @@
 	        <img src="resources/images/logo.png" alt="logo">
 	        도란도란
 	    </div>
-	
-		<div class="header-buttons">
-		    <% 
-		        Object loginUser = session.getAttribute("Authorization"); 
-		        if (loginUser != null) { 
-		    %>
-		        <!-- 로그인 상태: 메시지 + 마이페이지 + 로그아웃 -->
-		        <button class="msg-btn" onclick="location.href='<%= request.getContextPath() %>/chat/roomList'">메시지</button>
-		        <button class="mypage-btn" onclick="location.href='<%= request.getContextPath() %>/views/user/mypage.jsp'">마이페이지</button>
-		        <form action="<%= request.getContextPath() %>/user/logout" method="get" style="display:inline;">
-		            <button type="submit" class="log-btn">Log out</button>
-		        </form>
-		    <% 
-		        } else { 
-		    %>
-		        <!-- 비로그인 상태: 로그인 버튼만 -->
-		        <button class="log-btn" onclick="location.href='views/user/login.jsp'">Log in</button>
-		    <% 
-		        } 
-		    %>
-		</div>
+
+<div class="header-buttons">
+    <%
+        Object loginUser = session.getAttribute("Authorization");
+
+        if (loginUser != null) {
+
+            // JWT 토큰
+            String token = (String) loginUser;
+
+            // JWT에서 role 추출 (사용중인 메서드명에 맞게 수정하세요)
+            String role = AuthUtil.getRole(request);
+    %>
+
+        <!-- 로그인 상태 공통: 메시지 -->
+        <button class="msg-btn"
+                onclick="location.href='<%= request.getContextPath() %>/chat/roomList'">
+            메시지
+        </button>
+
+        <%-- ADMIN: 관리자 버튼 --%>
+        <% if ("ADMIN".equals(role)) { %>
+
+            <button class="log-btn"
+                    onclick="location.href='<%=request.getContextPath()%>/admin'">
+                관리자
+            </button>
+
+        <% } else { %>
+
+        <%-- USER: 마이페이지 버튼 --%>
+            <button class="mypage-btn"
+                    onclick="location.href='<%= request.getContextPath() %>/views/user/mypage.jsp'">
+                마이페이지
+            </button>
+
+        <% } %>
+
+        <!-- 로그아웃 -->
+        <form action="<%= request.getContextPath() %>/user/logout" method="get" style="display:inline;">
+            <button type="submit" class="log-btn">Log out</button>
+        </form>
+
+    <% } else { %>
+
+        <!-- 비로그인 상태 -->
+        <button class="log-btn"
+                onclick="location.href='views/user/login.jsp'">
+            Log in
+        </button>
+
+    <% } %>
+</div>
+
+
 	</header>
 
 
@@ -143,5 +179,10 @@
     </section>
 
 </div>
+<button class="log-btn"
+        onclick="location.href='<%=request.getContextPath()%>/admin/stats'">
+    통계 보기
+</button>
+
 </body>
 </html>
