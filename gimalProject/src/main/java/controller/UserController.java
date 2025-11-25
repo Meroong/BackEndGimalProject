@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 
 import service.UserService;
 import dto.ResponseDTO;
+import dto.UserAddressDTO;
 import dto.UserDTO;
 import com.google.gson.Gson;
 import auth.JwtAuth;
@@ -67,20 +68,21 @@ public class UserController extends HttpServlet {
                 HttpSession session = req.getSession();
 
                 // 서비스에서 DTO 반환
-                UserDTO dto = userService.loginUser(id, pw);
+                UserDTO userDto = userService.loginUser(id, pw);
+                
+                if (userDto != null) {
+                	UserAddressDTO addressDto = userService.getAddressInfo(userDto.getAutoId());
 
-                if (dto != null) {
                     // 화면용 세션 저장
                     UserDTO sessionUser = new UserDTO();
-                    sessionUser.setAutoId(dto.getAutoId());
-                    sessionUser.setUserName(dto.getUserName());
-                    sessionUser.setNickname(dto.getNickname());
-                    sessionUser.setAddressId(dto.getAddressId());
-                    sessionUser.setAddressDetail(dto.getAddressDetail());
+                    sessionUser.setUserId(userDto.getUserId());
+                    sessionUser.setUserName(userDto.getUserName());
+                    sessionUser.setNickname(userDto.getNickname());
                     session.setAttribute("userInfo", sessionUser);
+                    session.setAttribute("addressInfo", addressDto);
 
                     // JWT 생성
-                    String jwt = JwtAuth.generateToken(dto.getUserId(), dto.getAutoId(), dto.getRole());
+                    String jwt = JwtAuth.generateToken(userDto.getUserId(), userDto.getAutoId(), userDto.getRole());
                     session.setAttribute("Authorization", "Bearer " + jwt);
 
                     // 로그인 성공 후 메인 페이지 이동
@@ -100,10 +102,20 @@ public class UserController extends HttpServlet {
                 String password = req.getParameter("userPassword");
                 String nickName = req.getParameter("nickName");
                 String userName = req.getParameter("userName");
-                String addressIdStr = req.getParameter("addressId");
-                String addressDetail = req.getParameter("addressDetail");
+                String roadAddress = req.getParameter("roadAddress");
+                String jibunAddress = req.getParameter("jibunAddress");
+                String addrDetail = req.getParameter("addressDetail");
+                //추후 확장 예정
+				/*
+				 * String latitudeStr = req.getParameter("latitude"); String longitudeStr =
+				 * req.getParameter("longitude");
+				 */
 
-                result = userService.registerUser(userId, password, nickName, userName, addressIdStr, addressDetail);
+                result = userService.registerUser(userId, password, nickName, userName,
+						roadAddress, jibunAddress, addrDetail/*
+																 * , latitudeStr, longitudeStr
+																 */
+						);
                 break;
 
             // -----------------------------
@@ -113,14 +125,23 @@ public class UserController extends HttpServlet {
                 long autoId = Long.parseLong(req.getParameter("autoId"));
                 String newPassword = req.getParameter("newPassword");
                 String newNickname = req.getParameter("newNickname");
-                String addrIdStr = req.getParameter("addressId");
-                String addrDetail = req.getParameter("addressDetail");
+                String newRoadAddress = req.getParameter("roadAddress");
+                String newJibunAddress = req.getParameter("jibunAddress");
+				String newAddrDetail = req.getParameter("addressDetail");
+				/*//추후 확장예정
+														 * String newLatitude = req.getParameter("latitude"); String
+														 * newLongitude = req.getParameter("longitude");
+														 */
 
-                result = userService.updateUser(autoId, newPassword, newNickname, addrIdStr, addrDetail);
-
+                result = userService.updateUser(
+                        autoId, newPassword, newNickname,
+						newRoadAddress, newJibunAddress, newAddrDetail/*
+																		 * , newLatitude, newLongitude
+																		 */
+                        );
                 if (result.isSuccess()) {
                     // 세션 갱신
-                    UserDTO updatedUser = userService.getMyInfo((int) autoId);
+                    UserDTO updatedUser = userService.getMyInfo((long) autoId);
                     req.getSession().setAttribute("userInfo", updatedUser);
 
                     // 수정 성공 시 마이페이지로 리다이렉트

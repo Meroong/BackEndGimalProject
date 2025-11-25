@@ -1,13 +1,16 @@
 package service;
 
+import dao.UserAddressDAO;
 import dao.UserDAO;
 import dto.ResponseDTO;
+import dto.UserAddressDTO;
 import dto.UserDTO;
 import jakarta.servlet.http.HttpSession;
 
 public class UserService {
 
     private final UserDAO userDAO = new UserDAO();
+    private final UserAddressDAO addressDAO = new UserAddressDAO();
 
     // =============================
     // 회원가입
@@ -17,8 +20,12 @@ public class UserService {
             String password,
             String nickname,
             String userName,
-            String addressIdStr,
-            String addressDetail
+            String roadAddress,
+            String jibunAddress,
+			String addrDetail/*
+								 * , //추후 확장 예정 String latitudeStr, String longitudeStr
+								 */
+
     ) {
         System.out.println("registerUser 호출: userId=" + userId + ", password=" + password + ", nickname=" + nickname);
 
@@ -33,28 +40,37 @@ public class UserService {
         if (userDAO.isUserIdDuplicate(userId)) {
             return new ResponseDTO(false, "이미 존재하는 아이디입니다.");
         }
-
+        //1. 유저정보 저장 
         UserDTO dto = new UserDTO();
         dto.setUserId(userId);
         dto.setUserPassword(password);
         dto.setUserName(userName);
         dto.setNickname(nickname);
         dto.setRole("USER");
+        
+        
 
-        try {
-            long addrId = (addressIdStr != null && !addressIdStr.trim().isEmpty())
-                    ? Integer.parseInt(addressIdStr)
-                    : 1;
-            dto.setAddressId(addrId);
-        } catch (NumberFormatException e) {
-            dto.setAddressId(1);
-        }
-
-        dto.setAddressDetail(addressDetail);
-
-        boolean result = userDAO.insert(dto);
-
-        return result
+        long autoId = userDAO.insert(dto);
+        if (autoId == -1)
+            return new ResponseDTO(false, "회원가입 실패(유저 저장 오류)");
+        
+        
+        // 2) 주소 정보 저장
+        UserAddressDTO addr = new UserAddressDTO();
+        addr.setUserId(autoId);
+        addr.setRoadAddress(roadAddress);
+        addr.setJibunAddress(jibunAddress);
+        addr.setAddrDetail(addrDetail);
+        int result = addressDAO.saveOrUpdate(addr);
+		/*
+		 * try { if (latitudeStr != null && !latitudeStr.isEmpty())
+		 * addr.setLatitude(Double.parseDouble(latitudeStr)); if (longitudeStr != null
+		 * && !longitudeStr.isEmpty())
+		 * addr.setLongitude(Double.parseDouble(longitudeStr)); } catch (Exception e) {
+		 * return new ResponseDTO(false, "위도/경도 값이 잘못되었습니다."); }
+		 */
+        
+        return result > 0
                 ? new ResponseDTO(true, "회원가입 성공")
                 : new ResponseDTO(false, "회원가입 실패");
     }
@@ -63,6 +79,7 @@ public class UserService {
     // 로그인 (DTO 반환, 세션/JWT는 컨트롤러에서 처리)
     // =============================
     public UserDTO loginUser(String id, String password) {
+    	System.out.println("로그인서비스:");
         if (id == null || id.trim().isEmpty()) return null;
         if (password == null || password.trim().isEmpty()) return null;
 
@@ -77,16 +94,16 @@ public class UserService {
     }
 
     // =============================
-    // 내 정보 조회
+    // 내 정보 조회  수정 필요(손주성)
     // =============================
-    public UserDTO getMyInfo(int autoId) {
+    public UserDTO getMyInfo(long autoId) {
         return userDAO.searchByAutoId(autoId);
     }
 
     // =============================
     // 회원 탈퇴
     // =============================
-    public boolean deleteUser(int autoId) {
+    public boolean deleteUser(long autoId) {
         try {
             userDAO.delete(autoId);
             return true;
@@ -103,9 +120,13 @@ public class UserService {
             long autoId,
             String newPassword,
             String newNickname,
-            String addressIdStr,
-            String addressDetail
+            String roadAddress,
+            String jibunAddress,
+			String addrDetail/*
+								 * , String latitudeStr, String longitudeStr
+								 */
     ) {
+    	//1. User 수정
         UserDTO dto = new UserDTO();
         dto.setAutoId(autoId);
         boolean hasUpdates = false;
@@ -125,26 +146,33 @@ public class UserService {
             dto.setNickname(newNickname);
             hasUpdates = true;
         }
-
-        if (addressIdStr != null && !addressIdStr.trim().isEmpty()) {
-            try {
-                int addr = Integer.parseInt(addressIdStr);
-                dto.setAddressId(addr);
-                hasUpdates = true;
-            } catch (NumberFormatException e) {
-                return new ResponseDTO(false, "잘못된 주소 형식입니다.");
-            }
+        if (hasUpdates) {
+            userDAO.updateUser(dto);
         }
+        // ===== 2) 주소 수정 =====
+        UserAddressDTO addr = new UserAddressDTO();
+        addr.setUserId(autoId);
+        addr.setRoadAddress(roadAddress);
+        addr.setJibunAddress(jibunAddress);
+        addr.setAddrDetail(addrDetail);
 
-        if (addressDetail != null) {
-            dto.setAddressDetail(addressDetail);
-            hasUpdates = true;
-        }
+        //추후 확장 예정 카카오맵
+		/*
+		 * try { if (latitudeStr != null && !latitudeStr.isEmpty())
+		 * addr.setLatitude(Double.parseDouble(latitudeStr)); if (longitudeStr != null
+		 * && !longitudeStr.isEmpty())
+		 * addr.setLongitude(Double.parseDouble(longitudeStr)); } catch (Exception e) {
+		 * return new ResponseDTO(false, "잘못된 위도/경도 값입니다."); }
+		 */
+        addressDAO.saveOrUpdate(addr);
 
-        if (!hasUpdates) return new ResponseDTO(false, "수정할 정보를 입력해주세요.");
+        //유저 정보의 hasUpdates를 확장하여 주소 정보까지 확인
+        if (!hasUpdates &&
+                (roadAddress == null && jibunAddress == null && addrDetail == null))
+            return new ResponseDTO(false, "수정할 내용을 입력해주세요.");
 
         try {
-            userDAO.updateUser(dto);
+            
             return new ResponseDTO(true, "회원정보 수정성공");
         } catch (Exception e) {
             e.printStackTrace();
@@ -158,5 +186,16 @@ public class UserService {
     public void logoutUser(HttpSession session) {
         session.invalidate();
         System.out.println("로그아웃 성공!!");
+    }
+    public UserAddressDTO getAddressInfo(long autoId) {
+    	UserAddressDTO dto = new UserAddressDTO();
+    	//오토아이디 기반으로 주소 정보 가져오기 
+    	dto =addressDAO.getAddressByUserId(autoId);
+    	
+    	if(dto == null) {
+    		System.out.println("getAddressInfo: dto is null");
+    		dto = new UserAddressDTO();
+    	}
+    	return dto;
     }
 }
