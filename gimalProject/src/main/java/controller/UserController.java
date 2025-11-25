@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import service.UserService;
+import util.AuthUtil;
 import dto.ResponseDTO;
 import dto.UserAddressDTO;
 import dto.UserDTO;
@@ -72,7 +73,9 @@ public class UserController extends HttpServlet {
                 
                 if (userDto != null) {
                 	UserAddressDTO addressDto = userService.getAddressInfo(userDto.getAutoId());
-
+                	//데이터 확인용 syso
+                	System.out.println("login반환데이터:"+addressDto);
+                	
                     // 화면용 세션 저장
                     UserDTO sessionUser = new UserDTO();
                     sessionUser.setUserId(userDto.getUserId());
@@ -122,12 +125,12 @@ public class UserController extends HttpServlet {
             // 회원 정보 수정
             // -----------------------------
             case "/update":
-                long autoId = Long.parseLong(req.getParameter("autoId"));
+                long autoId = AuthUtil.getAutoId(req); //이 방식으로 수정 예정(손주성)
                 String newPassword = req.getParameter("newPassword");
                 String newNickname = req.getParameter("newNickname");
                 String newRoadAddress = req.getParameter("roadAddress");
                 String newJibunAddress = req.getParameter("jibunAddress");
-				String newAddrDetail = req.getParameter("addressDetail");
+                String newAddrDetail = req.getParameter("addrDetail");
 				/*//추후 확장예정
 														 * String newLatitude = req.getParameter("latitude"); String
 														 * newLongitude = req.getParameter("longitude");
@@ -141,8 +144,10 @@ public class UserController extends HttpServlet {
                         );
                 if (result.isSuccess()) {
                     // 세션 갱신
-                    UserDTO updatedUser = userService.getMyInfo((long) autoId);
+                    UserDTO updatedUser = userService.getMyInfo(autoId);
+                    UserAddressDTO updatedAddress = userService.getAddressInfo(autoId);
                     req.getSession().setAttribute("userInfo", updatedUser);
+                    req.getSession().setAttribute("addressInfo", updatedAddress);
 
                     // 수정 성공 시 마이페이지로 리다이렉트
                     resp.sendRedirect(req.getContextPath() + "/views/user/mypage.jsp");

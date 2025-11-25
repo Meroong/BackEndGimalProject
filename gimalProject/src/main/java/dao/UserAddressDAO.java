@@ -26,8 +26,10 @@ public class UserAddressDAO {
                     dto.setRoadAddress(rs.getString("road_address"));
                     dto.setJibunAddress(rs.getString("jibun_address"));
                     dto.setAddrDetail(rs.getString("addr_detail"));
-                    dto.setLatitude(rs.getDouble("latitude"));
-                    dto.setLongitude(rs.getDouble("longitude"));
+					/*
+					 * dto.setLatitude(rs.getDouble("latitude"));
+					 * dto.setLongitude(rs.getDouble("longitude"));
+					 */
                     dto.setCreatedAt(rs.getTimestamp("created_at"));
                     dto.setUpdatedAt(rs.getTimestamp("updated_at"));
                     return dto;
@@ -52,17 +54,18 @@ public class UserAddressDAO {
 
     // 주소 삽입
     private int insertAddress(UserAddressDTO dto) {
-        String sql = "INSERT INTO user_address (user_id, road_address, jibun_address, addr_detail, latitude, longitude) "
-                   + "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO user_address (user_id, road_address, jibun_address, addr_detail) "
+                   + "VALUES (?, ?, ?, ?)";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
             pstmt.setLong(1, dto.getUserId());
             pstmt.setString(2, dto.getRoadAddress());
             pstmt.setString(3, dto.getJibunAddress());
-            pstmt.setString(4, dto.getAddrDetail());
-            pstmt.setDouble(5, dto.getLatitude());
-            pstmt.setDouble(6, dto.getLongitude());
+			pstmt.setString(4, dto.getAddrDetail());/*
+													 * pstmt.setDouble(5, dto.getLatitude()); pstmt.setDouble(6,
+													 * dto.getLongitude());
+													 */
 
             return pstmt.executeUpdate();
 
@@ -76,16 +79,18 @@ public class UserAddressDAO {
     // 주소 수정
     private int updateAddress(UserAddressDTO dto) {
         String sql = "UPDATE user_address SET road_address = ?, jibun_address = ?, addr_detail = ?, "
-                   + "latitude = ?, longitude = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
+                   + "updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
             pstmt.setString(1, dto.getRoadAddress());
             pstmt.setString(2, dto.getJibunAddress());
             pstmt.setString(3, dto.getAddrDetail());
-            pstmt.setDouble(4, dto.getLatitude());
-            pstmt.setDouble(5, dto.getLongitude());
-            pstmt.setLong(6, dto.getUserId());
+			pstmt.setLong(4, dto.getUserId());/*
+												 * pstmt.setDouble(5, dto.getLatitude()); pstmt.setDouble(6,
+												 * dto.getLongitude());
+												 */
+            
 
             return pstmt.executeUpdate();
 

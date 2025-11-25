@@ -78,7 +78,7 @@
 <%-- 로그인 체크 --%>
 <%
     UserDTO user = (UserDTO) session.getAttribute("userInfo");
-    UserAddressDTO addr = (UserAddressDTO) session.getAttribute("userAddress");
+    UserAddressDTO addr = (UserAddressDTO) session.getAttribute("addressInfo");
     if (user != null) {
 %>
 
@@ -107,20 +107,27 @@
                 <label>주소</label>
                 <button type="button" class="update-btn" onclick="openJusoPopup()" style="width:auto; margin-bottom:10px;">주소 검색</button>
 
-                <!-- 도로명주소 -->
-                <label>도로명주소</label>
-                <input type="text" id="roadAddress" value="<%= addr != null && addr.getRoadAddress() != null ? addr.getRoadAddress() : "" %>" disabled style="background:#f4f4f4;">
-                <input type="hidden" name="roadAddress" value="<%= addr != null && addr.getRoadAddress() != null ? addr.getRoadAddress() : "" %>">
-
-                <!-- 지번주소 -->
-                <label>지번주소</label>
-                <input type="text" id="jibunAddress" value="<%= addr != null && addr.getJibunAddress() != null ? addr.getJibunAddress() : "" %>" disabled style="background:#f4f4f4;">
-                <input type="hidden" name="jibunAddress" value="<%= addr != null && addr.getJibunAddress() != null ? addr.getJibunAddress() : "" %>">
-
-                <!-- 상세주소 -->
-                <label>상세주소</label>
-                <input type="text" name="addrDetail" value="<%= addr != null && addr.getAddrDetail() != null ? addr.getAddrDetail() : "" %>">
-
+				<!-- 도로명주소 -->
+				<label>도로명주소</label>
+				<input type="text" id="roadAddress" disabled
+				       value="<%= addr != null ? addr.getRoadAddress() : "" %>" />
+				<input type="hidden" id="roadAddressValue" name="roadAddress"
+				       value="<%= addr != null ? addr.getRoadAddress() : "" %>" />
+				
+				<!-- 지번주소 disabled라 팝업에서 .textContent가 아니라 .value 사용해야함-->
+				<label>지번주소</label>
+				<input type="text" id="jibunAddress" disabled
+				       value="<%= addr != null ? addr.getJibunAddress() : "" %>" />
+				<input type="hidden" id="jibunAddressValue" name="jibunAddress"
+				       value="<%= addr != null ? addr.getJibunAddress() : "" %>" />
+				
+				<!-- 상세주소 (유저 입력 가능) -->	
+				<label>상세주소</label>
+				<input type="text" id="addrDetail" 
+				       value="<%= addr != null ? addr.getAddrDetail() : "" %>" />
+				<input type="hidden" id="addrDetailValue" name="addrDetail"
+				       value="<%= addr != null ? addr.getAddrDetail() : "" %>" />
+                
                 <button type="submit" class="update-btn">정보 수정</button>
             </form>
 

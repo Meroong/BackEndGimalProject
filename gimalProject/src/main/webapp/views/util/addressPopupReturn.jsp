@@ -4,25 +4,30 @@
     String roadAddr = request.getParameter("roadAddrPart1");
     String jibunAddr = request.getParameter("jibunAddr");
     String addrDetail = request.getParameter("addrDetail");
+
+    // ====== 🔥 디버깅용 출력 ======
+    System.out.println("==== [주소 API 반환값 확인] ====");
+    System.out.println("roadAddrPart1 = " + roadAddr);
+    System.out.println("jibunAddr     = " + jibunAddr);
+    System.out.println("addrDetail    = " + addrDetail);
+    System.out.println("===============================");
 %>
 <script>
 if (window.opener) {
-    // 부모창의 읽기 전용 span + hidden input 업데이트
-    window.opener.document.getElementById("roadAddress").textContent = "<%= roadAddr %>";
+
+
+    // 도로명주소
+    window.opener.document.getElementById("roadAddress").value = "<%= roadAddr %>";
     window.opener.document.getElementById("roadAddressValue").value = "<%= roadAddr %>";
 
-    window.opener.document.getElementById("jibunAddress").textContent = "<%= jibunAddr %>";
+    // 지번주소
+    window.opener.document.getElementById("jibunAddress").value = "<%= jibunAddr %>";
     window.opener.document.getElementById("jibunAddressValue").value = "<%= jibunAddr %>";
-    
-    window.opener.document.getElementById("addrDetail").textContent = "<%= addrDetail != null ? addrDetail.replace("\"", "\\\"") : "" %>";
+
+    // 상세주소
+    window.opener.document.getElementById("addrDetail").value = "<%= addrDetail != null ? addrDetail.replace("\"", "\\\"") : "" %>";
     window.opener.document.getElementById("addrDetailValue").value = "<%= addrDetail != null ? addrDetail.replace("\"", "\\\"") : "" %>";
 
-
-
-    // 팝업 닫기
-    window.close();
-} else {
-    alert("주소 선택 실패 또는 부모 창 없음");
     window.close();
 }
 </script>
