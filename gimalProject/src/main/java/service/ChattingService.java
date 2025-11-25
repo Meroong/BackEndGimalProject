@@ -81,16 +81,6 @@ public class ChattingService {
                 ChatRoomDTO dto = roomDao.getChatRoomById(roomId);
                 if (dto != null) {
                 	chatList.add(dto);
-                    // 콘솔 출력
-                    System.out.println(
-                        "방 ID: " + dto.getRoomId() +
-                        " | 타입: " + dto.getRoomType() +
-                        " | 호스트 ID: " + dto.getHostId() +
-                        " | 아이템 ID: " + dto.getItemId() +
-                        " | 모임 ID: " + dto.getMeetingId() +
-                        " | 생성일시: " + dto.getCreatedAt()
-                    );
-                
                 }
             }
             return new ResponseDTO(true, "채팅 리스트 반환 성공", chatList);
@@ -104,14 +94,6 @@ public class ChattingService {
     		return new ResponseDTO(false, "채팅목록이 없습니다.");
     	}
     	else {
-            System.out.println("===== 채팅방 " + roomId + " 메시지 목록 =====");
-            for (ChatMessageDTO msg : messageList) {
-                System.out.println(
-                    "[" + msg.getSentAt() + "] " +
-                    "보낸사람 ID: " + msg.getSenderId() + " | " +
-                    "내용: " + msg.getContent()
-                );
-            }
             return new ResponseDTO(true, "채팅목록을 가져왔습니다.", messageList);
     	}	 
     }

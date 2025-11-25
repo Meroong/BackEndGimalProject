@@ -1,5 +1,6 @@
 package service;
 
+import dao.ChatRoomUserDAO;
 import dao.UserAddressDAO;
 import dao.UserDAO;
 import dto.ResponseDTO;
@@ -105,7 +106,22 @@ public class UserService {
     // =============================
     public boolean deleteUser(long autoId) {
         try {
+        	
+        	int affectedRow = addressDAO.deleteAddress(autoId);
+        	if(affectedRow ==0) {
+        		return false;
+        	}
+        	
+        	affectedRow =new ChatRoomUserDAO().quitRoomForDeleteUser(autoId);
+        	
+        	if(affectedRow ==0) {
+        		return false;
+        	}
+        	
             userDAO.delete(autoId);
+            if(affectedRow ==0) {
+        		return false;
+        	}
             return true;
         } catch (Exception e) {
             e.printStackTrace();

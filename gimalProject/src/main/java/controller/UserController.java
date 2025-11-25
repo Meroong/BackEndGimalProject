@@ -162,8 +162,8 @@ public class UserController extends HttpServlet {
             // 회원 탈퇴
             // -----------------------------
             case "/delete":
-                long delAutoId = Long.parseLong(req.getParameter("autoId"));
-                boolean deleteResult = userService.deleteUser((int) delAutoId);
+                long delAutoId = AuthUtil.getAutoId(req);
+                boolean deleteResult = userService.deleteUser(delAutoId);
 
                 result = deleteResult
                         ? new ResponseDTO(true, "회원 탈퇴 성공")

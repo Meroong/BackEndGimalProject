@@ -12,7 +12,7 @@ import util.JDBCUtil;
 
 public class ChatMessageDAO {
 	
-	//채팅방  삭제 dao
+	//채팅방 아이디 기반으로 메시지 가져오기
 	public ArrayList<ChatMessageDTO> getMessageByRoomId(long roomId){
 		ArrayList<ChatMessageDTO> messageList = new ArrayList<ChatMessageDTO>();
 		ResultSet rs = null;
@@ -36,7 +36,7 @@ public class ChatMessageDAO {
 
     		}
     	} catch (SQLException e) {
-    		System.out.println("채팅방 삭제 디비 쿼리 중 에러!");
+    		System.out.println("채팅방 서치 쿼리 중 에러!");
     		e.printStackTrace();
     	}
     	return messageList;
@@ -61,7 +61,6 @@ public class ChatMessageDAO {
 			e.printStackTrace();
 			return 0;
 		}
-		
-
 	}
+	public int
 }

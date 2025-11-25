@@ -103,11 +103,33 @@
         <div class="box-title">우리 동네 기반 맞춤 추천</div>
 
         <div class="grid-3">
-
-            <%-- 지도 영역 --%>
-            <div class="map-card">
-                <img src="resources/images/map.png" alt="map">
-            </div>
+			<div class="map-card" id="map" style="width:100%; height:400px;"></div>
+			<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
+			<script>
+			    window.onload = function() {
+			        if (!window.kakao) {
+			            alert("카카오 지도 SDK 로드 실패");
+			            return;
+			        }
+			
+			        // 지도 생성 //
+			        var container = document.getElementById('map');
+			        var options = {
+			            center: new kakao.maps.LatLng(37.501, 126.884), // 기본 중심 좌표: 구로동 근처
+			            level: 3
+			        };
+			        var map = new kakao.maps.Map(container, options);
+			
+			        // 예시: 마커 추가
+			        var markerPosition  = new kakao.maps.LatLng(37.501, 126.884); 
+			        var marker = new kakao.maps.Marker({
+			            position: markerPosition
+			        });
+			        marker.setMap(map);
+			
+			        console.log("카카오 지도 로드 완료");
+			    }
+			</script>
 
             <%-- 가운데: 오늘의 인기 모임 --%>
             <div class="center-card">

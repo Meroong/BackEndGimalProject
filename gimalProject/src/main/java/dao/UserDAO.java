@@ -146,18 +146,21 @@ public class UserDAO {
     }
 
     // 회원 삭제
-    public void delete(long autoId) {
+    public int delete(long autoId) {
         String sql = "DELETE FROM user WHERE auto_id = ?";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
-
+        	
 
             pstmt.setLong(1, autoId);
-            pstmt.executeUpdate();
+            int result = pstmt.executeUpdate();
+            System.out.println(autoId);
+            return result;
 
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("DB연결 오류 혹은 쿼리오류");
+            return 0;
         }
     }
 

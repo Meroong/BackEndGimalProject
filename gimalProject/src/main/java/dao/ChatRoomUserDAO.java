@@ -67,5 +67,19 @@ public class ChatRoomUserDAO {
 		            return false;
 		        }
 	 }
+	public int quitRoomForDeleteUser(long autoId) {
+		String sql = "delete from chat_room_user where user_id =?; ";
+        try (Connection con = JDBCUtil.jdbcCon();
+   	         PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+   	            pstmt.setLong(1, autoId);
+   	            
+   	            return pstmt.executeUpdate(); //affectedRow
+   	    }catch (SQLException e) {
+   	            e.printStackTrace();
+   	            return 0;
+   	    }
+   	}
+	
 
 }
