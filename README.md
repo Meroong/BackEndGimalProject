@@ -9,6 +9,10 @@ DB 세팅
 create database dorandoran;
 use dorandoran;
 
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- 📍 지역정보 테이블
+DROP TABLE IF EXISTS user_address;
 -- 💬 채팅메시지
 DROP TABLE IF EXISTS chat_message;
 
@@ -18,60 +22,31 @@ DROP TABLE IF EXISTS chat_room;
 
 -- 🚨 신고
 DROP TABLE IF EXISTS report;
-
 -- ⭐ 리뷰
 DROP TABLE IF EXISTS review;
-
 -- 💳 거래기록
 DROP TABLE IF EXISTS transaction;
-
 -- ❤️ 찜 목록
 DROP TABLE IF EXISTS wishlist;
-
 -- 🔁 대여 상세정보
 DROP TABLE IF EXISTS rental_info;
-
 -- 💬 중고/대여 상품 게시판
 DROP TABLE IF EXISTS item;
-
 -- 💾 이미지 테이블
 DROP TABLE IF EXISTS image;
-
 -- 🏷️ 유저 태그
 DROP TABLE IF EXISTS user_tag;
-
 -- 🤝 모임참여자 관리
 DROP TABLE IF EXISTS meeting_participant;
-
 -- 🤝 모임 게시판
 DROP TABLE IF EXISTS meeting;
-
 -- 📢 공지게시판
 DROP TABLE IF EXISTS notice;
-
 -- 🧍 USER 관련
 DROP TABLE IF EXISTS user;
 
--- 📍 지역정보 테이블
-DROP TABLE IF EXISTS address;
-
-
 SET FOREIGN_KEY_CHECKS = 1;
 
-
--- 📍 지역정보 테이블
-CREATE TABLE address (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    sido_code INT NOT NULL,
-    sigungu_code INT NOT NULL,
-    dong_code INT NOT NULL,
-    sido_name VARCHAR(50) NOT NULL,
-    sigungu_name VARCHAR(50),
-    dong_name VARCHAR(50),
-    full_name VARCHAR(150) GENERATED ALWAYS AS (
-        CONCAT(sido_name, ' ', sigungu_name, ' ', dong_name)
-    ) STORED
-) COMMENT='지역 코드 및 행정구역 정보';
 
 
 -- 🧍 USER 관련
@@ -83,12 +58,26 @@ CREATE TABLE user (
     nickname VARCHAR(50) UNIQUE NOT NULL COMMENT '닉네임',
     trust_score INT DEFAULT 0 COMMENT '신뢰도 점수',
     role ENUM('USER', 'ADMIN') DEFAULT 'USER' COMMENT '권한',
-    address_id BIGINT COMMENT '지역 정보 참조키',
-    address_detail VARCHAR(255) COMMENT '상세 주소',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '가입일시',
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '정보 수정일시',
-    CONSTRAINT fk_user_address FOREIGN KEY (address_id) REFERENCES address(id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '정보 수정일시'
 ) COMMENT='회원 정보 테이블';
+
+
+
+-- 📍 지역정보 테이블
+CREATE TABLE user_address (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '주소 ID',
+    user_id BIGINT NOT NULL COMMENT '유저 ID',
+    road_address VARCHAR(255) NOT NULL COMMENT '도로명 주소',
+    jibun_address VARCHAR(255) NOT NULL COMMENT '지번 주소',
+    addr_detail VARCHAR(255) COMMENT '상세 주소',
+    latitude DOUBLE COMMENT '위도',
+    longitude DOUBLE COMMENT '경도',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    FOREIGN KEY (user_id) REFERENCES user(auto_id) ON DELETE CASCADE
+) COMMENT='유저별 주소 정보';
+
 
 
 -- 🏷️ 유저 태그
@@ -100,6 +89,7 @@ CREATE TABLE user_tag (
 ) COMMENT='유저 관심 태그';
 
 
+
 -- 💾 이미지 테이블
 CREATE TABLE image (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '이미지 식별자',
@@ -108,6 +98,8 @@ CREATE TABLE image (
     target_id BIGINT COMMENT '대상 ID',
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '업로드 일시'
 ) COMMENT='이미지 테이블';
+
+
 
 
 -- 💬 중고/대여 상품 게시판
@@ -126,6 +118,7 @@ CREATE TABLE item (
 ) COMMENT='중고/대여 게시판';
 
 
+
 -- 🔁 대여 상세정보
 CREATE TABLE rental_info (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '대여 정보 ID',
@@ -138,6 +131,7 @@ CREATE TABLE rental_info (
 ) COMMENT='대여 상세 정보';
 
 
+
 -- ❤️ 찜 목록
 CREATE TABLE wishlist (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '찜목록 ID',
@@ -147,6 +141,7 @@ CREATE TABLE wishlist (
     FOREIGN KEY (user_id) REFERENCES user(auto_id) ON DELETE CASCADE,
     FOREIGN KEY (item_id) REFERENCES item(item_id) ON DELETE CASCADE
 ) COMMENT='찜 목록';
+
 
 
 -- 💳 거래기록
@@ -164,6 +159,7 @@ CREATE TABLE transaction (
 ) COMMENT='거래 기록';
 
 
+
 -- ⭐ 리뷰
 CREATE TABLE review (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '리뷰 ID',
@@ -176,6 +172,7 @@ CREATE TABLE review (
     FOREIGN KEY (reviewer_id) REFERENCES user(auto_id),
     FOREIGN KEY (reviewee_id) REFERENCES user(auto_id)
 ) COMMENT='리뷰';
+
 
 
 -- 🤝 모임 게시판
@@ -194,6 +191,7 @@ CREATE TABLE meeting (
 ) COMMENT='모임 게시판';
 
 
+
 -- 👥 모임참여자 관리
 CREATE TABLE meeting_participant (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '참가 ID',
@@ -206,6 +204,7 @@ CREATE TABLE meeting_participant (
 ) COMMENT='모임 참여자';
 
 
+
 -- 📢 공지게시판
 CREATE TABLE notice (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '공지 ID',
@@ -215,8 +214,9 @@ CREATE TABLE notice (
 ) COMMENT='공지 게시판';
 
 
--- 💬 채팅방
 
+
+-- 💬 채팅방
 CREATE TABLE chat_room (
     room_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     item_id BIGINT COMMENT '상품 ID (거래 채팅일 경우)',
@@ -227,6 +227,7 @@ CREATE TABLE chat_room (
     FOREIGN KEY (host_id) REFERENCES user(auto_id),
     FOREIGN KEY (meeting_id) REFERENCES meeting(id)
 ) COMMENT='거래 및 모임용 채팅방';
+
 
 
 -- 💭 채팅방참여자
@@ -254,31 +255,18 @@ CREATE TABLE chat_message (
 
 
 
--- 🚨 신고
-CREATE TABLE report (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '신고 ID',
-    reporter_id BIGINT NOT NULL COMMENT '신고자 ID',
-    target_user_id BIGINT NOT NULL COMMENT '대상자 ID',
-    target_type ENUM('USER','ITEM','MEETING') COMMENT '대상 유형',
-    reason TEXT COMMENT '신고 사유',
-    status ENUM('PENDING','RESOLVED') DEFAULT 'PENDING' COMMENT '상태',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
-    FOREIGN KEY (reporter_id) REFERENCES user(auto_id),
-    FOREIGN KEY (target_user_id) REFERENCES user(auto_id)
-) COMMENT='신고';
-
--- 간이 데이터 
--- 📍 지역정보
-INSERT INTO address (sido_code, sigungu_code, dong_code, sido_name, sigungu_name, dong_name)
-VALUES
-(11, 101, 1, '서울특별시', '은평구', '역촌동'),
-(11, 102, 2, '서울특별시', '강남구', '삼성동');
-
+-- 간이 데이터
 -- 🧍 USER
-INSERT INTO user (user_id, user_password, user_name, nickname, role, address_id, address_detail)
+INSERT INTO user (user_id, user_password, user_name, nickname, role)
 VALUES
-('admin01', '1234', '관리자', '관리자닉', 'ADMIN', 1, '성산동 123-45'),
-('test01', '1234', '테스트', '닉테스트', 'USER', 2, '삼성동 456-78');
+('admin01', '1234', '관리자', '관리자닉', 'ADMIN'),
+('test01', '1234', '테스트', '닉테스트', 'USER');
+
+-- 📍 유저 주소
+INSERT INTO user_address (user_id, road_address, jibun_address, addr_detail)
+VALUES
+(1, '서울특별시 은평구 역촌동', '역촌동 123-45', '상세 없음'),
+(2, '서울특별시 강남구 삼성동', '삼성동 456-78', '상세 없음');
 
 -- 🏷️ 유저 태그
 INSERT INTO user_tag (user_id, tag_name)
@@ -286,13 +274,7 @@ VALUES
 (2, '운동 좋아함'),
 (2, '강아지 사랑');
 
--- 💾 이미지
-INSERT INTO image (src, type, target_id)
-VALUES
-('user1.png','USER',1),
-('item1.png','ITEM',1);
-
--- 💬 중고/대여 상품 게시판
+-- 💬 중고/대여 상품
 INSERT INTO item (seller_id, category_id, title, content, price, trade_type, status)
 VALUES
 (2, 1, '자전거 판매', '좋은 자전거 팝니다', 100000, 'SALE', 'AVAILABLE'),
@@ -323,7 +305,7 @@ INSERT INTO meeting (title, content, date, location, max_members, current_member
 VALUES
 ('조깅 모임', '매주 토요일 조깅', '2025-11-22 09:00:00', '한강공원', 10, 2, 0, '운동', 'OPEN');
 
--- 👥 모임참여자 관리
+-- 👥 모임참여자
 INSERT INTO meeting_participant (meeting_id, user_id, paid)
 VALUES
 (1, 1, TRUE),
@@ -335,65 +317,34 @@ VALUES
 ('서버 점검 안내', '2025-11-20 00:00 ~ 02:00 서버 점검 예정');
 
 
-
--- 🚨 신고
-INSERT INTO report (reporter_id, target_user_id, target_type, reason)
-VALUES
-(1, 2, 'USER', '스팸 메시지 발송');
-
--- -------------------------------
--- 💬 채팅방 (chat_room)
--- -------------------------------
-
+-- 💬 채팅방
 INSERT INTO chat_room (item_id, meeting_id, room_type, host_id)
 VALUES
--- 거래용 채팅방: item_id=1, host=2 (판매자)
 (1, NULL, 'PRIVATE', 2),
--- 거래용 채팅방: item_id=2, host=2 (판매자)
 (2, NULL, 'PRIVATE', 2),
--- 모임용 채팅방: meeting_id=1, host=1
 (NULL, 1, 'GROUP', 1);
 
--- -------------------------------
--- 💭 채팅방 참여자 (chat_room_user)
--- -------------------------------
+-- 💭 채팅방 참여자
 INSERT INTO chat_room_user (room_id, user_id)
 VALUES
--- 거래방 1 참여자: 구매자 1, 판매자 2
 (1, 1),
 (1, 2),
--- 거래방 2 참여자: 구매자 1, 판매자 2
 (2, 1),
 (2, 2),
--- 모임방 참여자: 유저 1, 2
 (3, 1),
 (3, 2);
 
--- -------------------------------
--- 💭 채팅 메시지 (chat_message)
--- -------------------------------
+-- 💭 채팅 메시지
 INSERT INTO chat_message (room_id, sender_id, content)
 VALUES
--- 거래방 1
 (1, 1, '안녕하세요, 자전거 구매하고 싶습니다.'),
 (1, 2, '안녕하세요! 가격 흥정 가능해요.'),
 (1, 1, '좋습니다. 그럼 언제 만날까요?'),
--- 거래방 2
 (2, 1, '책 대여 가능할까요?'),
 (2, 2, '네, 일주일 대여 가능합니다.'),
 (2, 1, '좋아요, 내일 수령할게요.'),
--- 모임방
 (3, 1, '이번 주 토요일 모임 몇 시에 시작하나요?'),
 (3, 2, '오전 9시에 한강공원에서 시작합니다.'),
 (3, 1, '좋아요, 그때 봬요!');
 
-select * from user;
-select * from chat_room;
-
-
-
--- 🚨 신고
-INSERT INTO report (reporter_id, target_user_id, target_type, reason)
-VALUES
-(1, 2, 'USER', '스팸 메시지 발송');
 
