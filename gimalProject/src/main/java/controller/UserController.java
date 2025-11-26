@@ -78,6 +78,7 @@ public class UserController extends HttpServlet {
                     sessionUser.setAddressId(dto.getAddressId());
                     sessionUser.setAddressDetail(dto.getAddressDetail());
                     session.setAttribute("userInfo", sessionUser);
+                    session.setAttribute("addressInfo", addressUser);
 
                     // JWT 생성
                     String jwt = JwtAuth.generateToken(dto.getUserId(), dto.getAutoId(), dto.getRole());
@@ -100,11 +101,20 @@ public class UserController extends HttpServlet {
                 String password = req.getParameter("userPassword");
                 String nickName = req.getParameter("nickName");
                 String userName = req.getParameter("userName");
-                String addressIdStr = req.getParameter("addressId");
-                String addressDetail = req.getParameter("addressDetail");
+                String roadAddress = req.getParameter("roadAddress");
+                String jibunAddress = req.getParameter("jibunAddress");
+				String addrDetail = req
+						.getParameter("addressDetail");/*
+														 * String latitudeStr = req.getParameter("latitude"); String
+														 * longitudeStr = req.getParameter("longitude");
+														 */
 
-                result = userService.registerUser(userId, password, nickName, userName, addressIdStr, addressDetail);
-                break;
+                result = userService.registerUser(
+                        userId, password, nickName, userName,
+						roadAddress, jibunAddress, addrDetail/*
+																 * , latitudeStr, longitudeStr
+																 */
+                );
 
             // -----------------------------
             // 회원 정보 수정
@@ -113,11 +123,19 @@ public class UserController extends HttpServlet {
                 long autoId = Long.parseLong(req.getParameter("autoId"));
                 String newPassword = req.getParameter("newPassword");
                 String newNickname = req.getParameter("newNickname");
-                String addrIdStr = req.getParameter("addressId");
-                String addrDetail = req.getParameter("addressDetail");
-
-                result = userService.updateUser(autoId, newPassword, newNickname, addrIdStr, addrDetail);
-
+                String newRoadAddress = req.getParameter("roadAddress");
+                String newJibunAddress = req.getParameter("jibunAddress");
+                String newAddrDetail = req.getParameter("addressDetail");
+				/*
+				 * String newLatitude = req.getParameter("latitude"); String newLongitude =
+				 * req.getParameter("longitude");
+				 */
+                result = userService.updateUser(
+                        autoId, newPassword, newNickname,
+						newRoadAddress, newJibunAddress, newAddrDetail/*
+																		 * , newLatitude, newLongitude
+																		 */
+                );
                 if (result.isSuccess()) {
                     // 세션 갱신
                     UserDTO updatedUser = userService.getMyInfo((int) autoId);
