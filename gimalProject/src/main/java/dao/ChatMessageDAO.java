@@ -62,5 +62,4 @@ public class ChatMessageDAO {
 			return 0;
 		}
 	}
-	public int
 }

@@ -117,8 +117,8 @@ public class UserController extends HttpServlet {
                 result = userService.registerUser(userId, password, nickName, userName,
 						roadAddress, jibunAddress, addrDetail/*
 																 * , latitudeStr, longitudeStr
-																 */
-						);
+																 */);
+                resp.sendRedirect(req.getContextPath() + "/index.jsp");
                 break;
 
             // -----------------------------

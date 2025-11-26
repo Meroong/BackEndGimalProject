@@ -52,7 +52,7 @@ public class UserDAO {
     public long insert(UserDTO dto) {
     	System.out.println("UserDAO/insert method working");
         String sql = "INSERT INTO user (user_id, user_password, user_name, nickname, role) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                   + "VALUES (?, ?, ?, ?, ?)";
         long autoId = -1;
         
         try (Connection con = JDBCUtil.jdbcCon();
@@ -148,9 +148,10 @@ public class UserDAO {
     // 회원 삭제
     public int delete(long autoId) {
         String sql = "DELETE FROM user WHERE auto_id = ?";
+    
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
-        	
+        	 System.out.println("deleteAddress: DB 연결 성공");
 
             pstmt.setLong(1, autoId);
             int result = pstmt.executeUpdate();
@@ -248,10 +249,10 @@ public class UserDAO {
     	 long autoId = -1;
 
          try (Connection con = JDBCUtil.jdbcCon();
-                 PreparedStatement pstmt = con.prepareStatement(sql)) {
-            	
+                 PreparedStatement pstmt = con.prepareStatement(sql)) 
+         {pstmt.setString(1, userId);
             	try(ResultSet rs = pstmt.executeQuery()){
-            	pstmt.setString(1, userId);
+            	
 
 			        while (rs.next()) {
 			        	autoId = rs.getLong("auto_id");

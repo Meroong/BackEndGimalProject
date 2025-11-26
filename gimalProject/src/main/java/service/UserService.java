@@ -52,7 +52,9 @@ public class UserService {
         
 
         long autoId = userDAO.insert(dto);
+        System.out.println("회원가입"+autoId);
         if (autoId == -1)
+        	
             return new ResponseDTO(false, "회원가입 실패(유저 저장 오류)");
         
         
@@ -105,29 +107,31 @@ public class UserService {
     // 회원 탈퇴
     // =============================
     public boolean deleteUser(long autoId) {
+    	System.out.println("deleteUserService:");
         try {
-        	
-        	int affectedRow = addressDAO.deleteAddress(autoId);
-        	if(affectedRow ==0) {
-        		return false;
-        	}
-        	
-        	affectedRow =new ChatRoomUserDAO().quitRoomForDeleteUser(autoId);
-        	
-        	if(affectedRow ==0) {
-        		return false;
-        	}
-        	
-            userDAO.delete(autoId);
-            if(affectedRow ==0) {
-        		return false;
-        	}
+
+            // 주소 삭제
+            addressDAO.deleteAddress(autoId);
+
+            // 채팅방 관련 데이터 삭제
+            new ChatRoomUserDAO().quitRoomForDeleteUser(autoId);
+
+            // 최종 유저 삭제
+            int userDeleted = userDAO.delete(autoId);
+            if (userDeleted == 0) {
+                return false;
+            }
+
+
+
             return true;
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
+
 
     // =============================
     // 회원 정보 수정

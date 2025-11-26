@@ -104,12 +104,14 @@ public class UserAddressDAO {
     // 주소 삭제
     public int deleteAddress(long userId) {
         String sql = "DELETE FROM user_address WHERE user_id = ?";
+        System.out.println("deleteAddress 시작, userId=" + userId);
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
+
             pstmt.setLong(1, userId);
             return pstmt.executeUpdate();
-
+           
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("DB 연결 또는 쿼리 오류");
