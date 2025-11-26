@@ -222,13 +222,17 @@ CREATE TABLE chat_room (
     item_id BIGINT COMMENT '상품 ID (거래 채팅일 경우)',
     meeting_id BIGINT COMMENT '모임 ID',
     room_type ENUM('PRIVATE', 'GROUP') DEFAULT 'PRIVATE',
-    host_id BIGINT NOT NULL COMMENT '방장 user_id',
+    host_id BIGINT  COMMENT '방장 user_id',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (host_id) REFERENCES user(auto_id),
     FOREIGN KEY (meeting_id) REFERENCES meeting(id)
 ) COMMENT='거래 및 모임용 채팅방';
 
-
+ALTER TABLE chat_room
+DROP FOREIGN KEY chat_room_ibfk_1,
+ADD CONSTRAINT fk_chat_room_host
+FOREIGN KEY (host_id) REFERENCES user(auto_id)
+ON DELETE SET NULL;
 
 -- 💭 채팅방참여자
 CREATE TABLE chat_room_user (
@@ -246,105 +250,101 @@ CREATE TABLE chat_room_user (
 CREATE TABLE chat_message (
     message_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '메시지 ID',
     room_id BIGINT NOT NULL COMMENT '채팅방 ID',
-    sender_id BIGINT NOT NULL COMMENT '보낸 사람 ID',
+    sender_id BIGINT  COMMENT '보낸 사람 ID',
     content TEXT COMMENT '메시지 내용',
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '전송일시',
     FOREIGN KEY (room_id) REFERENCES chat_room(room_id) ON DELETE CASCADE,
     FOREIGN KEY (sender_id) REFERENCES user(auto_id) ON DELETE CASCADE
 ) COMMENT='채팅 메시지';
 
-
+ALTER TABLE chat_message
+DROP FOREIGN KEY chat_message_ibfk_2,
+ADD CONSTRAINT fk_chat_message_user
+FOREIGN KEY (sender_id) REFERENCES user(auto_id)
+ON DELETE SET NULL;
 
 -- 간이 데이터
+-- 📍 지역정보
+INSERT INTO address (sido_code, sigungu_code, dong_code, sido_name, sigungu_name, dong_name)
+VALUES
+(11, 101, 1, '서울특별시', '은평구', '역촌동'),
+(11, 102, 2, '서울특별시', '강남구', '삼성동');
 -- 🧍 USER
 INSERT INTO user (user_id, user_password, user_name, nickname, role)
 VALUES
 ('admin01', '1234', '관리자', '관리자닉', 'ADMIN'),
 ('test01', '1234', '테스트', '닉테스트', 'USER');
 
--- 📍 유저 주소
-INSERT INTO user_address (user_id, road_address, jibun_address, addr_detail)
-VALUES
-(1, '서울특별시 은평구 역촌동', '역촌동 123-45', '상세 없음'),
-(2, '서울특별시 강남구 삼성동', '삼성동 456-78', '상세 없음');
-
--- 🏷️ 유저 태그
-INSERT INTO user_tag (user_id, tag_name)
-VALUES
-(2, '운동 좋아함'),
-(2, '강아지 사랑');
-
--- 💬 중고/대여 상품
-INSERT INTO item (seller_id, category_id, title, content, price, trade_type, status)
-VALUES
-(2, 1, '자전거 판매', '좋은 자전거 팝니다', 100000, 'SALE', 'AVAILABLE'),
-(2, 1, '책 대여', '프로그래밍 책 대여합니다', 5000, 'RENTAL', 'AVAILABLE');
-
--- 🔁 대여 상세정보
-INSERT INTO rental_info (item_id, deposit, daily_rate, rental_period, return_date)
-VALUES
-(2, 1000, 500, 7, '2025-11-24');
-
--- ❤️ 찜 목록
-INSERT INTO wishlist (user_id, item_id)
-VALUES
-(1, 1);
-
--- 💳 거래기록
-INSERT INTO transaction (item_id, buyer_id, seller_id, status)
-VALUES
-(1, 1, 2, 'IN_PROGRESS');
-
--- ⭐ 리뷰
-INSERT INTO review (reviewer_id, reviewee_id, item_id, rating_manner, content)
-VALUES
-(1, 2, 1, 5, '좋은 판매자입니다!');
 
 -- 🤝 모임 게시판
 INSERT INTO meeting (title, content, date, location, max_members, current_members, cost, tag, status)
 VALUES
 ('조깅 모임', '매주 토요일 조깅', '2025-11-22 09:00:00', '한강공원', 10, 2, 0, '운동', 'OPEN');
-
--- 👥 모임참여자
+-- 👥 모임참여자 관리
 INSERT INTO meeting_participant (meeting_id, user_id, paid)
 VALUES
 (1, 1, TRUE),
 (1, 2, FALSE);
-
 -- 📢 공지게시판
 INSERT INTO notice (title, content)
 VALUES
 ('서버 점검 안내', '2025-11-20 00:00 ~ 02:00 서버 점검 예정');
 
 
--- 💬 채팅방
+---
+
+-- 💬 채팅방 (chat_room)
+
+---
+
 INSERT INTO chat_room (item_id, meeting_id, room_type, host_id)
 VALUES
+-- 거래용 채팅방: item_id=1, host=2 (판매자)
 (1, NULL, 'PRIVATE', 2),
+-- 거래용 채팅방: item_id=2, host=2 (판매자)
 (2, NULL, 'PRIVATE', 2),
+-- 모임용 채팅방: meeting_id=1, host=1
 (NULL, 1, 'GROUP', 1);
 
--- 💭 채팅방 참여자
+---
+
+-- 💭 채팅방 참여자 (chat_room_user)
+
+---
+
 INSERT INTO chat_room_user (room_id, user_id)
 VALUES
+-- 거래방 1 참여자: 구매자 1, 판매자 2
 (1, 1),
 (1, 2),
+-- 거래방 2 참여자: 구매자 1, 판매자 2
 (2, 1),
 (2, 2),
+-- 모임방 참여자: 유저 1, 2
 (3, 1),
 (3, 2);
 
--- 💭 채팅 메시지
+---
+
+-- 💭 채팅 메시지 (chat_message)
+
+---
+
 INSERT INTO chat_message (room_id, sender_id, content)
 VALUES
+-- 거래방 1
 (1, 1, '안녕하세요, 자전거 구매하고 싶습니다.'),
 (1, 2, '안녕하세요! 가격 흥정 가능해요.'),
 (1, 1, '좋습니다. 그럼 언제 만날까요?'),
+-- 거래방 2
 (2, 1, '책 대여 가능할까요?'),
 (2, 2, '네, 일주일 대여 가능합니다.'),
 (2, 1, '좋아요, 내일 수령할게요.'),
+-- 모임방
 (3, 1, '이번 주 토요일 모임 몇 시에 시작하나요?'),
 (3, 2, '오전 9시에 한강공원에서 시작합니다.'),
 (3, 1, '좋아요, 그때 봬요!');
+
+select * from user;
 
 
