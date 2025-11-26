@@ -1,5 +1,6 @@
 package controller;
 
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -118,7 +119,14 @@ public class UserController extends HttpServlet {
 						roadAddress, jibunAddress, addrDetail/*
 																 * , latitudeStr, longitudeStr
 																 */);
-                resp.sendRedirect(req.getContextPath() + "/index.jsp");
+                if (!result.isSuccess()) {
+                    req.setAttribute("msg", result.getMessage());
+                    req.setAttribute("url", "/views/user/register.jsp");
+                    RequestDispatcher rd = req.getRequestDispatcher("/views/util/alert.jsp");
+                    rd.forward(req, resp);
+                } else {
+                    resp.sendRedirect(req.getContextPath() + "/index.jsp");
+                }
                 break;
 
             // -----------------------------
