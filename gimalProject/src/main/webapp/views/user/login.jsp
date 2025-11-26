@@ -92,6 +92,16 @@
 </style>
 </head>
 <body>
+<% 
+    String errorMsg = (String) request.getAttribute("errorMsg");
+    if (errorMsg != null) { 
+%>
+    <script>
+        alert("<%= errorMsg %>");
+    </script>
+<%
+    }
+%>
     <div class="container">
         <h2>로그인</h2>
         <form action="<%= request.getContextPath() %>/user/login" method="post">
