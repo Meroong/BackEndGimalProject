@@ -23,6 +23,7 @@
                 Object loginUser = session.getAttribute("Authorization");
                 if (loginUser != null) {
             %>
+            <button class="log-btn" onclick="location.href='<%=request.getContextPath()%>/'">홈으로</button>
                 <!-- 로그인 상태: 메시지 + 로그아웃 -->
                 <button class="msg-btn"
                         onclick="location.href='<%=request.getContextPath()%>/views/chat/chat.jsp'">메시지</button>
@@ -40,6 +41,7 @@
             <%
                 }
             %>
+            
         </div>
     </header>
 

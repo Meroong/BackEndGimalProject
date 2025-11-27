@@ -28,8 +28,10 @@ public class AdminUserDAO {
 
         return 0;
     }
- // 회원 삭제 (탈퇴 처리)
+
+    // 회원 삭제 (탈퇴 처리)
     public int deleteUser(long autoId) {
+
         String sql = "DELETE FROM user WHERE auto_id = ?";
 
         try (Connection con = JDBCUtil.jdbcCon();

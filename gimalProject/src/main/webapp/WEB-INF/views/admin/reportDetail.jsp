@@ -22,6 +22,7 @@
             도란도란 관리자
         </div>
         <div class="header-buttons">
+        <button class="log-btn" onclick="location.href='<%=request.getContextPath()%>/'">홈으로</button>
             <button class="log-btn"
                     onclick="location.href='<%=request.getContextPath()%>/admin'">
                 관리자 메인

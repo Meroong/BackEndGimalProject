@@ -1,5 +1,8 @@
 package controller;
 
+import java.io.IOException;
+import java.util.List;
+
 import auth.JwtAuth;
 import dto.AdminNoticeDTO;
 import dto.AdminStatsDTO;
@@ -14,18 +17,16 @@ import jakarta.servlet.http.HttpSession;
 import service.AdminService;
 import util.AuthUtil;
 
-import java.io.IOException;
-import java.util.List;
-
 @WebServlet("/admin/*")
 public class AdminController extends HttpServlet {
 
-    private AdminService adminService = new AdminService();
+    private final AdminService adminService = new AdminService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        // 세션에서 JWT 헤더 꺼내기
         HttpSession session = request.getSession(false);
         String authHeader = (session != null)
                 ? (String) session.getAttribute("Authorization")
@@ -72,15 +73,18 @@ public class AdminController extends HttpServlet {
                 request.setAttribute("notice", dto);
                 request.getRequestDispatcher("/WEB-INF/views/admin/noticeForm.jsp")
                        .forward(request, response);
+
             } else if ("POST".equalsIgnoreCase(request.getMethod())) {
                 request.setCharacterEncoding("UTF-8");
                 long id = Long.parseLong(request.getParameter("id"));
                 String title = request.getParameter("title");
                 String content = request.getParameter("content");
+
                 AdminNoticeDTO dto = new AdminNoticeDTO();
                 dto.setId(id);
                 dto.setTitle(title);
                 dto.setContent(content);
+
                 boolean success = adminService.updateNotice(dto);
                 if (success) {
                     response.sendRedirect(request.getContextPath() + "/admin/notices");
@@ -96,15 +100,18 @@ public class AdminController extends HttpServlet {
             if ("GET".equalsIgnoreCase(request.getMethod())) {
                 request.getRequestDispatcher("/WEB-INF/views/admin/noticeForm.jsp")
                        .forward(request, response);
+
             } else if ("POST".equalsIgnoreCase(request.getMethod())) {
                 request.setCharacterEncoding("UTF-8");
                 String title = request.getParameter("title");
                 String content = request.getParameter("content");
                 String writer = "ADMIN";
+
                 AdminNoticeDTO dto = new AdminNoticeDTO();
                 dto.setTitle(title);
                 dto.setContent(content);
                 dto.setWriter(writer);
+
                 boolean success = adminService.writeNotice(dto);
                 if (success) {
                     response.sendRedirect(request.getContextPath() + "/admin/notices");
@@ -129,6 +136,13 @@ public class AdminController extends HttpServlet {
             request.setAttribute("report", report);
             request.getRequestDispatcher("/WEB-INF/views/admin/reportDetail.jsp")
                    .forward(request, response);
+
+        // ===================== 신고 처리 완료 =====================
+        } else if (path.startsWith("/reports/resolve")) {
+            long id = Long.parseLong(request.getParameter("id"));
+            boolean success = adminService.resolveReport(id);
+            // TODO: 필요하면 success 여부에 따라 메시지 처리 추가 가능
+            response.sendRedirect(request.getContextPath() + "/admin/reports");
 
         // ===================== 신고 리스트 =====================
         } else if (path.startsWith("/reports")) {
