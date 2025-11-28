@@ -58,6 +58,7 @@
 		    );
 		}
 	</script>
+	<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
 </head>
 <body>
 <div class="container">
@@ -91,7 +92,7 @@
             <div class="center-title">내 정보</div>
             <div class="center-desc">회원님의 정보를 확인하고 수정할 수 있습니다.</div>
 
-            <form action="<%= request.getContextPath() %>/user/update" method="post">
+            <form id="updateForm" action="<%= request.getContextPath() %>/user/update" method="post">
                 <input type="hidden" name="autoId" value="<%= user.getAutoId() %>">
 
                 <label>이름</label>
@@ -112,7 +113,7 @@
 				<input type="text" id="roadAddress" disabled value="<%= (addr != null && addr.getRoadAddress() != null) ? addr.getRoadAddress() : "" %>" />
 				
 				<input type="hidden" id="roadAddressValue" name="roadAddress" value="<%= (addr != null && addr.getRoadAddress() != null) ? addr.getRoadAddress() : "" %>" />
-
+				
 				
 				<!-- 지번주소 disabled라 팝업에서 .textContent가 아니라 .value 사용해야함-->
 				<label>지번주소</label>
@@ -125,15 +126,18 @@
 				<input type="text" id="addrDetail" value="<%= (addr != null && addr.getAddrDetail() != null) ? addr.getAddrDetail() : "" %>" />
 
 				<input type="hidden" id="addrDetailValue" name="addrDetail" value="<%= (addr != null && addr.getAddrDetail() != null) ? addr.getAddrDetail() : "" %>" />
+				
+				<input type="hidden" id="latitude" name="latitude">
+				<input type="hidden" id="longitude" name="longitude">
+                
                 
                 <button type="submit" class="update-btn">정보 수정</button>
             </form>
-
-            <form action="<%= request.getContextPath() %>/user/delete" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까?');" style="margin-top:15px;">
-                <input type="hidden" name="autoId" value="<%= user.getAutoId() %>">
-                <button type="submit" class="delete-btn">회원 탈퇴</button>
-            </form>
-        </div>
+          	<form action="<%= request.getContextPath() %>/user/delete" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까?');">
+			    <input type="hidden" name="autoId" value="<%= user.getAutoId() %>">
+			    <button type="submit" class="delete-btn">회원 탈퇴</button>
+			</form>
+		</div>
 
         <%-- 가운데: 예비 영역 --%>
         <div class="map-card" style="display:flex; justify-content:center; align-items:center; color:#666;">
@@ -155,5 +159,47 @@
 <% } %>
 
 </div>
+<script>
+    // 카카오 Geocoder 객체 생성
+    var geocoder = new kakao.maps.services.Geocoder();
+
+    // form submit 가로채기
+    document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("updateForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+
+            let roadAddr = document.getElementById("roadAddressValue").value;
+            let jibunAddr = document.getElementById("jibunAddressValue").value;
+
+            let finalAddress = roadAddr || jibunAddr;
+
+            if (!finalAddress) {
+                alert("주소가 없습니다. 주소 검색을 먼저 해주세요.");
+                return;
+            }
+
+            // 주소 → 좌표 변환
+            geocoder.addressSearch(finalAddress, function(result, status) {
+                if (status === kakao.maps.services.Status.OK) {
+
+                    let lat = result[0].y;
+                    let lng = result[0].x;
+
+                    document.getElementById("latitude").value = lat;
+                    document.getElementById("longitude").value = lng;
+
+                    console.log("위도:", lat, "경도:", lng);
+
+                    // 실제 제출
+                    e.target.submit();
+
+                } else {
+                    alert("주소 → 좌표 변환 실패: " + status);
+                }
+            });
+        });
+    });
+</script>
+
 </body>
 </html>

@@ -104,7 +104,7 @@ public class UserService {
     }
 
     // =============================
-    // 회원 탈퇴
+    // 회원 탈퇴   //on delete cascade 활용
     // =============================
     public boolean deleteUser(long autoId) {
     	System.out.println("deleteUserService:");
@@ -142,9 +142,10 @@ public class UserService {
             String newNickname,
             String roadAddress,
             String jibunAddress,
-			String addrDetail/*
-								 * , String latitudeStr, String longitudeStr
-								 */
+			String addrDetail, 
+			String latitudeStr, 
+			String longitudeStr
+								 
     ) {
     	//1. User 수정
         UserDTO dto = new UserDTO();
@@ -177,13 +178,13 @@ public class UserService {
         addr.setAddrDetail(addrDetail);
 
         //추후 확장 예정 카카오맵
-		/*
-		 * try { if (latitudeStr != null && !latitudeStr.isEmpty())
-		 * addr.setLatitude(Double.parseDouble(latitudeStr)); if (longitudeStr != null
-		 * && !longitudeStr.isEmpty())
-		 * addr.setLongitude(Double.parseDouble(longitudeStr)); } catch (Exception e) {
-		 * return new ResponseDTO(false, "잘못된 위도/경도 값입니다."); }
-		 */
+		
+		  try { if (latitudeStr != null && !latitudeStr.isEmpty())
+		  addr.setLatitude(Double.parseDouble(latitudeStr)); if (longitudeStr != null
+		  && !longitudeStr.isEmpty())
+		  addr.setLongitude(Double.parseDouble(longitudeStr)); } catch (Exception e) {
+		  return new ResponseDTO(false, "잘못된 위도/경도 값입니다."); }
+		 
         addressDAO.saveOrUpdate(addr);
 
         //유저 정보의 hasUpdates를 확장하여 주소 정보까지 확인
@@ -204,7 +205,7 @@ public class UserService {
     // 로그아웃 (컨트롤러에서 세션 invalidate)
     // =============================
     public void logoutUser(HttpSession session) {
-        session.invalidate();
+        session.invalidate(); //레디스 같은 메모리가 아니기에 예외처리 안함
         System.out.println("로그아웃 성공!!");
     }
     public UserAddressDTO getAddressInfo(long autoId) {

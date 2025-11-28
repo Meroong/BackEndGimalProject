@@ -78,20 +78,21 @@ public class UserAddressDAO {
 
     // 주소 수정
     private int updateAddress(UserAddressDTO dto) {
+    	System.out.println("work DBquery: updateAddress");
         String sql = "UPDATE user_address SET road_address = ?, jibun_address = ?, addr_detail = ?, "
-                   + "updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
+                   + "latitude = ?, longitude = ?, updated_at= CURRENT_TIMESTAMP WHERE user_id = ?";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
             pstmt.setString(1, dto.getRoadAddress());
             pstmt.setString(2, dto.getJibunAddress());
             pstmt.setString(3, dto.getAddrDetail());
-			pstmt.setLong(4, dto.getUserId());/*
-												 * pstmt.setDouble(5, dto.getLatitude()); pstmt.setDouble(6,
-												 * dto.getLongitude());
-												 */
+			pstmt.setLong(4, dto.getUserId());
+			pstmt.setDouble(5, dto.getLatitude()); 
+			pstmt.setDouble(6, dto.getLongitude());
+												 
             
-
+			System.out.println("주소 수정 디비쿼리 성공");
             return pstmt.executeUpdate();
 
         } catch (SQLException e) {

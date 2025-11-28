@@ -128,6 +128,7 @@
 			        marker.setMap(map);
 			
 			        console.log("카카오 지도 로드 완료");
+			        
 			    }
 			</script>
 

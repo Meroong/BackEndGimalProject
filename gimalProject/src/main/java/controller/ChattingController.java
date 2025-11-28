@@ -43,7 +43,7 @@ public class ChattingController extends HttpServlet {
         // ---------- 채팅방 리스트 ----------
         if ("/roomList".equals(path)) {
         	System.out.println("roomList 요청");
-            ArrayList<ChatRoomDTO> chatRooms = (ArrayList<ChatRoomDTO>) service.getRoomList(autoId).getData(); //리스폰스 디티오의 오브젝트를 변환
+            ArrayList<ChatRoomDTO> chatRooms =  service.getRoomList(autoId); //chatList를 그대로 받아
             req.setAttribute("chatList", chatRooms);
             req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
             return;
@@ -68,7 +68,7 @@ public class ChattingController extends HttpServlet {
             }
 
             // 채팅 메시지 조회
-            ArrayList<ChatMessageDTO> messages = (ArrayList<ChatMessageDTO>) service.getMessage(roomId).getData();
+            ArrayList<ChatMessageDTO> messages = (ArrayList<ChatMessageDTO>) service.getMessage(roomId);
             req.setAttribute("messages", messages);
             req.setAttribute("selectedRoomId", roomId);
 
@@ -102,10 +102,14 @@ public class ChattingController extends HttpServlet {
             long receiverId = Long.parseLong(req.getParameter("receiverId"));
 
             // 개인용 채팅방 생성
-            ResponseDTO response = service.makePrivateRoom(itemId, "PRIVATE", hostId, receiverId);
+            boolean result = service.makePrivateRoom(itemId, "PRIVATE", hostId, receiverId);
+            
+			/* 추후 게시판 개설 이후 수정
+			 * if(result) {
+			 * 
+			 * }
+			 */
 
-            // 성공/실패에 따라 리다이렉트 혹은 메시지 표시
-            req.setAttribute("message", response.getMessage());
             req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
             return;
         }
@@ -116,10 +120,9 @@ public class ChattingController extends HttpServlet {
             long hostId = Long.parseLong(req.getParameter("hostId"));
 
             
-            ResponseDTO response = service.makeGroupRoom(meetingId, "Group", hostId);
+            boolean result = service.makeGroupRoom(meetingId, "Group", hostId);
 
-            // 성공/실패에 따라 리다이렉트 혹은 메시지 표시
-            req.setAttribute("message", response.getMessage());
+            
             req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
             return;
         }
@@ -160,13 +163,12 @@ public class ChattingController extends HttpServlet {
                 return;
         	}
         	Long roomId = Long.valueOf(parts[2]);
-        	service.quitRoomById(autoId, roomId);
+        	boolean result =service.quitRoomById(autoId, roomId);
         	
+        	// 추후 수정 result 활용해야함
         	resp.sendRedirect(req.getContextPath() + "/chat/roomList");
         	return;
         }
-        
-
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
 

@@ -19,7 +19,8 @@ public class ChattingService {
     private ChatMessageDAO messageDao = new ChatMessageDAO();
     
     // private채팅방 개설
-    public ResponseDTO makePrivateRoom(long itemId, String RoomType, long hostId, long receiverId ) {
+    public boolean makePrivateRoom(long itemId, String RoomType, long hostId, long receiverId ) {
+    	System.out.println("work service: makePrivateRoom");
     	ChatRoomDTO dto = new ChatRoomDTO();
     	boolean isExists = roomDao.isPrivateRoomExists(itemId, hostId, receiverId);
     	
@@ -33,19 +34,18 @@ public class ChattingService {
         	
         	if(affectedRow >0) {
         		System.out.println("개설 성공");
-        		return new ResponseDTO(true, "개인채팅방이 개설되었습니다.");
+        		return true;
         	}
         	else {
         		System.out.println("이미 존재하는 개인채팅방 혹은 오류");
-        		return new ResponseDTO(false, "개인채팅방 개설 실패");
+        		return false;
         		//jsp에서 1과 0 값으로 메시지와 페이지 세팅 >0은 성공 아니면 실패 
         	}
     	}
-    	return new ResponseDTO(false, "에러 이미 존재하는 개인채팅방");
-    	
     }
     // group 채팅방 개설
-    public ResponseDTO makeGroupRoom(long meetingId, String RoomType, long hostId ) {
+    public boolean makeGroupRoom(long meetingId, String RoomType, long hostId ) {
+    	System.out.println("work service: makeGroupRoom");
     	ChatRoomDTO dto = new ChatRoomDTO();
     	boolean isExists = roomDao.isGroupRoomExist(meetingId, hostId);
     	
@@ -57,20 +57,19 @@ public class ChattingService {
         	
         	if(affectedRow >0) {
         		System.out.println("개설 성공");
-        		return new ResponseDTO(true, "그룹 채팅방이 개설되었습니다.");
+        		return true;
         	}
         	else {
         		System.out.println("이미 존재하는 그룹채팅방 혹은 오류");
-        		return new ResponseDTO(false, "그룹 채팅방 개설 실패");
+        		return false;
         		//jsp에서 1과 0 값으로 메시지와 페이지 세팅 >0은 성공 아니면 실패 
         	}
     	}
-    	return new ResponseDTO(false, "에러 이미 존재하는 그룹 채팅방");
-    	
     }    
 
     // 오토아이디 기반으로 채팅방 목록 조회
-    public ResponseDTO getRoomList(long autoId) {
+    public ArrayList<ChatRoomDTO> getRoomList(long autoId) {
+    	System.out.println("work service: getRoomList");
         ArrayList<Long> roomList;
         ArrayList<ChatRoomDTO> chatList = new ArrayList<ChatRoomDTO>();
         
@@ -83,52 +82,61 @@ public class ChattingService {
                 	chatList.add(dto);
                 }
             }
-            return new ResponseDTO(true, "채팅 리스트 반환 성공", chatList);
+            System.out.println("채팅방 리스트 조회 성공");
+            return chatList;
         }
-        else return new ResponseDTO(false, "채팅 리스트 반환 실패");
+        else {
+        	System.out.println("채팅방 리스트 조회 실패 혹은 없음");
+        	return chatList;
+        }
     }
     //채팅방에 맞는 채팅가져오기
-    public ResponseDTO getMessage (long roomId) {
+    public ArrayList <ChatMessageDTO> getMessage (long roomId) {
+    	System.out.println("work service: getMessage");
     	ArrayList <ChatMessageDTO> messageList = messageDao.getMessageByRoomId(roomId);
-    	if(messageList.isEmpty()) {
-    		return new ResponseDTO(false, "채팅목록이 없습니다.");
+    	if(!messageList.isEmpty()) {
+    		System.out.println("채팅목록 조회 성공");
+    		return messageList;
     	}
     	else {
-            return new ResponseDTO(true, "채팅목록을 가져왔습니다.", messageList);
+    		System.out.println("채팅목록 없음 혹은 조회 실패");
+            return messageList;
     	}	 
     }
     
     
     // 채팅방 삭제 (일단 냅두기 ? 관리자용?)
-    public ResponseDTO deleteRoomById(long hostId, long roomId ) {
+    public boolean deleteRoomById(long hostId, long roomId ) {
+    	System.out.println("work service: deleteRoomById");
     	int affectedRow = roomDao.deleteChatRoom(hostId, roomId);
     	
     	if(affectedRow >0) {
     		System.out.println("삭제 성공");
-    		return new ResponseDTO(true, "삭제 성공");
+    		return true;
     	}
     	else {
     		System.out.println("삭제할 데이터가 없습니다.");
-    		return new ResponseDTO(false, "삭제 실패");
+    		return false;
     		//jsp에서 1과 0 값으로 메시지와 페이지 세팅 >0은 성공 아니면 실패 
     	}
     }
-    public ResponseDTO quitRoomById(long userId, long roomId) {
+    public boolean quitRoomById(long userId, long roomId) {
     	int affectedRow = roomUserDao.quitRoom(userId, roomId);
     	
     	if(affectedRow >0) {
     		System.out.println("삭제 성공");
-    		return new ResponseDTO(true, "채팅방 나오기 성공");
+    		return true;
     	}
     	else {
     		System.out.println("삭제할 데이터가 없습니다.");
-    		return new ResponseDTO(false, "채팅방 나오기 실패");
+    		return false;
     		//jsp에서 1과 0 값으로 메시지와 페이지 세팅 >0은 성공 아니면 실패 
     	}
     }
     
     //채팅 보내기 
-    public ResponseDTO chattingWithUserAndRoomId(long autoId, long roomId, String content) {
+    public boolean chattingWithUserAndRoomId(long autoId, long roomId, String content) {
+    	System.out.println("work service: chattingWithUserAndRoomId");
     	ChatMessageDTO dto = new ChatMessageDTO();
     	ChatMessageDAO dao = new ChatMessageDAO();
     	
@@ -141,14 +149,26 @@ public class ChattingService {
     	int affectedRow = dao.sendMessage(dto);
     	
     	if(affectedRow > 0) {
-    		return new ResponseDTO(true, "채팅 전송 성공");
+    		System.out.println("채팅 insert 성공");
+    		return true;
     	}
     	else {
-    		return new ResponseDTO(false, "채팅전송 실패");
+    		System.out.println("채팅 insert 실패");
+    		return false;
     	}
     }
     //url 통해 방에 접근하는 거 방지용 로직
     public boolean checkUserInRoom(long userId, long roomId) {
-        return roomUserDao.isUserInRoom(userId, roomId);
+        System.out.println("work service: checkUserInRoom");
+    	boolean isIn =roomUserDao.isUserInRoom(userId, roomId);
+        
+        if(isIn) {
+        	System.out.println("유효한 유저");
+        	return true;
+        }
+        else {
+        	System.out.println("유효하지 않은 유저");
+        	return false;
+        }
     }
 }
