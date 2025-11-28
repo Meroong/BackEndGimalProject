@@ -15,7 +15,7 @@ public class AdminStatsDAO {
         AdminStatsDTO dto = new AdminStatsDTO();
 
         // 1) 전체 회원 수
-        String userSql = "SELECT COUNT(*) AS cnt FROM user";
+        String userSql   = "SELECT COUNT(*) AS cnt FROM user";
 
         // 2) 전체 신고 수
         String reportSql = "SELECT COUNT(*) AS cnt FROM report";

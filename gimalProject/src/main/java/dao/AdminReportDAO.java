@@ -12,8 +12,9 @@ import util.JDBCUtil;
 
 public class AdminReportDAO {
 
-    // 신고 전체 조회 (상태 필터 없이 전부)
+    // 신고 전체 조회 (상태 상관없이 전부)
     public List<ReportDTO> findAll() {
+
         List<ReportDTO> list = new ArrayList<>();
 
         String sql = "SELECT id, reporter_id, target_user_id, target_type, "
@@ -34,6 +35,7 @@ public class AdminReportDAO {
                 dto.setReason(rs.getString("reason"));
                 dto.setStatus(rs.getString("status"));
                 dto.setCreatedAt(rs.getTimestamp("created_at"));
+
                 list.add(dto);
             }
 
@@ -46,6 +48,7 @@ public class AdminReportDAO {
 
     // 신고 단건 조회
     public ReportDTO findById(long id) {
+
         String sql = "SELECT id, reporter_id, target_user_id, target_type, "
                    + "reason, status, created_at "
                    + "FROM report "
@@ -79,6 +82,7 @@ public class AdminReportDAO {
 
     // 신고 상태 변경 (예: PENDING -> RESOLVED)
     public int updateStatus(long id, String status) {
+
         String sql = "UPDATE report SET status = ? WHERE id = ?";
 
         try (Connection con = JDBCUtil.jdbcCon();
@@ -86,6 +90,7 @@ public class AdminReportDAO {
 
             pstmt.setString(1, status);
             pstmt.setLong(2, id);
+
             return pstmt.executeUpdate();
 
         } catch (SQLException e) {

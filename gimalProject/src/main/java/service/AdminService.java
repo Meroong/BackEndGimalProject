@@ -14,7 +14,7 @@ import dto.UserDTO;
 
 public class AdminService {
 
-    // DAO 객체
+    // ===================== DAO 객체들 =====================
     private final AdminNoticeDAO noticeDAO = new AdminNoticeDAO();
     private final AdminReportDAO reportDAO = new AdminReportDAO();
     private final AdminStatsDAO statsDAO = new AdminStatsDAO();
@@ -94,7 +94,7 @@ public class AdminService {
         return adminUserDAO.updateRole(id, "USER") > 0;
     }
 
-    // 회원 삭제
+    // 회원 삭제(탈퇴)
     public int deleteUser(long autoId) {
         return adminUserDAO.deleteUser(autoId);
     }
