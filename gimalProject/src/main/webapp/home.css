@@ -24,15 +24,6 @@ header {
     padding-top: 10px;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 28px;
-    font-weight: 800;
-    color: #FF7C40;
-}
-
 .logo img {
     width: 100px !important;
     height: 100px !important;

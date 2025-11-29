@@ -1,24 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dto.UserDTO"%>
 <%@ page import="dto.UserAddressDTO"%>
-
-<%
-    UserDTO user = (UserDTO) session.getAttribute("userInfo");
-    UserAddressDTO addr = (UserAddressDTO) session.getAttribute("addressInfo");
-
-    // 프로필 이미지 URL
-    String profileUrl = (String) session.getAttribute("profileUrl");
-    if (profileUrl == null || profileUrl.isEmpty()) {
-        profileUrl = "/resources/images/default_profile.png"; // 기본 이미지
-    }
-%>
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>마이페이지 - 도란도란</title>
-    <style>
+	<style>
         body { margin:0; padding:0; background:#F5F6FA; font-family:'Pretendard',sans-serif; color:#222; }
         .container { width:1400px; margin:0 auto; padding:20px 40px; }
         header { display:flex; justify-content:space-between; align-items:flex-start; padding-top:10px; }
@@ -63,26 +51,27 @@
         .delete-btn-small { background:#FF4444; color:white; }
     </style>
     <script>
-        const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>"; 
-        const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
-        function openJusoPopup() {
-            window.open(
-                "https://business.juso.go.kr/addrlink/addrLinkUrl.do?confmKey=" + POPUP_KEY 
-                + "&returnUrl=" + encodeURIComponent(RETURN_URL)
-                + "&resultType=4",
-                "jusoPopup",
-                "width=570,height=420,scrollbars=yes,resizable=yes"
-            );
-        }
-    </script>
+		const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>"; // 팝업용 키
+		const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
+		function openJusoPopup() {
+		    window.open(
+		        "https://business.juso.go.kr/addrlink/addrLinkUrl.do?confmKey=" + POPUP_KEY 
+		        + "&returnUrl=" + encodeURIComponent(RETURN_URL)
+		        + "&resultType=4",
+		        "jusoPopup",
+		        "width=570,height=420,scrollbars=yes,resizable=yes"
+		    );
+		}
+	</script>
+	<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
 </head>
 <body>
 <div class="container">
 
+<%-- 헤더 --%>
 <header>
     <div class="logo">
         <img src="<%= request.getContextPath() %>/resources/images/logo.png" alt="logo">
-        도란도란
     </div>
     <div class="header-buttons">
         <form action="<%= request.getContextPath() %>/user/logout" method="get">
@@ -91,7 +80,21 @@
     </div>
 </header>
 
-<% if (user != null) { %>
+<%-- 로그인 체크 --%>
+<%
+    UserDTO user = (UserDTO) session.getAttribute("userInfo");
+    UserAddressDTO addr = (UserAddressDTO) session.getAttribute("addressInfo");
+    
+    if (user != null) {
+%>
+<%
+    // 프로필 이미지 URL 세션에서 가져오기
+    String profileUrl = (String) session.getAttribute("profileUrl");
+    if(profileUrl == null || profileUrl.isEmpty()) {
+        profileUrl = "/resources/images/default_profile.png"; // 기본 이미지 경로
+    }
+%>
+
 <section class="main-box">
     <div class="box-title">마이페이지</div>
     <div class="grid-3">
@@ -108,45 +111,46 @@
 
             <!-- 이미지 업로드 / 삭제 -->
             <div class="profile-actions">
-				<form id="profileForm" action="<%= request.getContextPath() %>/upload/profileUpload" method="post" enctype="multipart/form-data">
-				    <!-- 실제 파일 input은 숨김 -->
-				    <input type="file" id="profileInput" name="img" accept="image/*" style="display:none;" required>
-				    
-				    <!-- 사용자가 누를 버튼 -->
-				    <button type="button" id="uploadBtn">이미지 등록/수정</button>
-				    
-				    <!-- 이미지 삭제 버튼은 그대로 -->
-				    <button type="submit" formaction="<%= request.getContextPath() %>/upload/profileDelete" style="background:#ff4e4e; color:white;">
-				        프로필 이미지 삭제
-				    </button>
-				</form>
-				
-				<script>
-				    const uploadBtn = document.getElementById('uploadBtn');
-				    const fileInput = document.getElementById('profileInput');
-				    const form = document.getElementById('profileForm');
-				
-				    // 버튼 클릭 시 파일 선택 창 열기
-				    uploadBtn.addEventListener('click', () => fileInput.click());
-				
-				    // 파일 선택 후 자동 제출
-				    fileInput.addEventListener('change', () => form.submit());
-				</script>
-            </div>
-
-            <form id="updateForm" action="<%= request.getContextPath() %>/user/update" method="post">
-                <input type="hidden" name="autoId" value="<%= user.getAutoId() %>">
-
-                <label>이름</label>
-                <input type="text" value="<%= user.getUserName() != null ? user.getUserName() : "" %>" disabled>
-
-                <label>닉네임</label>
-                <input type="text" name="newNickname" value="<%= user.getNickname() != null ? user.getNickname() : "" %>">
-
-                <label>비밀번호</label>
-                <input type="password" name="newPassword" placeholder="변경할 비밀번호">
-
-                <%-- 주소 영역 --%>
+			<form id="profileForm" action="<%= request.getContextPath() %>/upload/profileUpload" method="post" enctype="multipart/form-data">
+			    <!-- 실제 파일 input은 숨김 -->
+			    <input type="file" id="profileInput" name="img" accept="image/*" style="display:none;" required>
+			    
+			    <!-- 사용자가 누를 버튼 -->
+			    <button type="button" id="uploadBtn">이미지 등록/수정</button>
+			    
+			    <!-- 이미지 삭제 버튼은 그대로 -->
+			    <button type="submit" formaction="<%= request.getContextPath() %>/upload/profileDelete" style="background:#ff4e4e; color:white;">
+			        프로필 이미지 삭제
+			    </button>
+			</form>
+			
+			<script>
+			    const uploadBtn = document.getElementById('uploadBtn');
+			    const fileInput = document.getElementById('profileInput');
+			    const form = document.getElementById('profileForm');
+			
+			    // 버튼 클릭 시 파일 선택 창 열기
+			    uploadBtn.addEventListener('click', () => fileInput.click());
+			
+			    // 파일 선택 후 자동 제출
+			    fileInput.addEventListener('change', () => form.submit());
+			</script>
+            </div> 
+		
+		    <%-- 기존 회원 정보 수정 폼 --%>
+		    <form id="updateForm" action="<%= request.getContextPath() %>/user/update" method="post">
+		        <input type="hidden" name="autoId" value="<%= user.getAutoId() %>">
+		
+		        <label>이름</label>
+		        <input type="text" value="<%= user.getUserName() != null ? user.getUserName() : "" %>" disabled>
+		
+		        <label>닉네임</label>
+		        <input type="text" name="newNickname" value="<%= user.getNickname() != null ? user.getNickname() : "" %>">
+		
+		        <label>비밀번호</label>
+		        <input type="password" name="newPassword" placeholder="변경할 비밀번호">
+		
+		                        <%-- 주소 영역 --%>
                 <label>주소</label>
                 <button type="button" class="update-btn" onclick="openJusoPopup()" style="width:auto; margin-bottom:10px;">주소 검색</button>
 
@@ -171,14 +175,14 @@
 				
 				<input type="hidden" id="latitude" name="latitude">
 				<input type="hidden" id="longitude" name="longitude">
-                
-                
-                <button type="submit" class="update-btn">정보 수정</button>
-            </form>
-          	<form action="<%= request.getContextPath() %>/user/delete" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까?');">
-			    <input type="hidden" name="autoId" value="<%= user.getAutoId() %>">
-			    <button type="submit" class="delete-btn">회원 탈퇴</button>
-			</form>
+				
+		        <button type="submit" class="update-btn">정보 수정</button>
+		    </form>
+		
+		    <form action="<%= request.getContextPath() %>/user/delete" method="post" onsubmit="return confirm('정말 탈퇴하시겠습니까?');">
+		        <input type="hidden" name="autoId" value="<%= user.getAutoId() %>">
+		        <button type="submit" class="delete-btn">회원 탈퇴</button>
+		    </form>
 		</div>
 
         <%-- 가운데: 예비 영역 --%>
@@ -214,7 +218,6 @@
             let jibunAddr = document.getElementById("jibunAddressValue").value;
 
             let finalAddress = roadAddr || jibunAddr;
-            
 
             if (!finalAddress) {
                 alert("주소가 없습니다. 주소 검색을 먼저 해주세요.");
@@ -244,6 +247,5 @@
     });
 </script>
 
-</div>
 </body>
 </html>
