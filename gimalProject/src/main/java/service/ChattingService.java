@@ -42,6 +42,8 @@ public class ChattingService {
         		//jsp에서 1과 0 값으로 메시지와 페이지 세팅 >0은 성공 아니면 실패 
         	}
     	}
+    	System.out.println("존재하는 채팅방");
+    	return false;
     }
     // group 채팅방 개설
     public boolean makeGroupRoom(long meetingId, String RoomType, long hostId ) {
@@ -65,6 +67,8 @@ public class ChattingService {
         		//jsp에서 1과 0 값으로 메시지와 페이지 세팅 >0은 성공 아니면 실패 
         	}
     	}
+    	System.out.println("존재하는 채팅방");
+    	return false;
     }    
 
     // 오토아이디 기반으로 채팅방 목록 조회
