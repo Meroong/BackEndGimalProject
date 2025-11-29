@@ -161,7 +161,7 @@ public class UserController extends HttpServlet {
 			
 			String newLatitude = req.getParameter("latitude"); 
 			String newLongitude = req.getParameter("longitude");
-
+			System.out.println(newLatitude);
 			result = userService.updateUser(updateAutoId, newPassword, newNickname, newRoadAddress, newJibunAddress,
 					newAddrDetail, newLatitude, newLongitude
 									 

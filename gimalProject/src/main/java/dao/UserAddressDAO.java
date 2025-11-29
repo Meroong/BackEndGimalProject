@@ -83,13 +83,13 @@ public class UserAddressDAO {
                    + "latitude = ?, longitude = ?, updated_at= CURRENT_TIMESTAMP WHERE user_id = ?";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
-
+        	System.out.println(dto.getLatitude());
             pstmt.setString(1, dto.getRoadAddress());
             pstmt.setString(2, dto.getJibunAddress());
             pstmt.setString(3, dto.getAddrDetail());
-			pstmt.setLong(4, dto.getUserId());
-			pstmt.setDouble(5, dto.getLatitude()); 
-			pstmt.setDouble(6, dto.getLongitude());
+			pstmt.setDouble(4, dto.getLatitude()); 
+			pstmt.setDouble(5, dto.getLongitude());
+			pstmt.setLong(6, dto.getUserId());
 												 
             
 			System.out.println("주소 수정 디비쿼리 성공");

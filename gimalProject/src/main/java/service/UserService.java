@@ -177,7 +177,7 @@ public class UserService {
         addr.setJibunAddress(jibunAddress);
         addr.setAddrDetail(addrDetail);
 
-        //추후 확장 예정 카카오맵
+        
 		
 		  try { if (latitudeStr != null && !latitudeStr.isEmpty())
 		  addr.setLatitude(Double.parseDouble(latitudeStr)); if (longitudeStr != null
