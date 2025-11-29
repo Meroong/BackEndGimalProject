@@ -1,5 +1,8 @@
+<%@page import="dto.UserAddressDTO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="util.AuthUtil" %>
+<%@ page import="util.AuthUtil"%>
+<%@ page import="dto.UserAddressDTO"%>
+
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -104,6 +107,26 @@
 
         <div class="grid-3">
 			<div class="map-card" id="map" style="width:100%; height:400px;"></div>
+			
+			<!-- 비로그인 시 좌표를 넣어줌 -->
+			<%
+			UserAddressDTO addressInfo = (UserAddressDTO) session.getAttribute("addressInfo");
+			
+			double defaultLat = 37.501;
+			double defaultLng = 126.884;
+			
+			double lat = (addressInfo != null && addressInfo.getLatitude() != null)
+			             ? addressInfo.getLatitude()
+			             : defaultLat;
+			
+			double lng = (addressInfo != null && addressInfo.getLongitude() != null)
+			             ? addressInfo.getLongitude()
+			             : defaultLng;
+			%>
+			<script>
+			    const userLat = <%= lat %>;
+			    const userLng = <%= lng %>;
+			</script>
 			<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
 			<script>
 			    window.onload = function() {
@@ -115,13 +138,13 @@
 			        // 지도 생성 //
 			        var container = document.getElementById('map');
 			        var options = {
-			            center: new kakao.maps.LatLng(37.501, 126.884), // 기본 중심 좌표: 구로동 근처
+			            center: new kakao.maps.LatLng(userLat, userLng), // 기본 중심 좌표: 구로동 근처
 			            level: 3
 			        };
 			        var map = new kakao.maps.Map(container, options);
 			
 			        // 예시: 마커 추가
-			        var markerPosition  = new kakao.maps.LatLng(37.501, 126.884); 
+			        var markerPosition  = new kakao.maps.LatLng(userLat, userLng); 
 			        var marker = new kakao.maps.Marker({
 			            position: markerPosition
 			        });

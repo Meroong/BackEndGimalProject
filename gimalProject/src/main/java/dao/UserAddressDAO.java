@@ -26,10 +26,9 @@ public class UserAddressDAO {
                     dto.setRoadAddress(rs.getString("road_address"));
                     dto.setJibunAddress(rs.getString("jibun_address"));
                     dto.setAddrDetail(rs.getString("addr_detail"));
-					/*
-					 * dto.setLatitude(rs.getDouble("latitude"));
-					 * dto.setLongitude(rs.getDouble("longitude"));
-					 */
+                    dto.setLatitude(rs.getDouble("latitude"));
+					dto.setLongitude(rs.getDouble("longitude"));
+					 
                     dto.setCreatedAt(rs.getTimestamp("created_at"));
                     dto.setUpdatedAt(rs.getTimestamp("updated_at"));
                     return dto;
