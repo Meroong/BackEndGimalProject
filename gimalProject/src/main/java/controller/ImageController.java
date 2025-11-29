@@ -63,7 +63,7 @@ public class ImageController extends HttpServlet {
 					req.getSession().setAttribute("profileUrl", profileUrl);
 					System.out.println(profileUrl);
 					
-					resp.sendRedirect(req.getContextPath() + "/fileUpload.jsp");
+					resp.sendRedirect(req.getContextPath() + "/views/user/mypage.jsp");
 				}
 				else resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				break;
@@ -73,7 +73,7 @@ public class ImageController extends HttpServlet {
 				  String usedType = "PROFILE";
 				  boolean deleteResult = imageService.deleteProfile(usedType, autoId, req.getServletContext().getRealPath("uploads/profile")); 
 				  if(deleteResult) {
-					  resp.sendRedirect(req.getContextPath() + "/fileUpload.jsp");
+					  resp.sendRedirect(req.getContextPath() + "/views/user/mypage.jsp");
 				  }
 				  else {
 					  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
