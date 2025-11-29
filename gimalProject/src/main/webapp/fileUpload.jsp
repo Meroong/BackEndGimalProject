@@ -4,7 +4,7 @@
 <%
     // 예: 세션에 저장된 현재 프로필 이미지 URL
     String profileUrl = (String) session.getAttribute("profileUrl");
-
+	System.out.println(profileUrl);
     if (profileUrl == null) {
         profileUrl = "resources/images/default_profile.png";  // 기본 이미지
     }
@@ -39,11 +39,12 @@
 <h2>프로필 이미지 테스트 페이지</h2>
 
 <div class="profile-box">
-    <img src="<%=profileUrl%>" alt="프로필 이미지">
+	<!-- 정적url로 접근해야함 -->
+    <img src="<%= request.getContextPath() + profileUrl %>" alt="프로필 이미지">
 </div>
 
 <!-- 이미지 변경 / 업로드 서블렛 3.0 지원사항-->
-<form action="uploadProfile" method="post" enctype="multipart/form-data">
+<form action="<%= request.getContextPath() %>/upload/profileUpload" method="post" enctype="multipart/form-data">
 
 	<!-- input type="file"을 사용해서 파일선택 버튼이 자동으로 생김 -->
 	
@@ -52,7 +53,7 @@
 </form>
 
 <!-- 이미지 삭제 -->
-<form action="deleteProfile" method="post">
+<form action="<%= request.getContextPath() %>/upload/profileDelete" method="post">
     <button type="submit" style="background:#ff4e4e; color:white;">
         프로필 이미지 삭제
     </button>

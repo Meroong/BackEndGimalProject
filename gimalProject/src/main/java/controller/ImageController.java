@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import service.ImageService;
 import service.UserService;
+import util.AuthUtil;
 
 @WebServlet("/upload/*")
 @MultipartConfig(
@@ -34,13 +35,52 @@ public class ImageController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
     	String path = req.getPathInfo(); //            /* 위치에 주소만 가져옴
-        
-    	// 업로드된 파일 가져오기
-        Part imgPart = req.getPart("img");
-        
-		//저장 경로 설정 웹 경로를 실제 저장 경로로 변경
-		String uploadPath = req.getServletContext().getRealPath("uploads/profile");
 
-		imageService.uploadProfile(imgPart, uploadPath);
+
+		// ---------- 로그인 검증 ---------- /util/authUtil.java 에 넣어둠 JwtAuth는 토큰 생성 검증만 하는게
+		// 좋아서
+		Long autoId = AuthUtil.getAutoId(req);
+
+		if (autoId == -1) {
+			resp.sendRedirect("/views/user/login.jsp");
+			return;
+		}
+		switch (path) {
+			
+			case "/profileUpload":
+				System.out.println("upload/profileUpload: ");
+		    	// 업로드된 파일 가져오기
+		        Part imgPart = req.getPart("img");
+		        
+				//저장 경로 설정 웹 경로를 실제 저장 경로로 변경
+				String uploadPath = req.getServletContext().getRealPath("uploads/profile");
+
+				Boolean result =imageService.uploadProfile(autoId, imgPart, uploadPath);
+				
+				if(result) {
+					//프로필 url 세션저장
+					String profileUrl = new ImageService().getProfileImage(autoId, "PROFILE");
+					req.getSession().setAttribute("profileUrl", profileUrl);
+					System.out.println(profileUrl);
+					
+					resp.sendRedirect(req.getContextPath() + "/fileUpload.jsp");
+				}
+				else resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				break;
+			
+			  case "/profileDelete": 
+				  //임시 설정용
+				  String usedType = "PROFILE";
+				  boolean deleteResult = imageService.deleteProfile(usedType, autoId, req.getServletContext().getRealPath("uploads/profile")); 
+				  if(deleteResult) {
+					  resp.sendRedirect(req.getContextPath() + "/fileUpload.jsp");
+				  }
+				  else {
+					  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				  } 
+				  break;
+			 
+		}
+
     }
 }

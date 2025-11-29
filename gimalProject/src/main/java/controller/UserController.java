@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-
+import service.ImageService;
 import service.UserService;
 import util.AuthUtil;
 import dto.ResponseDTO;
@@ -93,7 +93,12 @@ public class UserController extends HttpServlet {
 				sessionUser.setNickname(userDto.getNickname());
 				session.setAttribute("userInfo", sessionUser);
 				session.setAttribute("addressInfo", addressDto);
-
+				
+				//프로필 url 세션저장
+				String profileUrl = new ImageService().getProfileImage(userDto.getAutoId(), "PROFILE");
+				req.getSession().setAttribute("profileUrl", profileUrl);
+				System.out.println(profileUrl);
+				
 				// JWT 생성
 				String jwt = JwtAuth.generateToken(userDto.getUserId(), userDto.getAutoId(), userDto.getRole());
 				session.setAttribute("Authorization", "Bearer " + jwt);

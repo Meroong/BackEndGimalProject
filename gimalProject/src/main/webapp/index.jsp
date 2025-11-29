@@ -55,6 +55,10 @@
                     onclick="location.href='<%= request.getContextPath() %>/views/user/mypage.jsp'">
                 마이페이지
             </button>
+            <button class="mypage-btn"
+                    onclick="location.href='<%= request.getContextPath() %>/fileUpload.jsp'">
+                파일업로드
+            </button>
 
         <% } %>
 
