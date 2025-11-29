@@ -147,7 +147,7 @@ public class UserController extends HttpServlet {
 		// 회원 정보 수정
 		// -----------------------------
 		case "/update":
-
+			System.out.println("userController: update");
 			// ---------- 로그인 검증 ---------- /util/authUtil.java 에 넣어둠 JwtAuth는 토큰 생성 검증만 하는게
 			// 좋아서
 			Long updateAutoId = AuthUtil.getAutoId(req);
@@ -162,10 +162,9 @@ public class UserController extends HttpServlet {
 			String newRoadAddress = req.getParameter("roadAddress");
 			String newJibunAddress = req.getParameter("jibunAddress");
 			String newAddrDetail = req.getParameter("addrDetail");
-			
 			String newLatitude = req.getParameter("latitude"); 
 			String newLongitude = req.getParameter("longitude");
-			System.out.println(newLatitude);
+			System.out.println(newLongitude);
 			result = userService.updateUser(updateAutoId, newPassword, newNickname, newRoadAddress, newJibunAddress,
 					newAddrDetail, newLatitude, newLongitude
 									 

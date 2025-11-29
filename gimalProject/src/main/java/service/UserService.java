@@ -1,6 +1,9 @@
 package service;
 
+import org.apache.tomcat.jakartaee.bcel.classfile.Field;
+
 import dao.ChatRoomUserDAO;
+import dao.FileResourceDAO;
 import dao.UserAddressDAO;
 import dao.UserDAO;
 import dto.ResponseDTO;
@@ -110,20 +113,21 @@ public class UserService {
     	System.out.println("deleteUserService:");
         try {
 
-            // 주소 삭제
-            addressDAO.deleteAddress(autoId);
-
-            // 채팅방 관련 데이터 삭제
-            new ChatRoomUserDAO().quitRoomForDeleteUser(autoId);
-
+			/* on delete cascade
+			 * // 주소 삭제 addressDAO.deleteAddress(autoId);
+			 * 
+			 * // 채팅방 관련 데이터 삭제 new ChatRoomUserDAO().quitRoomForDeleteUser(autoId);
+			 */
+        	boolean rs =new FileResourceDAO().deleteFile("PROFILE", autoId);
+        	if(!rs){
+        		System.out.println("프로필삭제 실패");
+        		return false;
+        	}
             // 최종 유저 삭제
             int userDeleted = userDAO.delete(autoId);
             if (userDeleted == 0) {
                 return false;
             }
-
-
-
             return true;
 
         } catch (Exception e) {
@@ -147,6 +151,7 @@ public class UserService {
 			String longitudeStr
 								 
     ) {
+    	System.out.println("work service: updateUser");
     	//1. User 수정
         UserDTO dto = new UserDTO();
         dto.setAutoId(autoId);

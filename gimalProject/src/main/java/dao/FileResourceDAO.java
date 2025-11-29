@@ -11,6 +11,7 @@ import util.JDBCUtil;
 public class FileResourceDAO {
 	
 	public String getFileUrl(long autoId, String usedType) {
+		System.out.println("work DBquery: getFileUrl");
 		String sql = "select file_url from file_resource where used_id = ? and used_type = ?;";
 		String oldFileName = "";
         try (Connection con = JDBCUtil.jdbcCon();
@@ -34,7 +35,7 @@ public class FileResourceDAO {
 	
 	
 	public boolean insertFile(FileResourceDTO dto) {
-		System.out.println("work DBquery: uploadFile");
+		System.out.println("work DBquery: insertFile");
 		String sql = "Insert into file_resource(file_url, file_name, original_name,"
 				+ " file_type, size, used_type, used_id) values(?, ?, ?, ?, ?, ?, ?);";
 		
@@ -63,7 +64,7 @@ public class FileResourceDAO {
           }
       }	
 	public boolean deleteFile(String usedType, long autoId) {
-		System.out.println("work DBquery: uploadFile");
+		System.out.println("work DBquery: deleteFile");
 		String sql = "delete from file_resource where used_type = ? and used_id = ?";
 		
         try (Connection con = JDBCUtil.jdbcCon();
@@ -86,6 +87,7 @@ public class FileResourceDAO {
           }
 	}
 	public boolean isExist(long autoId, String usedType) {
+		System.out.println("work DBquery: isExist");
 		String sql = "select * from file_resource where used_type = ? and used_id = ?;";
 		
         try (Connection con = JDBCUtil.jdbcCon();
