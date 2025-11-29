@@ -23,7 +23,6 @@ import java.io.IOException;
 public class UserController extends HttpServlet {
 
 	private UserService userService;
-	private Gson gson = new Gson();
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
