@@ -5,96 +5,118 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insert title here</title>
-    <script>
-		const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>"; // 팝업용 키
-		const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
-		function openJusoPopup() {
-		    window.open(
-		        "https://business.juso.go.kr/addrlink/addrLinkUrl.do?confmKey=" + POPUP_KEY 
-		        + "&returnUrl=" + encodeURIComponent(RETURN_URL)
-		        + "&resultType=4",
-		        "jusoPopup",
-		        "width=570,height=420,scrollbars=yes,resizable=yes"
-		    );
-		}
-	</script>
-	<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
-	<% UserAddressDTO addr = (UserAddressDTO) session.getAttribute("addressInfo"); %>
+<title>모임 수정</title>
+
+<script>
+    const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>";
+    const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
+
+    function openJusoPopup() {
+        window.open(
+            "https://business.juso.go.kr/addrlink/addrLinkUrl.do?confmKey=" + POPUP_KEY 
+            + "&returnUrl=" + encodeURIComponent(RETURN_URL)
+            + "&resultType=4",
+            "jusoPopup",
+            "width=570,height=420,scrollbars=yes,resizable=yes"
+        );
+    }
+</script>
+
+<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
+<% UserAddressDTO addr = (UserAddressDTO) session.getAttribute("addressInfo"); %>
+
 </head>
 <body>
+<h2>모임 수정</h2>
 
-		    <%-- 날씨 테스트 --%>
-		    <form id="updateForm" action="<%= request.getContextPath() %>/meeting/update" method="post">
-		        
-		
-		                        <%-- 주소 영역 --%>
-                <label>주소</label>
-                <button type="button" class="update-btn" onclick="openJusoPopup()" style="width:auto; margin-bottom:10px;">주소 검색</button>
+<form id="updateForm" action="<%= request.getContextPath() %>/meeting/update" method="post">
 
-				<!-- 도로명주소 -->
-				<label>도로명주소</label>
-				<input type="text" id="roadAddress" disabled value="<%= (addr != null && addr.getRoadAddress() != null) ? addr.getRoadAddress() : "" %>" />
-				
-				<input type="hidden" id="roadAddressValue" name="roadAddress" value="<%= (addr != null && addr.getRoadAddress() != null) ? addr.getRoadAddress() : "" %>" />
-				
-				
-				<!-- 지번주소 disabled라 팝업에서 .textContent가 아니라 .value 사용해야함-->
-				<label>지번주소</label>
-				<input type="text" id="jibunAddress" disabled value="<%= (addr != null && addr.getJibunAddress() != null) ? addr.getJibunAddress() : "" %>" />
-				
-				<input type="hidden" id="jibunAddressValue" name="jibunAddress" value="<%= (addr != null && addr.getJibunAddress() != null) ? addr.getJibunAddress() : "" %>" />
-				
-				<!-- 상세주소 (유저 입력 가능) -->	
-				<label>상세주소</label>
-				<input type="text" id="addrDetail" value="<%= (addr != null && addr.getAddrDetail() != null) ? addr.getAddrDetail() : "" %>" />
+    <%-- 모임 ID (디폴트) --%>
+    <input type="hidden" name="meetingId" value="1">
+    
+    <%-- 장소 ID (디폴트) --%>
+    <input type="hidden" name="locationId" value="1">
 
-				<input type="hidden" id="addrDetailValue" name="addrDetail" value="<%= (addr != null && addr.getAddrDetail() != null) ? addr.getAddrDetail() : "" %>" />
-				
-				<input type="hidden" id="latitude" name="latitude">
-				<input type="hidden" id="longitude" name="longitude">
-				
-		        <button type="submit" class="update-btn">게시판 등록</button>
-		    </form>
-	
+    <!-- 주소 영역 -->
+    <label>주소</label>
+    <button type="button" onclick="openJusoPopup()">주소 검색</button><br>
+
+    <label>도로명주소</label>
+    <input type="text" id="roadAddress" disabled 
+        value="<%= (addr != null && addr.getRoadAddress() != null) ? addr.getRoadAddress() : "" %>" />
+    <input type="hidden" id="roadAddressValue" name="roadAddress" 
+        value="<%= (addr != null && addr.getRoadAddress() != null) ? addr.getRoadAddress() : "" %>" />
+
+    <label>지번주소</label>
+    <input type="text" id="jibunAddress" disabled 
+        value="<%= (addr != null && addr.getJibunAddress() != null) ? addr.getJibunAddress() : "" %>" />
+    <input type="hidden" id="jibunAddressValue" name="jibunAddress" 
+        value="<%= (addr != null && addr.getJibunAddress() != null) ? addr.getJibunAddress() : "" %>" />
+
+    <label>상세주소</label>
+    <input type="text" id="addrDetail" name="addrDetail" 
+        value="<%= (addr != null && addr.getAddrDetail() != null) ? addr.getAddrDetail() : "" %>" />
+
+    <!-- 좌표 hidden -->
+    <input type="hidden" id="latitude" name="latitude">
+    <input type="hidden" id="longitude" name="longitude">
+    
+    <!-- 모임 정보 -->
+    <label>모임 제목</label>
+    <input type="text" name="title" value="디폴트 모임" required><br>
+    
+    <label>내용</label>
+    <textarea name="content">디폴트 내용</textarea><br>
+    
+    <label>모임 날짜</label>
+    <input type="date" name="date" value="<%= java.time.LocalDate.now() %>" required><br>
+    
+    <label>최대 인원</label>
+    <input type="number" name="maxMembers" value="10"><br>
+    
+    <label>현재 인원</label>
+    <input type="number" name="currentMembers" value="1"><br>
+    
+    <label>참가비</label>
+    <input type="number" name="cost" value="0"><br>
+    
+    <label>태그</label>
+    <input type="text" name="tag" value="디폴트"><br>
+    
+    <label>상태</label>
+    <select name="status">
+        <option value="OPEN" selected>OPEN</option>
+        <option value="CLOSED">CLOSED</option>
+        <option value="COMPLETED">COMPLETED</option>
+    </select><br><br>
+
+    <button type="submit">모임 수정</button>
+</form>
+
 <script>
-    // 카카오 Geocoder 객체 생성
     var geocoder = new kakao.maps.services.Geocoder();
 
-    // form submit 가로채기
-    document.addEventListener("DOMContentLoaded", function () {
-        document.getElementById("updateForm").addEventListener("submit", function(e) {
-            e.preventDefault();
+    document.getElementById("updateForm").addEventListener("submit", function(e) {
+        e.preventDefault();
 
-            let roadAddr = document.getElementById("roadAddressValue").value;
-            let jibunAddr = document.getElementById("jibunAddressValue").value;
+        let roadAddr = document.getElementById("roadAddressValue").value;
+        let jibunAddr = document.getElementById("jibunAddressValue").value;
+        let finalAddress = roadAddr || jibunAddr;
 
-            let finalAddress = roadAddr || jibunAddr;
+        if (!finalAddress) {
+            alert("주소가 없습니다. 주소 검색을 먼저 해주세요.");
+            return;
+        }
 
-            if (!finalAddress) {
-                alert("주소가 없습니다. 주소 검색을 먼저 해주세요.");
-                return;
+        geocoder.addressSearch(finalAddress, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                document.getElementById("latitude").value = result[0].y;
+                document.getElementById("longitude").value = result[0].x;
+
+                e.target.submit(); // 실제 제출
+            } else {
+                alert("주소 → 좌표 변환 실패: " + status);
             }
-
-            // 주소 → 좌표 변환
-            geocoder.addressSearch(finalAddress, function(result, status) {
-                if (status === kakao.maps.services.Status.OK) {
-
-                    let lat = result[0].y;
-                    let lng = result[0].x;
-
-                    document.getElementById("latitude").value = lat;
-                    document.getElementById("longitude").value = lng;
-
-                    console.log("위도:", lat, "경도:", lng);
-
-                    // 실제 제출
-                    e.target.submit();
-
-                } else {
-                    alert("주소 → 좌표 변환 실패: " + status);
-                }
-            });
         });
     });
 </script>

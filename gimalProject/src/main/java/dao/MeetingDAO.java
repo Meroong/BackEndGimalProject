@@ -30,28 +30,35 @@ public class MeetingDAO {
 		ArrayList<MeetingDTO> aList = new ArrayList<MeetingDTO>();
 		String sql = "select * from meeting;";
 		
-		try (Connection con = JDBCUtil.jdbcCon()) {
-            if (con == null) throw new RuntimeException("DB 연결 실패");
-            
-            try (PreparedStatement pstmt = con.prepareStatement(sql)) {
+            try (Connection con = JDBCUtil.jdbcCon();
+            		PreparedStatement pstmt = con.prepareStatement(sql);
+            		ResultSet rs = pstmt.executeQuery()) {
                 
+                
+                while(rs.next()) {
+                	MeetingDTO dto = new MeetingDTO();
+    
+                	dto.setMeetingId(rs.getLong("meeting_id"));
+                	dto.setTitle(rs.getString("title"));
+                	dto.setContent(rs.getString("content"));
+                	dto.setDate(rs.getTimestamp("date"));
+                	dto.setLocationId(0);
+                	dto.setMaxMembers(rs.getInt("max_members"));
+                	dto.setCurrentMembers(rs.getInt("current_members"));
+                	dto.setCost(rs.getInt("cost"));
+                	dto.setTag(rs.getString("tag"));
+                	dto.setStatus(rs.getString("status"));
+                	aList.add(dto);
+                }
             }
             catch(SQLException e) {
             	System.out.println("sql 쿼리 오류");
             	e.printStackTrace();
             }
-		for(MeetingDTO dto : )
-			
-			return aList;
-		}
-		catch(){
-			
-		}
-		
-		
+            return aList;
 	}
  // 게시글 업데이트
-    public void updateMeet(MeetingDTO dto) {
+    public boolean updateMeet(MeetingDTO dto) {
         StringBuilder sql = new StringBuilder("UPDATE meeting SET ");
         int fieldCount = 0;
 
@@ -61,15 +68,18 @@ public class MeetingDAO {
             if (dto.getTitle() != null) { sql.append("title = ?, "); fieldCount++; }
             if (dto.getContent() != null) { sql.append("content = ?, "); fieldCount++; }
             if (dto.getDate() != null) { sql.append("date = ?, "); fieldCount++; }
-            if (dto.getLocation() != null) { sql.append("location = ?, "); fieldCount++; }
+            if (dto.getLocationId() != 0) { sql.append("location_id = ?, "); fieldCount++; }
             if (dto.getMaxMembers() != 0) { sql.append("max_members = ?, "); fieldCount++; }
             if (dto.getCurrentMembers() != 0) { sql.append("current_members = ?, "); fieldCount++; }
             if (dto.getCost() != 0) { sql.append("cost = ?, "); fieldCount++; }
             if (dto.getTag() != null) { sql.append("tag = ?, "); fieldCount++; }   //일단 통 텍스트로 태그 테이블 구상해야함
             if (dto.getStatus() != null) { sql.append("status = ?, "); fieldCount++; }
+            if (dto.getWeather() != null) { sql.append("weather = ?, "); fieldCount++; }
             
 
-            if (fieldCount == 0) return; // 업데이트할 필드가 없으면 종료
+            if (fieldCount == 0) {
+            	System.out.println("업데이트할 필드가 없음");
+            	return false; }// 업데이트할 필드가 없으면 종료
 
             // 마지막 콤마 제거
             sql.setLength(sql.length() - 2);
@@ -81,29 +91,32 @@ public class MeetingDAO {
                 if (dto.getTitle() != null) pstmt.setString(index++, dto.getTitle());
                 if (dto.getContent() != null) pstmt.setString(index++, dto.getContent());
                 if (dto.getDate() != null) pstmt.setTimestamp(index++, new java.sql.Timestamp(dto.getDate().getTime()));
-                if (dto.getLocation() != null) pstmt.setString(index++, dto.getLocation());
+                if (dto.getLocationId() != 0) pstmt.setLong(index++, dto.getLocationId());
                 if (dto.getMaxMembers() != 0) pstmt.setInt(index++, dto.getMaxMembers());
                 if (dto.getCurrentMembers() != 0) pstmt.setInt(index++, dto.getCurrentMembers());
                 if (dto.getCost() != 0) pstmt.setInt(index++, dto.getCost());
                 if (dto.getTag() != null) pstmt.setString(index++, dto.getTag());
                 if (dto.getStatus() != null) pstmt.setString(index++, dto.getStatus());
+                if (dto.getWeather() != null) pstmt.setString(index++, dto.getWeather());
 
                 // WHERE 조건
-                pstmt.setInt(index, dto.getMeetingId());
+                pstmt.setLong(index, dto.getMeetingId());
 
-                pstmt.executeUpdate();
+                int rs = pstmt.executeUpdate();
+                return rs>0;
             }
 
 
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("DB연결 오류 혹은 쿼리오류");
+            return false;
         }
     }
 
     // 게시글 작성
     public boolean insert(MeetingDTO dto) {
-        String sql = "INSERT INTO meeting (title, content, date, location, max_members, current_members, cost, tag, status\r\n"
+        String sql = "INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status"
         		+ ") "
                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
         try (Connection con = JDBCUtil.jdbcCon();
@@ -112,7 +125,7 @@ public class MeetingDAO {
             pstmt.setString(1, dto.getTitle());
             pstmt.setString(2, dto.getContent());
             pstmt.setTimestamp(3, dto.getDate());
-            pstmt.setString(4, dto.getLocation());
+            pstmt.setLong(4, dto.getLocation());
             pstmt.setInt(5, dto.getMaxMembers());
             pstmt.setInt(6, dto.getCurrentMembers());
             pstmt.setInt(7, dto.getCost());
