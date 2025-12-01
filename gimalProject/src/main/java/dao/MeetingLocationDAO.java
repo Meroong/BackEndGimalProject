@@ -2,7 +2,9 @@ package dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import dto.MeetingLocationDTO;
 import dto.UserAddressDTO;
@@ -10,12 +12,13 @@ import util.JDBCUtil;
 
 public class MeetingLocationDAO {
 	
+
     // 주소 삽입
-    public boolean addLocation(MeetingLocationDTO dto) {
+    public Long insertLocation(MeetingLocationDTO dto) {
         String sql = "INSERT INTO meeting_location (road_address, jibun_address, addr_detail, latitude, longitude) "
                    + "VALUES (?, ?, ?, ?, ?)";
         try (Connection con = JDBCUtil.jdbcCon();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
+        		PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             
             pstmt.setString(1, dto.getRoadAddress());
@@ -25,16 +28,24 @@ public class MeetingLocationDAO {
 			pstmt.setDouble(5, dto.getLongitude());
 													 
 
-            if(pstmt.executeUpdate() > 0) {
-            	return true;
-            }
+	        int affectedRows = pstmt.executeUpdate();
+	        if (affectedRows == 0) {
+	            throw new SQLException("Insertion failed, no rows affected.");
+	        }
+	        //인서트 결과로 생성된 키를 반환
+	        try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+	            if (generatedKeys.next()) {
+	                return generatedKeys.getLong(1); // 생성된 PK 반환
+	            } else {
+	                throw new SQLException("삽입 실패, 아이디 포함안됨.");
+	            }
+	        }
 
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("DB 연결 또는 쿼리 오류");
-            return false;
+            return null;
         }
-        return false;
     }
     //주소 수정
     public boolean updateLocation(MeetingLocationDTO dto) {

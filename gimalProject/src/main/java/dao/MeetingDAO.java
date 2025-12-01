@@ -116,21 +116,22 @@ public class MeetingDAO {
 
     // 게시글 작성
     public boolean insert(MeetingDTO dto) {
-        String sql = "INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status"
+        String sql = "INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, weather"
         		+ ") "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
             pstmt.setString(1, dto.getTitle());
             pstmt.setString(2, dto.getContent());
             pstmt.setTimestamp(3, dto.getDate());
-            pstmt.setLong(4, dto.getLocation());
+            pstmt.setLong(4, dto.getLocationId());
             pstmt.setInt(5, dto.getMaxMembers());
             pstmt.setInt(6, dto.getCurrentMembers());
             pstmt.setInt(7, dto.getCost());
             pstmt.setString(8, dto.getTag());
             pstmt.setString(9, dto.getStatus());
+            pstmt.setString(10, dto.getWeather());
 
             int result = pstmt.executeUpdate();
             return result > 0;
