@@ -1,101 +1,165 @@
 package service;
 
+import java.sql.Connection;
 import java.util.List;
 
 import dao.AdminNoticeDAO;
 import dao.AdminReportDAO;
 import dao.AdminStatsDAO;
 import dao.AdminUserDAO;
-import dao.UserDAO;
 import dto.AdminNoticeDTO;
-import dto.ReportDTO;
 import dto.AdminStatsDTO;
+import dto.ReportDTO;
 import dto.UserDTO;
+import util.DBUtil;
 
 public class AdminService {
 
-    // ===================== DAO 객체들 =====================
-    private final AdminNoticeDAO noticeDAO = new AdminNoticeDAO();
-    private final AdminReportDAO reportDAO = new AdminReportDAO();
-    private final AdminStatsDAO statsDAO = new AdminStatsDAO();
-    private final AdminUserDAO adminUserDAO = new AdminUserDAO();
-    private final UserDAO userDAO = new UserDAO();
+    public AdminService() {}
 
-    // ===================== 공지 관련 =====================
-
-    // 공지 전체 목록
-    public List<AdminNoticeDTO> getNoticeList() {
-        return noticeDAO.findAll();
-    }
-
-    // 공지 등록
-    public boolean writeNotice(AdminNoticeDTO dto) {
-        return noticeDAO.insert(dto) > 0;
-    }
-
-    // 공지 수정
-    public boolean updateNotice(AdminNoticeDTO dto) {
-        return noticeDAO.update(dto) > 0;
-    }
-
-    // 공지 삭제
-    public boolean deleteNotice(long id) {
-        return noticeDAO.delete(id) > 0;
-    }
-
-    // ===================== 신고 관련 =====================
-
-    // 신고 전체 목록
-    public List<ReportDTO> getReportList() {
-        return reportDAO.findAll();
-    }
-
-    // 신고 단건 조회
-    public ReportDTO getReportById(long id) {
-        return reportDAO.findById(id);
-    }
-
-    // 신고 처리 (PENDING -> RESOLVED)
-    public boolean resolveReport(long id) {
-        return reportDAO.updateStatus(id, "RESOLVED") > 0;
-    }
-
-    // ===================== 통계 관련 =====================
-
-    public AdminStatsDTO getStats() {
-        return statsDAO.getStats();
-    }
-
-    // ===================== 회원 관련 =====================
-
-    // 전체 회원 목록
+    // ================== 회원 ==================
     public List<UserDTO> getUserList() {
-        return userDAO.findAllUsers();
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminUserDAO dao = new AdminUserDAO(conn);
+            return dao.findAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    // 회원 단건 조회
     public UserDTO getUserById(long id) {
-        // UserDAO에 단건 조회 메서드가 없어서
-        // 기존 설계처럼 전체 조회 후 필터링
-        return userDAO.findAllUsers()
-                .stream()
-                .filter(u -> u.getAutoId() == id)
-                .findFirst()
-                .orElse(null);
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminUserDAO dao = new AdminUserDAO(conn);
+            return dao.findById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
-    // 회원 정지 (role -> BLOCKED)
-    public boolean blockUser(long id) {
-        return adminUserDAO.updateRole(id, "BLOCKED") > 0;
+    public int blockUser(long id) {
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminUserDAO dao = new AdminUserDAO(conn);
+            return dao.updateBlockStatus(id, true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
-    // 회원 정지 해제 (role -> USER)
-    public boolean unblockUser(long id) {
-        return adminUserDAO.updateRole(id, "USER") > 0;
+    public int unblockUser(long id) {
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminUserDAO dao = new AdminUserDAO(conn);
+            return dao.updateBlockStatus(id, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
-    // 회원 삭제(탈퇴)
-    public int deleteUser(long autoId) {
-        return adminUserDAO.deleteUser(autoId);
+    // 🔥 회원 삭제(탈퇴)
+    public int deleteUser(long id) {
+        System.out.println("[AdminService] deleteUser id = " + id);
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminUserDAO dao = new AdminUserDAO(conn);
+            int result = dao.deleteUser(id);
+            System.out.println("[AdminService] deleteUser result = " + result);
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    // ================== 신고 ==================
+    public List<ReportDTO> getReportList() {
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminReportDAO dao = new AdminReportDAO(conn);
+            return dao.findAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public ReportDTO getReportById(long id) {
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminReportDAO dao = new AdminReportDAO(conn);
+            return dao.findById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // 신고 상태 토글 (PENDING <-> RESOLVED)
+    public boolean toggleReportStatus(long id) {
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminReportDAO dao = new AdminReportDAO(conn);
+
+            ReportDTO dto = dao.findById(id);
+            if (dto == null) return false;
+
+            String newStatus = "PENDING";
+            if ("PENDING".equals(dto.getStatus())) {
+                newStatus = "RESOLVED";
+            }
+
+            int updated = dao.updateStatus(id, newStatus);
+            return updated > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ================== 공지 ==================
+    public List<AdminNoticeDTO> getNoticeList() {
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminNoticeDAO dao = new AdminNoticeDAO(conn);
+            return dao.findAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public void writeNotice(AdminNoticeDTO dto) {
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminNoticeDAO dao = new AdminNoticeDAO(conn);
+            dao.insert(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateNotice(AdminNoticeDTO dto) {
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminNoticeDAO dao = new AdminNoticeDAO(conn);
+            dao.update(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteNotice(long id) {
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminNoticeDAO dao = new AdminNoticeDAO(conn);
+            dao.delete(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ================== 통계 ==================
+    public AdminStatsDTO getStats() {
+        try (Connection conn = DBUtil.getConnection()) {
+            AdminStatsDAO dao = new AdminStatsDAO(conn);
+            return dao.getStats();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

@@ -21,11 +21,13 @@ public class AdminUserDAO {
             pstmt.setString(1, newRole);
             pstmt.setLong(2, autoId);
 
-            return pstmt.executeUpdate();
+            int rows = pstmt.executeUpdate();
+            System.out.println("[AdminUserDAO] updateRole rows = " + rows);
+            return rows;
 
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("[AdminUserDAO] 회원 권한 변경 중 오류");
+            System.out.println("[AdminUserDAO] 권한 변경 중 오류");
         }
 
         return 0;
@@ -44,17 +46,17 @@ public class AdminUserDAO {
                 "DELETE FROM report WHERE reporter_id = ? OR target_user_id = ?";
 
         // 2. 리뷰 삭제 (작성자/대상 둘 다)
+        //   ※ 실제 테이블 컬럼명이 다르면 여기만 맞게 바꿔 주세요.
         String deleteReviewsSql =
                 "DELETE FROM review WHERE reviewer_id = ? OR reviewee_id = ?";
 
-        // 3. 거래 기록 삭제 (구매자/판매자 둘 다)
-        //  💡 transaction 은 MySQL 예약어라 백틱(`) 으로 감싸줘야 함
+        // 3. 거래 기록 삭제
         String deleteTransactionsSql =
-                "DELETE FROM `transaction` WHERE buyer_id = ? OR seller_id = ?";
+                "DELETE FROM transaction WHERE buyer_id = ? OR seller_id = ?";
 
-        // 4. 채팅방 삭제 (host가 이 유저인 방)
+        // 4. 채팅방 삭제
         String deleteChatRoomsSql =
-                "DELETE FROM chat_room WHERE host_id = ?";
+                "DELETE FROM chat_room WHERE buyer_id = ? OR seller_id = ?";
 
         // 5. 이 유저가 올린 상품 삭제
         String deleteItemsSql =
@@ -74,7 +76,7 @@ public class AdminUserDAO {
                 PreparedStatement pstmtTrans  = con.prepareStatement(deleteTransactionsSql);
                 PreparedStatement pstmtChat   = con.prepareStatement(deleteChatRoomsSql);
                 PreparedStatement pstmtItem   = con.prepareStatement(deleteItemsSql);
-                PreparedStatement pstmtUser   = con.prepareStatement(deleteUserSql)
+                PreparedStatement pstmtUser   = con.prepareStatement(deleteUserSql);
             ) {
                 // 1) 신고 삭제
                 pstmtReport.setLong(1, autoId);
@@ -93,6 +95,7 @@ public class AdminUserDAO {
 
                 // 4) 채팅방 삭제
                 pstmtChat.setLong(1, autoId);
+                pstmtChat.setLong(2, autoId);
                 pstmtChat.executeUpdate();
 
                 // 5) 상품 삭제
@@ -122,4 +125,21 @@ public class AdminUserDAO {
 
         return 0;
     }
+ // 회원 삭제(탈퇴) - PK(autoId) 기준
+    public int deleteUser(long autoId) {
+        // ★ 여기 테이블명 / 컬럼명은 실제 DB에 맞게 바꿔야 합니다.
+        //    예시로 users / autoId 를 사용했습니다.
+        String sql = "DELETE FROM users WHERE autoId = ?";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setLong(1, autoId);
+            int result = pstmt.executeUpdate();
+            System.out.println("[AdminUserDAO] deleteUser autoId=" + autoId + ", result=" + result);
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
 }
