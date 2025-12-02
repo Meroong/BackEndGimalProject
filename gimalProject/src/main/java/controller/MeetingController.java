@@ -10,6 +10,7 @@ import service.MeetingService;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 
 import dto.MeetingDTO;
 import dto.MeetingLocationDTO;
@@ -23,9 +24,27 @@ public class MeetingController extends HttpServlet {
 	}
 
 
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		String path = req.getPathInfo();
 		
-	}
+		switch(path) {
+			case "/list":
+				ArrayList<MeetingDTO> aList = meetingService.getMeetingList();
+				req.getSession().setAttribute("meetingList", aList);
+				if(!aList.isEmpty()) {
+					resp.sendRedirect(req.getContextPath()+"/views/");
+					return;
+				}
+				else {
+					
+				}
+				break;
+			//게시글 상세 조회 미팅 아이디를 인자로 받음
+			case "/info":
+				MeetingInfoDTO meetingDto = meetingService.getMeetingInfo((long)req.getParameter("meetingId"));
+				
+		}
+}
 
 	
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

@@ -24,10 +24,43 @@ public class MeetingDAO {
    // private String tag;            // 태그 (단순 텍스트)
    //private String status;         // 상태 (모집중 / 마감 등)
     
-	
-	//게시글 전체조회
-	public ArrayList<MeetingDTO> searchAll(){
+	//게시판 목록을 위한 조회
+	public ArrayList<MeetingDTO> getPostList(){
+		//모임 아이디 제목 날짜 상태 태그
 		ArrayList<MeetingDTO> aList = new ArrayList<MeetingDTO>();
+		String sql = "select meeting_id, title, date, location, maxMembers, currentMembers, tag, status from meeting;";
+        
+		try (Connection con = JDBCUtil.jdbcCon();
+        		PreparedStatement pstmt = con.prepareStatement(sql);
+        		ResultSet rs = pstmt.executeQuery()) {
+            
+            
+            if(rs.next()) {
+            	MeetingDTO dto = new MeetingDTO();
+            	dto.setMeetingId(rs.getLong("meeting_id"));
+            	dto.setTitle(rs.getString("title"));
+            	dto.setContent(rs.getString("content"));
+            	dto.setDate(rs.getTimestamp("date"));
+            	dto.setLocationId(0);
+            	dto.setMaxMembers(rs.getInt("max_members"));
+            	dto.setCurrentMembers(rs.getInt("current_members"));
+            	dto.setCost(rs.getInt("cost"));
+            	dto.setTag(rs.getString("tag"));
+            	dto.setStatus(rs.getString("status"));
+            	dto.setWeather(rs.getString("weather")); //날씨 정보 
+            	aList.add(dto);
+            }
+        }
+        catch(SQLException e) {
+        	System.out.println("sql 쿼리 오류");
+        	e.printStackTrace();
+        }
+        return aList;
+	}
+	
+	//게시글 상세조회 is empty로 체크 
+	public MeetingDTO getPostDetail(){
+		MeetingDTO dto = new MeetingDTO();
 		String sql = "select * from meeting;";
 		
             try (Connection con = JDBCUtil.jdbcCon();
@@ -35,9 +68,7 @@ public class MeetingDAO {
             		ResultSet rs = pstmt.executeQuery()) {
                 
                 
-                while(rs.next()) {
-                	MeetingDTO dto = new MeetingDTO();
-    
+                if(rs.next()) {
                 	dto.setMeetingId(rs.getLong("meeting_id"));
                 	dto.setTitle(rs.getString("title"));
                 	dto.setContent(rs.getString("content"));
@@ -48,15 +79,16 @@ public class MeetingDAO {
                 	dto.setCost(rs.getInt("cost"));
                 	dto.setTag(rs.getString("tag"));
                 	dto.setStatus(rs.getString("status"));
-                	aList.add(dto);
+                	dto.setWeather(rs.getString("weather")); //날씨 정보 
                 }
             }
             catch(SQLException e) {
             	System.out.println("sql 쿼리 오류");
             	e.printStackTrace();
             }
-            return aList;
+            return dto;
 	}
+	//
  // 게시글 업데이트
     public boolean updateMeet(MeetingDTO dto) {
         StringBuilder sql = new StringBuilder("UPDATE meeting SET ");

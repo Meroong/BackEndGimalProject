@@ -12,11 +12,39 @@ import util.JDBCUtil;
 
 public class MeetingLocationDAO {
 	
+	//주소 가져오기 널 반환 가능성 익셉션 처리 잘
+	public MeetingLocationDTO getLocation(long locationId) {
+		String sql = "select * from meeting_location where id = ?;";
+		
+		try (Connection con = JDBCUtil.jdbcCon();
+        		PreparedStatement pstmt = con.prepareStatement(sql);){
+			pstmt.setLong(1, locationId);
+			
+			try(ResultSet rs = pstmt.executeQuery();){
+				if(rs.next()) {
+					MeetingLocationDTO dto = new MeetingLocationDTO();
+					dto.setId(locationId);
+					dto.setRoadAddress(rs.getString("road_address"));
+					dto.setJibunAddress(rs.getString("jibun_address"));
+					dto.setAddrDetail("addrDetail");
+					dto.setLatitude(rs.getDouble("latitude"));
+					dto.setLongitude(rs.getDouble("longitude"));
+					
+					return dto;
+				}
+			}
+		}catch(SQLException e) {
+			System.out.println("주소 가져오기 에러");
+			e.printStackTrace();
+		}
+		return null;
+
+	}
 
     // 주소 삽입
     public Long insertLocation(MeetingLocationDTO dto) {
         String sql = "INSERT INTO meeting_location (road_address, jibun_address, addr_detail, latitude, longitude) "
-                   + "VALUES (?, ?, ?, ?, ?)";
+                   + "VALUES (?, ?, ?, ?, ?);";
         try (Connection con = JDBCUtil.jdbcCon();
         		PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 

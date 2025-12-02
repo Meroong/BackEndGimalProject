@@ -83,6 +83,12 @@
         <option value="CLOSED">CLOSED</option>
         <option value="COMPLETED">COMPLETED</option>
     </select><br><br>
+    
+    <!-- 이미지 업로드 -->
+    <label>이미지 업로드</label>
+    <input type="file" id="imageFile" name="imageFile" accept="image/*"><br>
+    <img id="imagePreview" src="#" alt="선택한 이미지 미리보기" style="display:none; max-width:300px; margin-top:10px;"><br><br>
+    
 
     <button type="submit">모임 생성</button>
 </form>
