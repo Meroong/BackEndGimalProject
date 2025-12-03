@@ -48,121 +48,122 @@ public class MeetingController extends HttpServlet {
 
 	
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String path = req.getPathInfo();
-		String latitudeStr;
-		String longitudeStr;
-	    double latitude = 37.1;
-	    double longitude = 107.1;
-	    MeetingLocationDTO locationDto = new MeetingLocationDTO();
-	    boolean result = false;
-		
-		switch(path) {
-		//테스트용
-			case "/update":
-				
-				latitudeStr = req.getParameter("latitude");
-				longitudeStr = req.getParameter("longitude");
-				latitude =37.1;
-				longitude = 107.1;
-				locationDto = new MeetingLocationDTO();
-			    
-				if (latitudeStr != null && !latitudeStr.isEmpty()) {
-					  latitude = Double.parseDouble(latitudeStr);
-				  }
-				if (longitudeStr != null && !longitudeStr.isEmpty()) {
-					  longitude = Double.parseDouble(longitudeStr); 
-				  }
-			    locationDto.setRoadAddress(req.getParameter("roadAddress"));
-			    locationDto.setJibunAddress(req.getParameter("jibunAddress"));
-			    locationDto.setAddrDetail(req.getParameter("addrDetail"));
-			    locationDto.setLatitude(latitude);
-			    locationDto.setLongitude(longitude);
-			    locationDto.setId(Long.parseLong(req.getParameter("locationId")));
-				
-			    //로케이션 업데이트 meeting_location 테이블
-				result = meetingService.updateLocation(locationDto);
-				
-					//모임 정보 업데이트 meeting 테이블
-				if(result) {
-						 	MeetingDTO meetingDto = new MeetingDTO();
-						    meetingDto.setMeetingId(Long.parseLong(req.getParameter("meetingId")));
-						    meetingDto.setTitle(req.getParameter("title"));
-						    meetingDto.setContent(req.getParameter("content"));
-						    
-						    //date 파싱
-						    String dateStr = req.getParameter("date");
-						    dateStr = dateStr.length() == 10 ? dateStr + " 00:00:00" : dateStr;
-						    meetingDto.setDate(Timestamp.valueOf(dateStr));
-						    
-						    meetingDto.setLocationId(locationDto.getId());
-						    meetingDto.setMaxMembers(Integer.parseInt(req.getParameter("maxMembers")));
-						    meetingDto.setCurrentMembers(Integer.parseInt(req.getParameter("currentMembers")));
-						    meetingDto.setCost(Integer.parseInt(req.getParameter("cost")));
-						    meetingDto.setTag(req.getParameter("tag"));
-						    meetingDto.setStatus(req.getParameter("status"));
-						    result = meetingService.updateMeetingInfo(meetingDto, latitude, longitude);
-						    if(result) {
-								resp.sendRedirect(req.getContextPath()+"/weatherAPI.jsp");
-								return;
-						    }
-						    else
-						    	break;
-				}
-				else
-					break;
-				
-			case "/insert":
-				latitudeStr = req.getParameter("latitude");
-				longitudeStr = req.getParameter("longitude");
-				latitude =37.1;
-				longitude = 107.1;
-				locationDto = new MeetingLocationDTO();
-			    
-				if (latitudeStr != null && !latitudeStr.isEmpty()) {
-					  latitude = Double.parseDouble(latitudeStr);
-				  }
-				if (longitudeStr != null && !longitudeStr.isEmpty()) {
-					  longitude = Double.parseDouble(longitudeStr); 
-				  }
-			    locationDto.setRoadAddress(req.getParameter("roadAddress"));
-			    locationDto.setJibunAddress(req.getParameter("jibunAddress"));
-			    locationDto.setAddrDetail(req.getParameter("addrDetail"));
-			    locationDto.setLatitude(latitude);
-			    locationDto.setLongitude(longitude);
-			    
-			    long locationId = 0;
-				try {
-					 locationId = meetingService.insertLocation(locationDto);
-				} catch (Exception e) {
-					e.printStackTrace();
-			        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "모임 위치 삽입 실패");
-			        return;
-				}
-				
-				 	MeetingDTO meetingDto = new MeetingDTO();
-				    meetingDto.setTitle(req.getParameter("title"));
-				    meetingDto.setContent(req.getParameter("content"));
-				    
-				    //date 파싱
-				    String dateStr = req.getParameter("date");
-				    dateStr = dateStr.length() == 10 ? dateStr + " 00:00:00" : dateStr;
-				    meetingDto.setDate(Timestamp.valueOf(dateStr));
-				    
-				    meetingDto.setLocationId(locationId);
-				    meetingDto.setMaxMembers(Integer.parseInt(req.getParameter("maxMembers")));
-				    meetingDto.setCurrentMembers(Integer.parseInt(req.getParameter("currentMembers")));
-				    meetingDto.setCost(Integer.parseInt(req.getParameter("cost")));
-				    meetingDto.setTag(req.getParameter("tag"));
-				    meetingDto.setStatus(req.getParameter("status"));
-				    result = meetingService.insertMeetingInfo(meetingDto, latitude, longitude);
-			        
-			        if (result) {
-			            resp.sendRedirect(req.getContextPath() + "/weatherAPI.jsp");
-			            return;
-			        } else {
-			            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "모임 정보 업데이트 실패");
-			            return;
-			        }
-			    }
-		}
+	    String path = req.getPathInfo();
+
+	    String latitudeStr = req.getParameter("latitude");
+	    String longitudeStr = req.getParameter("longitude");
+
+	    double latitude = (latitudeStr != null && !latitudeStr.isEmpty()) ? Double.parseDouble(latitudeStr) : 37.1;
+	    double longitude = (longitudeStr != null && !longitudeStr.isEmpty()) ? Double.parseDouble(longitudeStr) : 107.1;
+
+	    try {
+	        switch (path) {
+
+	            /* ========================
+	             * UPDATE
+	             * ======================== */
+	            case "/update":
+	                long locationId = Long.parseLong(req.getParameter("locationId"));
+	                long meetingId = Long.parseLong(req.getParameter("meetingId"));
+
+	                // location 업데이트
+	                meetingService.updateLocation(
+	                        locationId,
+	                        req.getParameter("roadAddress"),
+	                        req.getParameter("jibunAddress"),
+	                        req.getParameter("addrDetail"),
+	                        latitude,
+	                        longitude
+	                );
+
+	                // meeting 업데이트
+	                String dateStr = req.getParameter("date");
+	                dateStr = dateStr.length() == 10 ? dateStr + " 00:00:00" : dateStr;
+	                Timestamp date = Timestamp.valueOf(dateStr);
+
+	                meetingService.updateMeetingInfo(
+	                        meetingId,
+	                        req.getParameter("title"),
+	                        req.getParameter("content"),
+	                        date,
+	                        locationId,
+	                        Integer.parseInt(req.getParameter("maxMembers")),
+	                        Integer.parseInt(req.getParameter("currentMembers")),
+	                        Integer.parseInt(req.getParameter("cost")),
+	                        req.getParameter("tag"),
+	                        req.getParameter("status"),
+	                        latitude,
+	                        longitude
+	                );
+
+	                // 성공 시
+	                resp.sendRedirect(req.getContextPath() + "/weatherAPI.jsp");
+	                return;
+
+
+	            /* ========================
+	             * INSERT
+	             * ======================== */
+	            case "/insert":
+	                // location insert
+	                long newLocationId = meetingService.insertLocation(
+	                        req.getParameter("roadAddress"),
+	                        req.getParameter("jibunAddress"),
+	                        req.getParameter("addrDetail"),
+	                        latitude,
+	                        longitude
+	                );
+
+	                // meeting insert
+	                String dateStrInsert = req.getParameter("date");
+	                dateStrInsert = dateStrInsert.length() == 10 ? dateStrInsert + " 00:00:00" : dateStrInsert;
+
+	                meetingService.insertMeetingInfo(
+	                        req.getParameter("title"),
+	                        req.getParameter("content"),
+	                        Timestamp.valueOf(dateStrInsert),
+	                        newLocationId,
+	                        Integer.parseInt(req.getParameter("maxMembers")),
+	                        Integer.parseInt(req.getParameter("currentMembers")),
+	                        Integer.parseInt(req.getParameter("cost")),
+	                        req.getParameter("tag"),
+	                        req.getParameter("status"),
+	                        latitude,
+	                        longitude
+	                );
+
+	                // 성공 시
+	                resp.sendRedirect(req.getContextPath() + "/weatherAPI.jsp");
+	                return;
+
+	            default:
+	                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "잘못된 요청 경로입니다.");
+	        }
+
+	    	} catch (Exception e) {
+	        e.printStackTrace();
+
+	        // 에러 메시지를 request에 담아서 회원가입/모임 페이지로 포워딩
+	        req.setAttribute("errorMsg", e.getMessage());
+
+	        // 기존 입력값도 유지
+	        req.setAttribute("roadAddress", req.getParameter("roadAddress"));
+	        req.setAttribute("jibunAddress", req.getParameter("jibunAddress"));
+	        req.setAttribute("addrDetail", req.getParameter("addrDetail"));
+	        req.setAttribute("title", req.getParameter("title"));
+	        req.setAttribute("content", req.getParameter("content"));
+	        req.setAttribute("date", req.getParameter("date"));
+	        req.setAttribute("maxMembers", req.getParameter("maxMembers"));
+	        req.setAttribute("currentMembers", req.getParameter("currentMembers"));
+	        req.setAttribute("cost", req.getParameter("cost"));
+	        req.setAttribute("tag", req.getParameter("tag"));
+	        req.setAttribute("status", req.getParameter("status"));
+
+	        // 포워딩
+	        req.getRequestDispatcher("/meetingForm.jsp").forward(req, resp);
+	    }
+	}
+
 }
+
+
