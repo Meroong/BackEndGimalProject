@@ -33,9 +33,11 @@ DROP TABLE IF EXISTS rental_info;
 -- 💬 중고/대여 상품 게시판
 DROP TABLE IF EXISTS item;
 -- 💾 이미지 테이블
-DROP TABLE IF EXISTS image;
+DROP TABLE IF EXISTS file_resource;
 -- 🏷️ 유저 태그
 DROP TABLE IF EXISTS user_tag;
+-- 🤝 모임참여자 관리
+DROP TABLE IF EXISTS meeting_location;
 -- 🤝 모임참여자 관리
 DROP TABLE IF EXISTS meeting_participant;
 -- 🤝 모임 게시판
@@ -68,8 +70,8 @@ CREATE TABLE user (
 CREATE TABLE user_address (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '주소 ID',
     user_id BIGINT NOT NULL COMMENT '유저 ID',
-    road_address VARCHAR(255) NOT NULL COMMENT '도로명 주소',
-    jibun_address VARCHAR(255) NOT NULL COMMENT '지번 주소',
+    road_address VARCHAR(255)  COMMENT '도로명 주소',
+    jibun_address VARCHAR(255)  COMMENT '지번 주소',
     addr_detail VARCHAR(255) COMMENT '상세 주소',
     latitude DOUBLE COMMENT '위도',
     longitude DOUBLE COMMENT '경도',
@@ -90,14 +92,18 @@ CREATE TABLE user_tag (
 
 
 
--- 💾 이미지 테이블
-CREATE TABLE image (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '이미지 식별자',
-    src VARCHAR(255) NOT NULL COMMENT '저장 경로',
-    type ENUM('USER', 'ITEM', 'MEETING') COMMENT '이미지 종류',
-    target_id BIGINT COMMENT '대상 ID',
-    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '업로드 일시'
-) COMMENT='이미지 테이블';
+CREATE TABLE file_resource (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    file_url VARCHAR(255) NOT NULL,     -- 실제 저장 경로
+    file_name VARCHAR(255) NOT NULL,    -- 서버에 저장된 이름
+    original_name VARCHAR(255),         -- 원본파일 이름
+    file_type VARCHAR(30),              -- MIME 타입 (image/png)
+    size BIGINT,                        -- 파일 크기
+    used_type VARCHAR(30) NOT NULL,     -- PROFILE / BOARD / CHAT / ETC
+    used_id BIGINT NOT NULL,            -- user_id 또는 post_id 등
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 
 
 
@@ -175,19 +181,32 @@ CREATE TABLE review (
 
 
 
+-- 🤝 모임 장소
+CREATE TABLE meeting_location(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '모임 장소 ID', 
+    road_address VARCHAR(255)  COMMENT '도로명 주소',
+    jibun_address VARCHAR(255)  COMMENT '지번 주소',
+    addr_detail VARCHAR(255) COMMENT '상세 주소',
+    latitude DOUBLE COMMENT '위도',
+    longitude DOUBLE COMMENT '경도'
+);
+
 -- 🤝 모임 게시판
 CREATE TABLE meeting (
     id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '모임 ID',
     title VARCHAR(255) NOT NULL COMMENT '모임 제목',
     content TEXT COMMENT '설명',
     date DATETIME COMMENT '모임 날짜',
-    location VARCHAR(255) COMMENT '장소',
+    location_id BIGINT COMMENT '장소 ID',
     max_members INT COMMENT '최대 인원',
     current_members INT COMMENT '현재 인원',
     cost INT DEFAULT 0 COMMENT '참가비',
     tag VARCHAR(100) COMMENT '모임 태그',
     status ENUM('OPEN','CLOSED','COMPLETED') DEFAULT 'OPEN' COMMENT '상태',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    weather VARCHAR(20) COMMENT '날씨정보',
+    FOREIGN KEY (location_id) REFERENCES meeting_location(id)
 ) COMMENT='모임 게시판';
 
 
@@ -265,86 +284,73 @@ ON DELETE SET NULL;
 
 -- 간이 데이터
 -- 📍 지역정보
-INSERT INTO address (sido_code, sigungu_code, dong_code, sido_name, sigungu_name, dong_name)
-VALUES
-(11, 101, 1, '서울특별시', '은평구', '역촌동'),
-(11, 102, 2, '서울특별시', '강남구', '삼성동');
--- 🧍 USER
+-- 📍 지역정보 샘플
+
+-- 🧍 USER 샘플 이미 존재
 INSERT INTO user (user_id, user_password, user_name, nickname, role)
 VALUES
 ('admin01', '1234', '관리자', '관리자닉', 'ADMIN'),
 ('test01', '1234', '테스트', '닉테스트', 'USER');
-
-
--- 🤝 모임 게시판
-INSERT INTO meeting (title, content, date, location, max_members, current_members, cost, tag, status)
+INSERT INTO user_address (user_id, road_address, jibun_address, addr_detail, latitude, longitude)
 VALUES
-('조깅 모임', '매주 토요일 조깅', '2025-11-22 09:00:00', '한강공원', 10, 2, 0, '운동', 'OPEN');
+(1, '서울특별시 은평구 역촌동', '서울특별시 은평구 역촌동 123', '101호', 37.602, 126.927),
+(2, '서울특별시 강남구 삼성동', '서울특별시 강남구 삼성동 456', '201호', 37.514, 127.063);
+
+-- 🤝 모임 장소 샘플
+INSERT INTO meeting_location (road_address, jibun_address, addr_detail, latitude, longitude)
+VALUES
+('서울특별시 한강공원', '서울특별시 용산구 한강로', '1구역', 37.526, 126.927);
+
+-- 🤝 모임 게시판 샘플
+INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, weather)
+VALUES
+('조깅 모임', '매주 토요일 조깅', '2025-11-22 09:00:00', 1, 10, 2, 0, '운동', 'OPEN', '맑음');
+
 -- 👥 모임참여자 관리
 INSERT INTO meeting_participant (meeting_id, user_id, paid)
 VALUES
 (1, 1, TRUE),
 (1, 2, FALSE);
+
 -- 📢 공지게시판
 INSERT INTO notice (title, content)
 VALUES
 ('서버 점검 안내', '2025-11-20 00:00 ~ 02:00 서버 점검 예정');
 
-
----
-
--- 💬 채팅방 (chat_room)
-
----
-
+-- 💬 채팅방
 INSERT INTO chat_room (item_id, meeting_id, room_type, host_id)
 VALUES
--- 거래용 채팅방: item_id=1, host=2 (판매자)
-(1, NULL, 'PRIVATE', 2),
--- 거래용 채팅방: item_id=2, host=2 (판매자)
-(2, NULL, 'PRIVATE', 2),
--- 모임용 채팅방: meeting_id=1, host=1
-(NULL, 1, 'GROUP', 1);
+(1, NULL, 'PRIVATE', 2),  -- 거래방 1
+(2, NULL, 'PRIVATE', 2),  -- 거래방 2
+(NULL, 1, 'GROUP', 1);     -- 모임방
 
----
-
--- 💭 채팅방 참여자 (chat_room_user)
-
----
-
+-- 💭 채팅방 참여자
 INSERT INTO chat_room_user (room_id, user_id)
 VALUES
--- 거래방 1 참여자: 구매자 1, 판매자 2
-(1, 1),
-(1, 2),
--- 거래방 2 참여자: 구매자 1, 판매자 2
-(2, 1),
-(2, 2),
--- 모임방 참여자: 유저 1, 2
-(3, 1),
-(3, 2);
+(1, 1),(1, 2),
+(2, 1),(2, 2),
+(3, 1),(3, 2);
 
----
-
--- 💭 채팅 메시지 (chat_message)
-
----
-
+-- 💭 채팅 메시지
 INSERT INTO chat_message (room_id, sender_id, content)
 VALUES
--- 거래방 1
 (1, 1, '안녕하세요, 자전거 구매하고 싶습니다.'),
 (1, 2, '안녕하세요! 가격 흥정 가능해요.'),
 (1, 1, '좋습니다. 그럼 언제 만날까요?'),
--- 거래방 2
 (2, 1, '책 대여 가능할까요?'),
 (2, 2, '네, 일주일 대여 가능합니다.'),
 (2, 1, '좋아요, 내일 수령할게요.'),
--- 모임방
 (3, 1, '이번 주 토요일 모임 몇 시에 시작하나요?'),
 (3, 2, '오전 9시에 한강공원에서 시작합니다.'),
 (3, 1, '좋아요, 그때 봬요!');
 
+-- 💾 file_resource 예시 데이터
+
+
+
+
 select * from user;
+select * from user_address;
+select * from file_resource;
 
 
