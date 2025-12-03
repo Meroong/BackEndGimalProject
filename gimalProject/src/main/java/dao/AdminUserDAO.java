@@ -13,6 +13,7 @@ public class AdminUserDAO {
      */
     public int updateRole(long autoId, String newRole) {
 
+        // TODO: 실제 테이블/컬럼명에 맞게 수정 필요
         String sql = "UPDATE user SET role = ? WHERE auto_id = ?";
 
         try (Connection con = JDBCUtil.jdbcCon();
@@ -42,11 +43,11 @@ public class AdminUserDAO {
     public int deleteUser(long autoId) {
 
         // 1. 신고 삭제 (reporter, target 둘 다)
+        //    실제 테이블/컬럼명에 맞게 수정해서 사용하세요.
         String deleteReportsSql =
                 "DELETE FROM report WHERE reporter_id = ? OR target_user_id = ?";
 
         // 2. 리뷰 삭제 (작성자/대상 둘 다)
-        //   ※ 실제 테이블 컬럼명이 다르면 여기만 맞게 바꿔 주세요.
         String deleteReviewsSql =
                 "DELETE FROM review WHERE reviewer_id = ? OR reviewee_id = ?";
 
@@ -124,22 +125,6 @@ public class AdminUserDAO {
         }
 
         return 0;
-    }
- // 회원 삭제(탈퇴) - PK(autoId) 기준
-    public int deleteUser(long autoId) {
-        // ★ 여기 테이블명 / 컬럼명은 실제 DB에 맞게 바꿔야 합니다.
-        //    예시로 users / autoId 를 사용했습니다.
-        String sql = "DELETE FROM users WHERE autoId = ?";
-
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, autoId);
-            int result = pstmt.executeUpdate();
-            System.out.println("[AdminUserDAO] deleteUser autoId=" + autoId + ", result=" + result);
-            return result;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
-        }
     }
 
 }

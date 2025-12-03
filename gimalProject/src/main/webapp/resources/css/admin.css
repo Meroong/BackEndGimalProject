@@ -499,3 +499,142 @@ button.admin-btn:focus {
 
 /* PENDING 되돌리기 버튼은 이미 있는 .btn-warning 사용 가능 */
 /* 목록으로 버튼은 .btn-ghost 그대로 사용 */
+/**************
+ * 공지 작성/수정 페이지
+ **************/
+
+.admin-page {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.admin-page-header {
+    margin-bottom: 24px;
+}
+
+.admin-page-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.admin-page-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.notice-form-wrapper {
+    display: flex;
+    justify-content: center;
+}
+
+.notice-card {
+    width: 100%;
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px 24px 28px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e5e7eb;
+}
+
+/* 필드 레이아웃 */
+.notice-field {
+    margin-bottom: 20px;
+}
+
+.notice-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #374151;
+}
+
+/* 인풋 / 텍스트 영역 */
+.notice-input,
+.notice-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    background-color: #f9fafb;
+}
+
+.notice-input:focus,
+.notice-textarea:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    background-color: #ffffff;
+}
+
+/* 버튼 영역 */
+.notice-actions {
+    margin-top: 24px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* 버튼 공통 */
+.btn {
+    min-width: 96px;
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.15s ease,
+                color 0.15s ease,
+                box-shadow 0.15s ease,
+                transform 0.05s ease;
+}
+
+/* 파란 버튼 */
+.btn-primary {
+    background-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(59, 130, 246, 0.35);
+}
+
+.btn-primary:hover {
+    background-color: #2563eb;
+    box-shadow: 0 8px 22px rgba(37, 99, 235, 0.45);
+    transform: translateY(-1px);
+}
+
+/* 회색 아웃라인 버튼 */
+.btn-outline {
+    background-color: #ffffff;
+    color: #4b5563;
+    border-color: #d1d5db;
+}
+
+.btn-outline:hover {
+    background-color: #f3f4f6;
+}
+
+/* 모바일 대응 */
+@media (max-width: 640px) {
+    .admin-page {
+        margin-top: 24px;
+    }
+
+    .notice-card {
+        padding: 18px 16px 22px;
+    }
+
+    .notice-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
