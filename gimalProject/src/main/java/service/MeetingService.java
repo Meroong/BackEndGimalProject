@@ -40,11 +40,28 @@ public class MeetingService {
 		if(meetingDto == null) {
 			throw new IllegalArgumentException("MeetingDTO가 존재하지않습니다.");
 		}
+		    
+		infoDto.setMeetingId(meetingDto.getMeetingId());   // id
+		infoDto.setTitle(meetingDto.getTitle());           // 제목
+		infoDto.setContent(meetingDto.getContent());       // 설명
+		infoDto.setDate(meetingDto.getDate());             // 모임 날짜
+		infoDto.setLocationId(meetingDto.getLocationId()); // 장소 ID (FK)
+		infoDto.setMaxMembers(meetingDto.getMaxMembers()); // 최대 인원
+		infoDto.setCurrentMembers(meetingDto.getCurrentMembers()); // 현재 인원
+		infoDto.setCost(meetingDto.getCost());             // 참가비
+		infoDto.setTag(meetingDto.getTag());               // 태그 문자열
+		infoDto.setStatus(meetingDto.getStatus());         // OPEN / CLOSED / COMPLETED
+		infoDto.setCreatedAt(meetingDto.getCreatedAt());   // 생성일
+		infoDto.setUpdatedAt(meetingDto.getUpdatedAt());   // 수정일
+		infoDto.setWeather(meetingDto.getWeather());       // 날씨
 		
-		infoDto.setMeetingId(meetingDto.getMeetingId());
-		infoDto.setTitle(meetingDto.getTitle());
-		infoDto.setContent(meetingDto.getContent());
-		infoDto.set
+		infoDto.setLocationId(locationDto.getId());            // 모임 장소 ID
+		infoDto.setRoadAddress(locationDto.getRoadAddress());  // 도로명 주소
+		infoDto.setJibunAddress(locationDto.getJibunAddress()); // 지번 주소
+		infoDto.setAddrDetail(locationDto.getAddrDetail());    // 상세 주소
+		infoDto.setLatitude(locationDto.getLatitude());        // 위도
+		infoDto.setLongitude(locationDto.getLongitude());      // 경도
+
 		
 		return infoDto;
 		
@@ -59,92 +76,139 @@ public class MeetingService {
 	}
 	
 	 //모임 장소 업데이트
-	public boolean updateLocation(MeetingLocationDTO dto) {
-		System.out.println("Service: updateLocation");
-	    if (dto == null) {
-	        throw new IllegalArgumentException("DTO가 존재하지 않습니다.");
-	    }
+	public boolean updateLocation(
+	        long locationId,
+	        String roadAddress,
+	        String jibunAddress,
+	        String addrDetail,
+	        double latitude,
+	        double longitude
+	) throws Exception { // 예외 던지도록
+	    if(locationId <= 0) throw new IllegalArgumentException("주소정보가 없습니다.");
 
-	    // locationId 체크
-	    if (dto.getId() == null) {
-	        throw new IllegalArgumentException("locationId 값이 없습니다.");
-	    }
+	    MeetingLocationDTO dto = new MeetingLocationDTO();
+	    dto.setId(locationId);
+	    dto.setRoadAddress(roadAddress);
+	    dto.setJibunAddress(jibunAddress);
+	    dto.setAddrDetail(addrDetail);
+	    dto.setLatitude(latitude);
+	    dto.setLongitude(longitude);
 
-	    // DAO 호출 (위치 정보 업데이트)
-	    return new MeetingLocationDAO().updateLocation(dto);
+	    boolean result = new MeetingLocationDAO().updateLocation(dto);
+	    if(!result) throw new Exception("모임 장소 업데이트 실패");
+	    return result;
 	}
+
 	//모임 장소 디비저장
-	public long insertLocation(MeetingLocationDTO dto) throws Exception {
-		System.out.println("Service: insertLocation");
+	public long insertLocation(
+	        String roadAddress,
+	        String jibunAddress,
+	        String addrDetail,
+	        double latitude,
+	        double longitude
+	) throws Exception {
+	    System.out.println("Service: insertLocation");
 
-		//위치 정보 저장 table=meeting_location
-		Long rs = new MeetingLocationDAO().insertLocation(dto);
-		
-		if(rs != null) {
-			return rs;
-		}
-			throw new Exception("모임장소 아이디값 없음");
+	    MeetingLocationDTO dto = new MeetingLocationDTO();
+	    dto.setRoadAddress(roadAddress);
+	    dto.setJibunAddress(jibunAddress);
+	    dto.setAddrDetail(addrDetail);
+	    dto.setLatitude(latitude);
+	    dto.setLongitude(longitude);
+
+	    Long rs = new MeetingLocationDAO().insertLocation(dto);
+	    if (rs != null) return rs;
+
+	    throw new Exception("모임장소 아이디값 없음");
 	}
+
 	//모임생성
-	public boolean insertMeetingInfo(MeetingDTO dto, double latitude, double longitude) {
-		if (dto.getDate() == null) {
-		    throw new IllegalArgumentException("모임 날짜가 존재하지 않습니다.");
-		}
-		
-		LocalDate meetingDate = dto.getDate().toLocalDateTime().toLocalDate();
+	public boolean insertMeetingInfo(
+	        String title,
+	        String content,
+	        Timestamp date,
+	        long locationId,
+	        int maxMembers,
+	        int currentMembers,
+	        int cost,
+	        String tag,
+	        String status,
+	        double latitude,
+	        double longitude
+	) throws Exception { // Exception 던지도록
+	    if (date == null) throw new IllegalArgumentException("모임 날짜가 존재하지 않습니다.");
+
+	    LocalDate meetingDate = date.toLocalDateTime().toLocalDate();
 	    LocalDate today = LocalDate.now();
+	    int dayIndex = (int) ChronoUnit.DAYS.between(today, meetingDate);
+	    if (dayIndex < 0 || dayIndex > 7) throw new RuntimeException("날씨 조회는 7일 이내 날짜만 가능합니다");
 
-	    long diff = ChronoUnit.DAYS.between(today, meetingDate);
+	    MeetingDTO dto = new MeetingDTO();
+	    dto.setTitle(title);
+	    dto.setContent(content);
+	    dto.setDate(date);
+	    dto.setLocationId(locationId);
+	    dto.setMaxMembers(maxMembers);
+	    dto.setCurrentMembers(currentMembers);
+	    dto.setCost(cost);
+	    dto.setTag(tag);
+	    dto.setStatus(status);
 
-	    int dayIndex = (int) diff;
-
-	    // 유효성 검사 (0~7일 안에 있어야)
-	    if (dayIndex < 0 || dayIndex > 7) {
-	        throw new RuntimeException("날씨 조회는 7일 이내 날짜만 가능합니다");
-	    }
-	    
 	    String jsonStr = callAnAPI(latitude, longitude);
-	    System.out.println("jsonStr:"+jsonStr);
-	    if (jsonStr == null) {
-	        dto.setWeather("정보없음");
-	        return new MeetingDAO().insert(dto);
-	    }
-	    String weather = extractWeather(jsonStr, dayIndex);
-	    System.out.println(weather);
-	    dto.setWeather(weather);
-		return new MeetingDAO().insert(dto);
+	    if (jsonStr == null) dto.setWeather("정보없음");
+	    else dto.setWeather(extractWeather(jsonStr, dayIndex));
+
+	    boolean result = new MeetingDAO().insert(dto);
+	    if(!result) throw new Exception("모임 정보 삽입 실패");
+	    return result;
 	}
+
+
 	
 	//모임 업데이트
-	public boolean updateMeetingInfo(MeetingDTO dto, double latitude, double longitude) {
-		System.out.println("Service: updateMeetingInfo");
-		if (dto.getDate() == null) {
-		    throw new IllegalArgumentException("모임 날짜가 존재하지 않습니다.");
-		}
-		
-		LocalDate meetingDate = dto.getDate().toLocalDateTime().toLocalDate();
+	public boolean updateMeetingInfo(
+	        long meetingId,
+	        String title,
+	        String content,
+	        Timestamp date,
+	        long locationId,
+	        int maxMembers,
+	        int currentMembers,
+	        int cost,
+	        String tag,
+	        String status,
+	        double latitude,
+	        double longitude
+	) throws Exception {
+	    if (date == null) throw new IllegalArgumentException("모임 날짜가 존재하지 않습니다.");
+
+	    LocalDate meetingDate = date.toLocalDateTime().toLocalDate();
 	    LocalDate today = LocalDate.now();
+	    int dayIndex = (int) ChronoUnit.DAYS.between(today, meetingDate);
+	    if (dayIndex < 0 || dayIndex > 7) throw new RuntimeException("날씨 조회는 7일 이내 날짜만 가능합니다");
 
-	    long diff = ChronoUnit.DAYS.between(today, meetingDate);
+	    MeetingDTO dto = new MeetingDTO();
+	    dto.setMeetingId(meetingId);
+	    dto.setTitle(title);
+	    dto.setContent(content);
+	    dto.setDate(date);
+	    dto.setLocationId(locationId);
+	    dto.setMaxMembers(maxMembers);
+	    dto.setCurrentMembers(currentMembers);
+	    dto.setCost(cost);
+	    dto.setTag(tag);
+	    dto.setStatus(status);
 
-	    int dayIndex = (int) diff;
-
-	    // 유효성 검사 (0~7일 안에 있어야)
-	    if (dayIndex < 0 || dayIndex > 7) {
-	        throw new RuntimeException("날씨 조회는 7일 이내 날짜만 가능합니다");
-	    }
-	    
 	    String jsonStr = callAnAPI(latitude, longitude);
-	    System.out.println("jsonStr:"+jsonStr);
-	    if (jsonStr == null) {
-	        dto.setWeather("정보없음");
-	        return new MeetingDAO().updateMeet(dto);
-	    }
-	    String weather = extractWeather(jsonStr, dayIndex);
-	    dto.setWeather(weather);
-		
-		return new MeetingDAO().updateMeet(dto);
+	    if (jsonStr == null) dto.setWeather("정보없음");
+	    else dto.setWeather(extractWeather(jsonStr, dayIndex));
+
+	    boolean result = new MeetingDAO().updateMeet(dto);
+	    if(!result) throw new Exception("모임 정보 업데이트 실패");
+	    return result;
 	}
+
+
 	
 	//오픈웨더 API 호출용 서비스
 	public String callAnAPI(double lat, double lon) {

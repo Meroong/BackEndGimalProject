@@ -165,10 +165,6 @@
     </section>
 
 </div>
-<button class="log-btn"
-        onclick="location.href='<%=request.getContextPath()%>/admin/stats'">
-    통계 보기
-</button>
 
 </body>
 </html>
