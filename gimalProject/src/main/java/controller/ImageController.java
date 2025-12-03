@@ -2,7 +2,9 @@ package controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
+import dto.FileResourceDTO;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -80,27 +82,38 @@ public class ImageController extends HttpServlet {
 					  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				  } 
 				  break;
-			  case "meetUpload":
-					System.out.println("upload/meetUpload: ");
-					long meetingId = req.getParameter(meeting_id);
-			    	// 업로드된 파일 가져오기
-			        Part meetImgPart = req.getPart("img");
-			        
-					//저장 경로 설정 웹 경로를 실제 저장 경로로 변경
-					uploadPath = req.getServletContext().getRealPath("uploads/meeting");
+			  case "/meetUpload":
+				    System.out.println("upload/meetUpload: ");
 
-					result =imageService.uploadProfile(autoId, meetImgPart, uploadPath);
-					
-					if(result) {
-						//프로필 url 세션저장
-						String profileUrl = new ImageService().getProfileImage(meetingID, "MEETING");
-						req.getSession().setAttribute("profileUrl", profileUrl);
-						System.out.println(profileUrl);
-						
-						resp.sendRedirect(req.getContextPath() + "/views/user/mypage.jsp");
-					}
-					else resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-					break;
+				    // request에서 meeting_id 파라미터 가져오기
+				    String meetingIdStr = req.getParameter("meeting_id"); 
+				    if(meetingIdStr == null || meetingIdStr.isEmpty()) {
+				        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "meeting_id가 없습니다.");
+				        return;
+				    }
+				    long meetingId = Long.parseLong(meetingIdStr);
+
+				    // 업로드된 파일 가져오기
+				    Part meetImgPart = req.getPart("img");
+
+				    // 저장 경로 설정 웹 경로를 실제 저장 경로로 변경
+				    uploadPath = req.getServletContext().getRealPath("uploads/meeting");
+
+				    // 모임 이미지 업로드
+				    FileResourceDTO uploadedFile = imageService.uploadMeetImg(meetingId, meetImgPart, uploadPath);
+
+				    if(uploadedFile != null) {
+				        // 업로드 성공 시 세션에 URL 저장
+				        List<String> meetingImages = imageService.getMeetingImage(meetingId, "MEETING");
+				        req.getSession().setAttribute("meetingImages", meetingImages);
+				        System.out.println("업로드된 이미지 URL: " + meetingImages);
+
+				        resp.sendRedirect(req.getContextPath() + "/views/meeting/meetingDetail.jsp?meeting_id=" + meetingId);
+				    } else {
+				        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				    }
+				    break;
+
 				  
 			 
 		}
