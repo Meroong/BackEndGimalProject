@@ -1,93 +1,112 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도란도란 관리자 페이지</title>
-
-    <!-- 메인 화면이 쓰는 home.css 그대로 사용 -->
+    <title>관리자 메인</title>
     <link rel="stylesheet" href="<%=request.getContextPath()%>/resources/css/admin.css">
 </head>
-<body>
-<div class="container">
+<body class="admin-body">
 
-    <%-- 메인과 동일한 헤더 --%>
+<div class="admin-container">
+
+    <!-- 상단 헤더 -->
     <header>
-        <div class="logo">
-            <img src="<%=request.getContextPath()%>/resources/images/logo.png" alt="logo">
-            도란도란
-        </div>
+        <h1>관리자 메인</h1>
 
         <div class="header-buttons">
-            <%
-                Object loginUser = session.getAttribute("Authorization");
-                if (loginUser != null) {
-            %>
-                <!-- 로그인 상태: 메시지 + 로그아웃 -->
-                <button class="msg-btn"
-                        onclick="location.href='<%=request.getContextPath()%>/views/chat/chat.jsp'">메시지</button>
-
-                <form action="<%= request.getContextPath() %>/user/logout"
-                      method="get" style="display:inline;">
-                    <button type="submit" class="log-btn">Log out</button>
-                </form>
-            <%
-                } else {
-            %>
-                <!-- 비로그인 상태: 로그인 버튼 -->
-                <button class="log-btn"
-                        onclick="location.href='<%=request.getContextPath()%>/views/user/login.jsp'">Log in</button>
-            <%
-                }
-            %>
+            <button class="log-btn"
+                    onclick="location.href='${pageContext.request.contextPath}/'">
+                홈으로
+            </button>
         </div>
     </header>
 
-    <%-- 관리자 메인 컨텐츠 --%>
-    <section class="main-box">
-        <div class="box-title">관리자 메인</div>
+    <!-- 안내 텍스트 + 카드들 -->
+    <div class="main-box">
+        <div class="box-title">관리 기능 한눈에 보기</div>
+        <p>도란도란을 안전하고 편하게 운영하기 위한 관리자 전용 메뉴입니다.</p>
 
-        <p style="margin-bottom: 16px; color:#555;">
-            도란도란 서비스 운영을 위한 관리자 전용 메뉴입니다.
-        </p>
+        <div class="admin-card-grid">
 
-        <div class="grid-3">
-
-            <div class="meeting-card" style="cursor:pointer;"
-                 onclick="location.href='<%=request.getContextPath()%>/admin/users'">
-                <div class="meeting-info">
-                    <h3>회원 관리</h3>
-                    <p>회원 목록 조회, 권한 확인</p>
+            <!-- 공지 관리 카드 -->
+            <a href="${pageContext.request.contextPath}/admin/notice/list" class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <div class="admin-card-title">공지 관리</div>
+                        <div class="admin-card-sub">
+                            서비스 공지와 안내 문구를 등록·수정·삭제할 수 있어요.
+                        </div>
+                    </div>
+                    <div class="admin-card-icon">🔔</div>
                 </div>
-            </div>
 
-            <div class="meeting-card"  style="cursor:pointer;"
-                 onclick="location.href='<%=request.getContextPath()%>/admin/reports'">
-                <div class="meeting-info">
-                    <h3>신고 관리</h3>
-                    <p>신고 내역 확인 및 처리</p>
+                <ul class="admin-card-meta-list">
+                    <li>새 기능 오픈이나 점검 안내 등록</li>
+                    <li>기간이 지난 공지는 정리해서 깔끔하게 관리</li>
+                </ul>
+            </a>
+
+            <!-- 회원 관리 카드 -->
+            <a href="${pageContext.request.contextPath}/admin/user/list" class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <div class="admin-card-title">회원 관리</div>
+                        <div class="admin-card-sub">
+                            가입된 회원 정보를 확인하고, 정지·탈퇴 처리를 할 수 있어요.
+                        </div>
+                    </div>
+                    <div class="admin-card-icon">👤</div>
                 </div>
-            </div>
 
-            <div class="meeting-card" style="cursor:pointer;"
-                 onclick="location.href='<%=request.getContextPath()%>/admin/stats'">
-                <div class="meeting-info">
-                    <h3>게시글·모임 통계</h3>
-                    <p>서비스 이용 현황 조회</p>
+                <ul class="admin-card-meta-list">
+                    <li>문제가 되는 회원은 BLOCKED 상태로 전환</li>
+                    <li>회원 상세 정보와 활동 이력 확인</li>
+                </ul>
+            </a>
+
+            <!-- 신고 관리 카드 -->
+            <a href="${pageContext.request.contextPath}/admin/report/list" class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <div class="admin-card-title">신고 관리</div>
+                        <div class="admin-card-sub">
+                            이용자들이 보낸 신고를 확인하고 처리 상태를 변경할 수 있어요.
+                        </div>
+                    </div>
+                    <div class="admin-card-icon">⚠️</div>
                 </div>
-            </div>
 
-            <div class="meeting-card" style="cursor:pointer;"
-                 onclick="location.href='<%=request.getContextPath()%>/admin/notices'">
-                <div class="meeting-info">
-                    <h3>공지사항 관리</h3>
-                    <p>공지 등록 / 수정 / 삭제</p>
+                <ul class="admin-card-meta-list">
+                    <li>PENDING 상태 신고 검토 후 RESOLVED로 처리</li>
+                    <li>신고자·피신고자 정보를 보고 추가 조치 여부 결정</li>
+                </ul>
+            </a>
+
+            <!-- 서비스 통계 카드 -->
+            <a href="${pageContext.request.contextPath}/admin/stats" class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <div class="admin-card-title">서비스 통계</div>
+                        <div class="admin-card-sub">
+                            전체 회원 수와 신고 건수를 기준으로 서비스 현황을 확인할 수 있어요.
+                        </div>
+                    </div>
+                    <div class="admin-card-icon">📊</div>
                 </div>
-            </div>
 
-        </div>
-    </section>
+                <ul class="admin-card-meta-list">
+                    <li>가입자 규모와 신고 추이를 한눈에 파악</li>
+                    <li>운영 방향을 정할 때 참고용 지표로 활용</li>
+                </ul>
+            </a>
 
-</div>
+        </div><!-- /.admin-card-grid -->
+    </div><!-- /.main-box -->
+
+</div><!-- /.admin-container -->
+
 </body>
 </html>
