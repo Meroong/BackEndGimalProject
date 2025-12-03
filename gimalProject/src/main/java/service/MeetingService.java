@@ -40,11 +40,28 @@ public class MeetingService {
 		if(meetingDto == null) {
 			throw new IllegalArgumentException("MeetingDTO가 존재하지않습니다.");
 		}
+		    
+		infoDto.setMeetingId(meetingDto.getMeetingId());   // id
+		infoDto.setTitle(meetingDto.getTitle());           // 제목
+		infoDto.setContent(meetingDto.getContent());       // 설명
+		infoDto.setDate(meetingDto.getDate());             // 모임 날짜
+		infoDto.setLocationId(meetingDto.getLocationId()); // 장소 ID (FK)
+		infoDto.setMaxMembers(meetingDto.getMaxMembers()); // 최대 인원
+		infoDto.setCurrentMembers(meetingDto.getCurrentMembers()); // 현재 인원
+		infoDto.setCost(meetingDto.getCost());             // 참가비
+		infoDto.setTag(meetingDto.getTag());               // 태그 문자열
+		infoDto.setStatus(meetingDto.getStatus());         // OPEN / CLOSED / COMPLETED
+		infoDto.setCreatedAt(meetingDto.getCreatedAt());   // 생성일
+		infoDto.setUpdatedAt(meetingDto.getUpdatedAt());   // 수정일
+		infoDto.setWeather(meetingDto.getWeather());       // 날씨
 		
-		infoDto.setMeetingId(meetingDto.getMeetingId());
-		infoDto.setTitle(meetingDto.getTitle());
-		infoDto.setContent(meetingDto.getContent());
-		infoDto.set
+		infoDto.setLocationId(locationDto.getId());            // 모임 장소 ID
+		infoDto.setRoadAddress(locationDto.getRoadAddress());  // 도로명 주소
+		infoDto.setJibunAddress(locationDto.getJibunAddress()); // 지번 주소
+		infoDto.setAddrDetail(locationDto.getAddrDetail());    // 상세 주소
+		infoDto.setLatitude(locationDto.getLatitude());        // 위도
+		infoDto.setLongitude(locationDto.getLongitude());      // 경도
+
 		
 		return infoDto;
 		
