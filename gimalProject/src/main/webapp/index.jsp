@@ -3,7 +3,6 @@
 <%@ page import="util.AuthUtil"%>
 <%@ page import="dto.UserAddressDTO"%>
 
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -14,9 +13,8 @@
 <body>
 <div class="container">
 
- 	    <%-- 헤더 include --%>
+    <%-- 헤더 include --%>
     <jsp:include page="/include/header.jsp" />
-
 
     <%-- 검색 영역 --%>
     <section class="search-section">
@@ -46,54 +44,52 @@
         <div class="box-title">우리 동네 기반 맞춤 추천</div>
 
         <div class="grid-3">
-			<div class="map-card" id="map" style="width:100%; height:400px;"></div>
-			
-			<!-- 비로그인 시 좌표를 넣어줌 -->
-			<%
-			UserAddressDTO addressInfo = (UserAddressDTO) session.getAttribute("addressInfo");
-			
-			double defaultLat = 37.501;
-			double defaultLng = 126.884;
-			
-			double lat = (addressInfo != null && addressInfo.getLatitude() != null)
-			             ? addressInfo.getLatitude()
-			             : defaultLat;
-			
-			double lng = (addressInfo != null && addressInfo.getLongitude() != null)
-			             ? addressInfo.getLongitude()
-			             : defaultLng;
-			%>
-			<script>
-			    const userLat = <%= lat %>;
-			    const userLng = <%= lng %>;
-			</script>
-			<script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
-			<script>
-			    window.onload = function() {
-			        if (!window.kakao) {
-			            alert("카카오 지도 SDK 로드 실패");
-			            return;
-			        }
-			
-			        // 지도 생성 //
-			        var container = document.getElementById('map');
-			        var options = {
-			            center: new kakao.maps.LatLng(userLat, userLng), // 기본 중심 좌표: 구로동 근처
-			            level: 3
-			        };
-			        var map = new kakao.maps.Map(container, options);
-			
-			        // 예시: 마커 추가
-			        var markerPosition  = new kakao.maps.LatLng(userLat, userLng); 
-			        var marker = new kakao.maps.Marker({
-			            position: markerPosition
-			        });
-			        marker.setMap(map);
-			
-			        console.log("카카오 지도 로드 완료");
-			        
-			    }
-			</script>
+
+            <%-- 지도 카드 --%>
+            <div class="map-card" id="map" style="width:100%; height:400px;"></div>
+
+            <% 
+            UserAddressDTO addressInfo = (UserAddressDTO) session.getAttribute("addressInfo");
+
+            double defaultLat = 37.501;
+            double defaultLng = 126.884;
+
+            double lat = (addressInfo != null && addressInfo.getLatitude() != null)
+                         ? addressInfo.getLatitude()
+                         : defaultLat;
+
+            double lng = (addressInfo != null && addressInfo.getLongitude() != null)
+                         ? addressInfo.getLongitude()
+                         : defaultLng;
+            %>
+
+            <script>
+                const userLat = <%= lat %>;
+                const userLng = <%= lng %>;
+            </script>
+            <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
+            <script>
+                window.onload = function() {
+                    if (!window.kakao) {
+                        alert("카카오 지도 SDK 로드 실패");
+                        return;
+                    }
+
+                    var container = document.getElementById('map');
+                    var options = {
+                        center: new kakao.maps.LatLng(userLat, userLng),
+                        level: 3
+                    };
+
+                    var map = new kakao.maps.Map(container, options);
+
+                    var markerPosition  = new kakao.maps.LatLng(userLat, userLng);
+                    var marker = new kakao.maps.Marker({ position: markerPosition });
+                    marker.setMap(map);
+
+                    console.log("카카오 지도 로드 완료");
+                }
+            </script>
 
             <%-- 가운데: 오늘의 인기 모임 --%>
             <div class="center-card">
@@ -137,7 +133,7 @@
                 </div>
             </div>
 
-            <%-- 날씨 + 활동 카드 --%>
+            <%-- 오른쪽: 날씨 + 활동 카드 --%>
             <div>
                 <div class="weather-card">
                     <div class="weather-title">현재 구로동 날씨</div>
@@ -146,18 +142,23 @@
                 </div>
 
                 <div class="activities">
-                    <div class="activity-card">
+
+                    <%-- 🔗 모임 버튼 → /meet/list 이동 --%>
+                    <a href="<%= request.getContextPath() %>/meeting/list" class="activity-card" style="text-decoration:none; color:inherit;">
                         <img src="resources/images/meeting.jpg" alt="meet">
                         <span>모임</span>
-                    </div>
+                    </a>
+
                     <div class="activity-card">
                         <img src="resources/images/trade.jpg" alt="friend">
                         <span>교환</span>
                     </div>
+
                     <div class="activity-card">
                         <img src="resources/images/giving.jpg" alt="chat">
                         <span>드림</span>
                     </div>
+
                 </div>
             </div>
 

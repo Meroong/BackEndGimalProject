@@ -139,8 +139,9 @@
         <label>내용</label>
         <textarea name="content">디폴트 내용</textarea>
 
+		<% String today = java.time.LocalDate.now().toString(); %>
         <label>모임 날짜</label>
-        <input type="date" name="date" value="<%= java.time.LocalDate.now() %>" required>
+		<input type="date" name="date" value="<%= today %>" required>
 
         <label>최대 인원</label>
         <input type="number" name="maxMembers" value="10">
@@ -179,7 +180,7 @@
             alert("주소가 없습니다. 주소 검색을 먼저 해주세요.");
             return;
         }
-
+		
         geocoder.addressSearch(finalAddress, function(result, status) {
             if (status === kakao.maps.services.Status.OK) {
                 document.getElementById("latitude").value = result[0].y;

@@ -65,7 +65,7 @@ public class MeetingService {
 		
 		return infoDto;
 		
-		//새로 게시용 DTO를 만들자 
+		//게시판에 뿌릴 리스트 가져오는 서비스 
 	}
 	public ArrayList<MeetingDTO> getMeetingList(){
 		//meeting_id, title, date, location, maxMembers, currentMembers, tag, status
@@ -74,6 +74,7 @@ public class MeetingService {
 		//모임정보 가져오기 
 		return new MeetingDAO().getPostList(); 
 	}
+	
 	
 	 //모임 장소 업데이트
 	public boolean updateLocation(
@@ -136,6 +137,7 @@ public class MeetingService {
 	        double latitude,
 	        double longitude
 	) throws Exception { // Exception 던지도록
+		System.out.println("Service: insertMeetingInfo");
 	    if (date == null) throw new IllegalArgumentException("모임 날짜가 존재하지 않습니다.");
 
 	    LocalDate meetingDate = date.toLocalDateTime().toLocalDate();

@@ -69,16 +69,8 @@
 <div class="container">
 
 <%-- 헤더 --%>
-<header>
-    <div class="logo">
-        <img src="<%= request.getContextPath() %>/resources/images/logo.png" alt="logo">
-    </div>
-    <div class="header-buttons">
-        <form action="<%= request.getContextPath() %>/user/logout" method="get">
-            <button type="submit" class="log-btn">Log out</button>
-        </form>
-    </div>
-</header>
+ 	    <%-- 헤더 include --%>
+    <jsp:include page="/include/header.jsp" />
 
 <%-- 로그인 체크 --%>
 <%
@@ -117,12 +109,18 @@
 			    
 			    <!-- 사용자가 누를 버튼 -->
 			    <button type="button" id="uploadBtn">이미지 등록/수정</button>
-			    
-			    <!-- 이미지 삭제 버튼은 그대로 -->
-			    <button type="submit" formaction="<%= request.getContextPath() %>/upload/profileDelete" style="background:#ff4e4e; color:white;">
+			</form>
+			
+			<form id="profileDeleteForm"
+			      action="<%= request.getContextPath() %>/upload/profileDelete"
+			      method="post">
+			
+			    <button type="submit"
+			            style="background:#ff4e4e; color:white;">
 			        프로필 이미지 삭제
 			    </button>
 			</form>
+			
 			
 			<script>
 			    const uploadBtn = document.getElementById('uploadBtn');

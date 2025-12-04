@@ -2,6 +2,7 @@ package controller;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,9 +14,15 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import dto.MeetingDTO;
+import dto.MeetingInfoDTO;
 import dto.MeetingLocationDTO;
 
 @WebServlet("/meeting/*")
+@MultipartConfig(
+	    fileSizeThreshold = 1024 * 1024,    // 1MB
+	    maxFileSize = 5 * 1024 * 1024,      // 5MB
+	    maxRequestSize = 10 * 1024 * 1024   // 10MB
+	)
 public class MeetingController extends HttpServlet {
 	MeetingService meetingService;
 
@@ -30,19 +37,24 @@ public class MeetingController extends HttpServlet {
 		switch(path) {
 			case "/list":
 				ArrayList<MeetingDTO> aList = meetingService.getMeetingList();
-				req.getSession().setAttribute("meetingList", aList);
+				req.setAttribute("meetingList", aList);
 				if(!aList.isEmpty()) {
-					resp.sendRedirect(req.getContextPath()+"/views/");
+					req.getRequestDispatcher("/views/meet/list.jsp").forward(req, resp);
 					return;
 				}
 				else {
-					
+					resp.sendError(HttpServletResponse.SC_NOT_FOUND, "잘못된 요청 경로입니다.");
+					return;
 				}
-				break;
 			//게시글 상세 조회 미팅 아이디를 인자로 받음
 			case "/info":
-				MeetingInfoDTO meetingDto = meetingService.getMeetingInfo((long)req.getParameter("meetingId"));
+				MeetingInfoDTO meetingDto = meetingService.getMeetingInfo(Long.parseLong(req.getParameter("meetingId")));
 				
+				if(meetingDto != null) {
+					req.setAttribute("meetingInfo", meetingDto);
+					req.getRequestDispatcher("/views/meet/info.jsp").forward(req, resp);
+				}
+				return;
 		}
 }
 
@@ -116,6 +128,11 @@ public class MeetingController extends HttpServlet {
 
 	                // meeting insert
 	                String dateStrInsert = req.getParameter("date");
+
+	                if (dateStrInsert == null || dateStrInsert.isEmpty()) {
+	                    throw new Exception("날짜 값이 전달되지 않았습니다.");
+	                }
+	                
 	                dateStrInsert = dateStrInsert.length() == 10 ? dateStrInsert + " 00:00:00" : dateStrInsert;
 
 	                meetingService.insertMeetingInfo(
@@ -133,7 +150,7 @@ public class MeetingController extends HttpServlet {
 	                );
 
 	                // 성공 시
-	                resp.sendRedirect(req.getContextPath() + "/weatherAPI.jsp");
+	                resp.sendRedirect(req.getContextPath() + "/views/meet/list.jsp");
 	                return;
 
 	            default:
