@@ -1,5 +1,11 @@
 package controller;
 
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+
+import dto.MeetingDTO;
+import dto.MeetingInfoDTO;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
@@ -7,15 +13,9 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+import service.ImageService;
 import service.MeetingService;
-
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-
-import dto.MeetingDTO;
-import dto.MeetingInfoDTO;
-import dto.MeetingLocationDTO;
 
 @WebServlet("/meeting/*")
 @MultipartConfig(
@@ -69,14 +69,70 @@ public class MeetingController extends HttpServlet {
 	    double longitude = (longitudeStr != null && !longitudeStr.isEmpty()) ? Double.parseDouble(longitudeStr) : 107.1;
 
 	    try {
+	    	System.out.println(path);
 	        switch (path) {
+	        
+	        /* ========================
+             * INSERT
+             * ======================== */
+            case "/insert":
+                // location insert
+                long newLocationId = meetingService.insertLocation(
+                        req.getParameter("roadAddress"),
+                        req.getParameter("jibunAddress"),
+                        req.getParameter("addrDetail"),
+                        latitude,
+                        longitude
+                );
+
+                // meeting insert
+                String dateStrInsert = req.getParameter("date");
+
+                if (dateStrInsert == null || dateStrInsert.isEmpty()) {
+                    throw new Exception("날짜 값이 전달되지 않았습니다.");
+                }
+
+                dateStrInsert = dateStrInsert.length() == 10 ? dateStrInsert + " 00:00:00" : dateStrInsert;
+
+                long meetingId = meetingService.insertMeetingInfo(
+                        req.getParameter("title"),
+                        req.getParameter("content"),
+                        Timestamp.valueOf(dateStrInsert),
+                        newLocationId,
+                        Integer.parseInt(req.getParameter("maxMembers")),
+                        Integer.parseInt(req.getParameter("currentMembers")),
+                        Integer.parseInt(req.getParameter("cost")),
+                        req.getParameter("tag"),
+                        req.getParameter("status"),
+                        latitude,
+                        longitude
+                );
+
+                /* ================================
+                 *   다중 이미지 업로드 처리
+                 * ================================ */
+                String uploadPath = req.getServletContext().getRealPath("/uploads/meeting");
+
+                for (Part part : req.getParts()) {
+                    if ("images".equals(part.getName()) && part.getSize() > 0) {
+                        new ImageService().uploadFile(
+                                meetingId,
+                                part,
+                                uploadPath,
+                                "MEETING");
+                    }
+                }
+
+                resp.sendRedirect(req.getContextPath() + "/meeting/list");
+                return;
+
 
 	            /* ========================
 	             * UPDATE
 	             * ======================== */
 	            case "/update":
 	                long locationId = Long.parseLong(req.getParameter("locationId"));
-	                long meetingId = Long.parseLong(req.getParameter("meetingId"));
+	                long meetingUpId = Long.parseLong(req.getParameter("meetingId"));
 
 	                // location 업데이트
 	                meetingService.updateLocation(
@@ -94,7 +150,7 @@ public class MeetingController extends HttpServlet {
 	                Timestamp date = Timestamp.valueOf(dateStr);
 
 	                meetingService.updateMeetingInfo(
-	                        meetingId,
+	                        meetingUpId,
 	                        req.getParameter("title"),
 	                        req.getParameter("content"),
 	                        date,
@@ -112,46 +168,6 @@ public class MeetingController extends HttpServlet {
 	                resp.sendRedirect(req.getContextPath() + "/weatherAPI.jsp");
 	                return;
 
-
-	            /* ========================
-	             * INSERT
-	             * ======================== */
-	            case "/insert":
-	                // location insert
-	                long newLocationId = meetingService.insertLocation(
-	                        req.getParameter("roadAddress"),
-	                        req.getParameter("jibunAddress"),
-	                        req.getParameter("addrDetail"),
-	                        latitude,
-	                        longitude
-	                );
-
-	                // meeting insert
-	                String dateStrInsert = req.getParameter("date");
-
-	                if (dateStrInsert == null || dateStrInsert.isEmpty()) {
-	                    throw new Exception("날짜 값이 전달되지 않았습니다.");
-	                }
-	                
-	                dateStrInsert = dateStrInsert.length() == 10 ? dateStrInsert + " 00:00:00" : dateStrInsert;
-
-	                meetingService.insertMeetingInfo(
-	                        req.getParameter("title"),
-	                        req.getParameter("content"),
-	                        Timestamp.valueOf(dateStrInsert),
-	                        newLocationId,
-	                        Integer.parseInt(req.getParameter("maxMembers")),
-	                        Integer.parseInt(req.getParameter("currentMembers")),
-	                        Integer.parseInt(req.getParameter("cost")),
-	                        req.getParameter("tag"),
-	                        req.getParameter("status"),
-	                        latitude,
-	                        longitude
-	                );
-
-	                // 성공 시
-	                resp.sendRedirect(req.getContextPath() + "/views/meet/list.jsp");
-	                return;
 
 	            default:
 	                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "잘못된 요청 경로입니다.");

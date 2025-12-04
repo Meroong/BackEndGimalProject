@@ -30,69 +30,6 @@ public class ImageService {
 		}
 		return urls;
 	}
-	//프로필 업로드
-	public boolean uploadProfile(long autoId, Part imgPart, String uploadPath) {
-		System.out.println("work service: uploadProfile");
-		FileResourceDAO fileDao = new FileResourceDAO();
-		
-		//파일명 가져오기
-		String ogName = imgPart.getSubmittedFileName();
-		
-		//업로드 디렉토리 설정
-		File uploadDir = new File(uploadPath);
-		if (!uploadDir.exists()) uploadDir.mkdirs();
-		
-		//파일정보 추출
-		String fileType = imgPart.getContentType();
-		long size = imgPart.getSize();
-		
-		
-		// 확장자 추출 
-	    String ext = "";
-	    int dotIndex = ogName.lastIndexOf("."); //.의 인덱스를 반환 없는 경우 -1을 반환
-	    if (dotIndex != -1) { 					//확장자가 있는 경우만 실행 -1이 아닌 경우
-	        ext = ogName.substring(dotIndex);
-	    }
-	    
-	  //파일명 중복방지 동시 업로드 시에도 방지하기 위해 UUID사용
-		String savedFileName = UUID.randomUUID().toString() + ext;
-		
-        // 파일 저장
-        try {
-			imgPart.write(uploadPath + File.separator + savedFileName);
-			System.out.println("파일 저장 성공!");
-		} catch (IOException e) {
-			System.out.println("파일 저장 실패!");
-			e.printStackTrace();
-			return false;
-		}
-        // 파일 존재 여부 확인
-        File savedFile = new File(uploadPath + File.separator + savedFileName);
-        if (!savedFile.exists() || !savedFile.isFile()) {
-            System.out.println("파일 저장 확인 실패!");
-            return false;
-        }
-        
-        // DB에 저장할 경로 
-        String dbPath = "/uploads/profile/" + savedFileName;
-        
-        FileResourceDTO dto = new FileResourceDTO();
-        
-        dto.setFileUrl(dbPath);
-        dto.setFileName(savedFileName);
-        dto.setOriginalName(ogName);
-        dto.setFileType(fileType);
-        dto.setSize(size);
-        dto.setUsedType("PROFILE");
-        dto.setUsedId(autoId);
-        
-        // 기존 파일 존재 시 삭제
-        if (fileDao.isExist(autoId, "PROFILE")) {
-            fileDao.deleteFile("PROFILE", autoId);
-        }
-        return fileDao.insertFile(dto);
-
-	}
 	public boolean deleteProfile(String usedType, long autoId, String uploadPath) {
 		System.out.println("work service: deleteProfile");
 		
@@ -110,66 +47,53 @@ public class ImageService {
 		
 		return new FileResourceDAO().deleteFile(usedType, autoId);
 	}
-	public FileResourceDTO uploadMeetImg(long meetId, Part imgPart, String uploadPath) {
-		System.out.println("work service: uploadMeeting");
-		FileResourceDAO fileDao = new FileResourceDAO();
-		
-		//파일명 가져오기
-		String ogName = imgPart.getSubmittedFileName();
-		
-		//업로드 디렉토리 설정
-		File uploadDir = new File(uploadPath);
-		if (!uploadDir.exists()) uploadDir.mkdirs();
-		
-		//파일정보 추출
-		String fileType = imgPart.getContentType();
-		long size = imgPart.getSize();
-		
-		
-		// 확장자 추출 
-	    String ext = "";
-	    int dotIndex = ogName.lastIndexOf("."); //.의 인덱스를 반환 없는 경우 -1을 반환
-	    if (dotIndex != -1) { 					//확장자가 있는 경우만 실행 -1이 아닌 경우
-	        ext = ogName.substring(dotIndex);
-	    }
-	    
-	  //파일명 중복방지 동시 업로드 시에도 방지하기 위해 UUID사용
-		String savedFileName = UUID.randomUUID().toString() + ext;
-		
-        // 파일 저장
-        try {
-			imgPart.write(uploadPath + File.separator + savedFileName);
-			System.out.println("파일 저장 성공!");
-		} catch (IOException e) {
-			System.out.println("파일 저장 실패!");
-			e.printStackTrace();
-			return false;
-		}
-        // 파일 존재 여부 확인
-        File savedFile = new File(uploadPath + File.separator + savedFileName);
-        if (!savedFile.exists() || !savedFile.isFile()) {
-            System.out.println("파일 저장 확인 실패!");
-            return false;
-        }
-        
-        // DB에 저장할 경로 
-        String dbPath = "/uploads/meeting/" + savedFileName;
-        
-        FileResourceDTO dto = new FileResourceDTO();
-        
-        dto.setFileUrl(dbPath);
-        dto.setFileName(savedFileName);
-        dto.setOriginalName(ogName);
-        dto.setFileType(fileType);
-        dto.setSize(size);
-        dto.setUsedType("PROFILE");
-        dto.setUsedId(autoId);
-        
-        // 기존 파일 존재 시 삭제
-        if (fileDao.isExist(autoId, "PROFILE")) {
-            fileDao.deleteFile("PROFILE", autoId);
-        }
+	//이미지 업로드 서비스  usedType으로 구분하도록
+	public boolean uploadFile(long usedId, Part filePart, String uploadPath, String usedType) {
+	    System.out.println("Service: uploadFile " + usedType);
 
-		return new FileResourceDTO();
+	    FileResourceDAO fileDao = new FileResourceDAO();
+
+	    String ogName = filePart.getSubmittedFileName();
+	    String fileType = filePart.getContentType();
+	    long size = filePart.getSize();
+
+	    // 확장자
+	    String ext = "";
+	    int dotIndex = ogName.lastIndexOf(".");
+	    if (dotIndex != -1) ext = ogName.substring(dotIndex);
+
+	    // 저장 파일명
+	    String savedFileName = UUID.randomUUID().toString() + ext;
+
+	    // 폴더 생성
+	    File dir = new File(uploadPath);
+	    if (!dir.exists()) dir.mkdirs();
+
+	    // 저장
+	    try {
+	        filePart.write(uploadPath + File.separator + savedFileName);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+
+	    // DB 저장용 URL
+	    String dbUrl = "/uploads/" + usedType.toLowerCase() + "/" + savedFileName;
+
+	    FileResourceDTO dto = new FileResourceDTO();
+	    dto.setUsedId(usedId);
+	    dto.setUsedType(usedType);
+	    dto.setOriginalName(ogName);
+	    dto.setFileName(savedFileName);
+	    dto.setFileType(fileType);
+	    dto.setSize(size);
+	    dto.setFileUrl(dbUrl);
+
+	    // 기존 파일 삭제 여부
+	    if (usedType.equalsIgnoreCase("PROFILE") && fileDao.isExist(usedId, usedType)) {
+	        fileDao.deleteFile(usedType, usedId);
+	    }
+
+	    return fileDao.insertFile(dto);
 	}
 }

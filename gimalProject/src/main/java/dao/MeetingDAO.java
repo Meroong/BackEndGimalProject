@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
@@ -148,12 +149,14 @@ public class MeetingDAO {
     }
 
     // 게시글 작성
-    public boolean insert(MeetingDTO dto) {
-        String sql = "INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, weather"
-        		+ ") "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+ // 게시글 작성 (생성된 meeting_id 반환)
+    public long insert(MeetingDTO dto) {
+
+        String sql = "INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, weather) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
         try (Connection con = JDBCUtil.jdbcCon();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
+             PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setString(1, dto.getTitle());
             pstmt.setString(2, dto.getContent());
@@ -167,14 +170,26 @@ public class MeetingDAO {
             pstmt.setString(10, dto.getWeather());
 
             int result = pstmt.executeUpdate();
-            return result > 0;
+
+            if (result == 0) {
+                return -1;  // INSERT 실패
+            }
+
+            // 생성된 PK 가져오기
+            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getLong(1); // 생성된 meeting_id
+                }
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("DB연결 오류 혹은 쿼리오류");
+            System.out.println("DB 연결 오류 또는 쿼리 오류");
         }
-        return false;
+
+        return -1;
     }
+
 
     // 제목으로 검색
     public MeetingDTO searchByTitle(String userId, String userPassword) {

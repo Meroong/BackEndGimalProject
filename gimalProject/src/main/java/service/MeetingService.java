@@ -124,7 +124,7 @@ public class MeetingService {
 	}
 
 	//모임생성
-	public boolean insertMeetingInfo(
+	public long insertMeetingInfo(
 	        String title,
 	        String content,
 	        Timestamp date,
@@ -160,9 +160,7 @@ public class MeetingService {
 	    if (jsonStr == null) dto.setWeather("정보없음");
 	    else dto.setWeather(extractWeather(jsonStr, dayIndex));
 
-	    boolean result = new MeetingDAO().insert(dto);
-	    if(!result) throw new Exception("모임 정보 삽입 실패");
-	    return result;
+	    return new MeetingDAO().insert(dto);
 	}
 
 

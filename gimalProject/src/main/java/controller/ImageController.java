@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import com.mysql.cj.x.protobuf.MysqlxCrud.Collection;
+
 import dto.FileResourceDTO;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -39,6 +41,7 @@ public class ImageController extends HttpServlet {
     	String path = req.getPathInfo(); //            /* 위치에 주소만 가져옴
     	boolean result = false;
     	String uploadPath =null;
+    	String usedType = "PROFILE";
 
 		// ---------- 로그인 검증 ---------- /util/authUtil.java 에 넣어둠 JwtAuth는 토큰 생성 검증만 하는게
 		// 좋아서
@@ -50,6 +53,7 @@ public class ImageController extends HttpServlet {
 		}
 		switch (path) {
 			
+		//프로필 업로드용 항상 usedType은 PROFILE로 !
 			case "/profileUpload":
 				System.out.println("upload/profileUpload: ");
 		    	// 업로드된 파일 가져오기
@@ -58,11 +62,11 @@ public class ImageController extends HttpServlet {
 				//저장 경로 설정 웹 경로를 실제 저장 경로로 변경
 				uploadPath = req.getServletContext().getRealPath("uploads/profile");
 
-				result =imageService.uploadProfile(autoId, imgPart, uploadPath);
+				result =imageService.uploadFile(autoId, imgPart, uploadPath, usedType);
 				
 				if(result) {
 					//프로필 url 세션저장
-					String profileUrl = new ImageService().getProfileImage(autoId, "PROFILE");
+					String profileUrl = new ImageService().getProfileImage(autoId, usedType);
 					req.getSession().setAttribute("profileUrl", profileUrl);
 					System.out.println(profileUrl);
 					
@@ -73,7 +77,6 @@ public class ImageController extends HttpServlet {
 			
 			  case "/profileDelete": 
 				  //임시 설정용
-				  String usedType = "PROFILE";
 				  boolean deleteResult = imageService.deleteProfile(usedType, autoId, req.getServletContext().getRealPath("uploads/profile")); 
 				  if(deleteResult) {
 					  resp.sendRedirect(req.getContextPath() + "/views/user/mypage.jsp");
@@ -81,40 +84,7 @@ public class ImageController extends HttpServlet {
 				  else {
 					  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				  } 
-				  break;
-			  case "/meetUpload":
-				    System.out.println("upload/meetUpload: ");
-
-				    // request에서 meeting_id 파라미터 가져오기
-				    String meetingIdStr = req.getParameter("meeting_id"); 
-				    if(meetingIdStr == null || meetingIdStr.isEmpty()) {
-				        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "meeting_id가 없습니다.");
-				        return;
-				    }
-				    long meetingId = Long.parseLong(meetingIdStr);
-
-				    // 업로드된 파일 가져오기
-				    Part meetImgPart = req.getPart("img");
-
-				    // 저장 경로 설정 웹 경로를 실제 저장 경로로 변경
-				    uploadPath = req.getServletContext().getRealPath("uploads/meeting");
-
-				    // 모임 이미지 업로드
-				    FileResourceDTO uploadedFile = imageService.uploadMeetImg(meetingId, meetImgPart, uploadPath);
-
-				    if(uploadedFile != null) {
-				        // 업로드 성공 시 세션에 URL 저장
-				        List<String> meetingImages = imageService.getMeetingImage(meetingId, "MEETING");
-				        req.getSession().setAttribute("meetingImages", meetingImages);
-				        System.out.println("업로드된 이미지 URL: " + meetingImages);
-
-				        resp.sendRedirect(req.getContextPath() + "/views/meeting/meetingDetail.jsp?meeting_id=" + meetingId);
-				    } else {
-				        resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-				    }
-				    break;
-
-				  
+				  break;  
 			 
 		}
 
