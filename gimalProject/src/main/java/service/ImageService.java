@@ -24,7 +24,7 @@ public class ImageService {
 	public List<String> getMeetingImage(long meetingId, String usedType){
 		System.out.println("work service: getImages");
 		List<String> urls = new FileResourceDAO().getFileUrls(meetingId, usedType);
-		if(urls == null || urls.isEmpty()) {
+		if(urls.isEmpty()) {
 			//흑백 사진으로 대체?해야함
 			urls.add("/resources/images/default_profile.png");
 		}
@@ -82,7 +82,7 @@ public class ImageService {
 
 	    FileResourceDTO dto = new FileResourceDTO();
 	    dto.setUsedId(usedId);
-	    dto.setUsedType(usedType);
+	    dto.setUsedType(usedType.toUpperCase());
 	    dto.setOriginalName(ogName);
 	    dto.setFileName(savedFileName);
 	    dto.setFileType(fileType);

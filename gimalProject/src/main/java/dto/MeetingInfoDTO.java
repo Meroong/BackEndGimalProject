@@ -23,7 +23,17 @@ public class MeetingInfoDTO {
     private int cost;                // 참가비
     private String tag;              // 태그
     private String status;           // OPEN / CLOSED / COMPLETED
-    private Timestamp createdAt;     // 생성일
+    private long creatorId;        // 게시자 ID (새로 추가)
+    
+    public long getCreatorId() {
+		return creatorId;
+	}
+
+	public void setCreatorId(long creatorId) {
+		this.creatorId = creatorId;
+	}
+
+	private Timestamp createdAt;     // 생성일
     private Timestamp updatedAt;     // 수정일
 
     // === Weather ===

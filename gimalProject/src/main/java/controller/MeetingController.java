@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import service.ImageService;
 import service.MeetingService;
+import util.AuthUtil;
 
 @WebServlet("/meeting/*")
 @MultipartConfig(
@@ -48,19 +49,86 @@ public class MeetingController extends HttpServlet {
 				}
 			//게시글 상세 조회 미팅 아이디를 인자로 받음
 			case "/info":
-				MeetingInfoDTO meetingDto = meetingService.getMeetingInfo(Long.parseLong(req.getParameter("meetingId")));
 				
-				if(meetingDto != null) {
-					req.setAttribute("meetingInfo", meetingDto);
+				// 로그인 여부 확인
+			    Long userId = AuthUtil.getAutoId(req);
+			    
+				boolean isParticipant = false;
+					if (userId != -1) {
+						isParticipant = meetingService.isParticipant(Long.parseLong(req.getParameter("meetingId")), userId);
+				    }
+
+				req.setAttribute("isParticipant", isParticipant);
+				MeetingInfoDTO infoDto = meetingService.getMeetingInfo(Long.parseLong(req.getParameter("meetingId")));
+				
+				 // DTO 전체 정보 출력
+			    System.out.println("===== MeetingInfoDTO =====");
+			    System.out.println("ID: " + infoDto.getMeetingId());
+			    System.out.println("제목: " + infoDto.getTitle());
+			    System.out.println("내용: " + infoDto.getContent());
+			    System.out.println("날짜: " + infoDto.getDate());
+			    System.out.println("장소ID: " + infoDto.getLocationId());
+			    System.out.println("최대 인원: " + infoDto.getMaxMembers());
+			    System.out.println("현재 인원: " + infoDto.getCurrentMembers());
+			    System.out.println("참가비: " + infoDto.getCost());
+			    System.out.println("태그: " + infoDto.getTag());
+			    System.out.println("상태: " + infoDto.getStatus());
+			    System.out.println("생성일: " + infoDto.getCreatedAt());
+			    System.out.println("수정일: " + infoDto.getUpdatedAt());
+			    System.out.println("날씨: " + infoDto.getWeather());
+
+			    System.out.println("--- 장소 정보 ---");
+			    System.out.println("도로명 주소: " + infoDto.getRoadAddress());
+			    System.out.println("지번 주소: " + infoDto.getJibunAddress());
+			    System.out.println("상세 주소: " + infoDto.getAddrDetail());
+			    System.out.println("위도: " + infoDto.getLatitude());
+			    System.out.println("경도: " + infoDto.getLongitude());
+
+			    System.out.println("--- 이미지 ---");
+			    if(infoDto.getImages() != null) {
+			        for(String img : infoDto.getImages()) {
+			            System.out.println("이미지 URL: " + img);
+			        }
+			    } else {
+			        System.out.println("이미지 없음");
+			    }
+			    if(AuthUtil.getAutoId(req) == infoDto.getCreatorId()) {
+			    	boolean isCreator =true;
+			    	req.setAttribute("isCreator", isCreator);
+			    }
+				
+				if(infoDto != null) {
+					req.setAttribute("meetingInfo", infoDto);
 					req.getRequestDispatcher("/views/meet/info.jsp").forward(req, resp);
 				}
 				return;
+				
+			case "/edit":
+			    long meetingId = Long.parseLong(req.getParameter("meetingId"));
+			    MeetingInfoDTO dto = meetingService.getMeetingInfo(meetingId);
+
+			    if(dto != null) {
+			        req.setAttribute("meetingInfo", dto);
+			        req.getRequestDispatcher("/views/meet/meetUpdate.jsp").forward(req, resp);
+			    } else {
+			        resp.sendRedirect(req.getContextPath() + "/meeting/list");
+			    }
+			    return;
+
 		}
 }
 
 	
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-	    String path = req.getPathInfo();
+        String path = req.getPathInfo(); // /roomMake
+        
+        // ---------- 로그인 검증 ----------
+        Long autoId = AuthUtil.getAutoId(req);
+        
+        if(autoId == -1) {
+        	resp.sendRedirect(req.getContextPath()+"/views/user/login.jsp");
+        	return;
+        }
 
 	    String latitudeStr = req.getParameter("latitude");
 	    String longitudeStr = req.getParameter("longitude");
@@ -71,6 +139,8 @@ public class MeetingController extends HttpServlet {
 	    try {
 	    	System.out.println(path);
 	        switch (path) {
+	        
+	        
 	        
 	        /* ========================
              * INSERT
@@ -105,7 +175,8 @@ public class MeetingController extends HttpServlet {
                         req.getParameter("tag"),
                         req.getParameter("status"),
                         latitude,
-                        longitude
+                        longitude,
+                        autoId //로그인 추가시 동작
                 );
 
                 /* ================================
@@ -122,6 +193,7 @@ public class MeetingController extends HttpServlet {
                                 "MEETING");
                     }
                 }
+                System.out.println("### INSERT MEETING AFTER ### meetingId = " + meetingId);
 
                 resp.sendRedirect(req.getContextPath() + "/meeting/list");
                 return;
@@ -161,12 +233,56 @@ public class MeetingController extends HttpServlet {
 	                        req.getParameter("tag"),
 	                        req.getParameter("status"),
 	                        latitude,
-	                        longitude
+	                        longitude,
+	                        autoId  //로그인 추가 시 해결
 	                );
 
 	                // 성공 시
 	                resp.sendRedirect(req.getContextPath() + "/weatherAPI.jsp");
 	                return;
+	                
+	            case "/join":
+
+				    // meetingId 파라미터
+				    long meetId = Long.parseLong(req.getParameter("meetingId"));
+
+				    try {
+				 
+				        boolean result	=	meetingService.joinMeet(meetId, autoId);
+				        if (result) {
+				            resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + meetId);
+				        }
+				    } catch (Exception e) {
+				        e.printStackTrace();
+				        req.setAttribute("errorMsg", e.getMessage());
+
+				        // 에러 메시지와 함께 상세 페이지로 되돌리기
+				        req.getRequestDispatcher("/meeting/info?meetingId=" + meetId)
+				           .forward(req, resp);
+				    }
+				    return;
+				    
+				    /* ========================================
+	                   QUIT
+	                 ======================================== */
+	                case "/quit":
+
+	                    long quitMeetId = Long.parseLong(req.getParameter("meetingId"));
+
+	                    try {
+	                        boolean quitResult = meetingService.quitMeet(quitMeetId, autoId);
+
+	                        if (quitResult) {
+	                            resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + quitMeetId);
+	                        }
+
+	                    } catch (Exception e) {
+	                        e.printStackTrace();
+	                        req.setAttribute("errorMsg", e.getMessage());
+	                        req.getRequestDispatcher("/meeting/info?meetingId=" + quitMeetId).forward(req, resp);
+	                    }
+	                    return;
+
 
 
 	            default:

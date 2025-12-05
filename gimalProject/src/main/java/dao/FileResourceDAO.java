@@ -62,6 +62,15 @@ public class FileResourceDAO {
 	
 	public boolean insertFile(FileResourceDTO dto) {
 		System.out.println("work DBquery: insertFile");
+		
+		System.out.println("INSERT PARAMS:");
+	    System.out.println("fileUrl = " + dto.getFileUrl());
+	    System.out.println("fileName = " + dto.getFileName());
+	    System.out.println("originalName = " + dto.getOriginalName());
+	    System.out.println("fileType = " + dto.getFileType());
+	    System.out.println("size = " + dto.getSize());
+	    System.out.println("usedType = " + dto.getUsedType());
+	    System.out.println("usedId = " + dto.getUsedId());
 		String sql = "Insert into file_resource(file_url, file_name, original_name,"
 				+ " file_type, size, used_type, used_id) values(?, ?, ?, ?, ?, ?, ?);";
 		

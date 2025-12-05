@@ -26,7 +26,7 @@ public class MeetingLocationDAO {
 					dto.setId(locationId);
 					dto.setRoadAddress(rs.getString("road_address"));
 					dto.setJibunAddress(rs.getString("jibun_address"));
-					dto.setAddrDetail("addrDetail");
+					dto.setAddrDetail(rs.getString("addr_detail"));
 					dto.setLatitude(rs.getDouble("latitude"));
 					dto.setLongitude(rs.getDouble("longitude"));
 					

@@ -142,7 +142,7 @@
 
         <!-- 이미지 업로드 input -->
         <label>이미지 업로드 (최대 5장)</label>
-        <input type="file" accept="image/*" multiple onchange="addImages(event)">
+        <input type="file" accept="image/*" name = "images" multiple onchange="addImages(event)">
 
         <!-- 주소 검색 -->
         <label>주소</label>

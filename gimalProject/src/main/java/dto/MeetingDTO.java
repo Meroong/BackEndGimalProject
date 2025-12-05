@@ -14,6 +14,7 @@ public class MeetingDTO {
     private int cost;                // 참가비
     private String tag;              // 태그 문자열
     private String status;           // OPEN / CLOSED / COMPLETED
+    private long creatorId;        // 게시자 ID (새로 추가)
     private Timestamp createdAt;     // 생성일
     private Timestamp updatedAt;     // 수정일
     private String weather;          // 날씨 (맑음/흐림/비/눈 등)
@@ -97,6 +98,14 @@ public class MeetingDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public long getCreatorId() {
+        return creatorId;
+    }
+
+    public void setCreatorId(long creatorId) {
+        this.creatorId = creatorId;
     }
 
     public Timestamp getCreatedAt() {
