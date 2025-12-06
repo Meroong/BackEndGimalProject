@@ -35,8 +35,6 @@ public class MeetingService {
         MeetingDTO meetingDto = new MeetingDAO().getPostDetail(meetingId);
         if (meetingDto == null) throw new IllegalArgumentException("MeetingDTO가 존재하지않습니다.");
 
-        System.out.println(meetingDto.getLocationId());
-
         // 주소 가져오기
         MeetingLocationDTO locationDto = new MeetingLocationDAO().getLocation(meetingDto.getLocationId());
         if (locationDto == null) throw new IllegalArgumentException("MeetingLocationDTO가 존재하지않습니다.");
@@ -71,6 +69,12 @@ public class MeetingService {
         infoDto.setImages(imageUrls);
 
         return infoDto;
+    }
+    
+    //특정 모임의 모든 참가자 조회
+    public ArrayList<MeetingParticipantDTO> getParticipantsInfo(long meetingId){
+    	System.out.println("Service: getParticipantsInfo");
+    	return new MeetingParticipantDAO().getParticipantsByMeetId(meetingId);
     }
 
     // 게시판 리스트 조회
@@ -212,10 +216,12 @@ public class MeetingService {
         if (!result) throw new Exception("모임 정보 업데이트 실패");
         return result;
     }
+    //참가자인지 확인
     public boolean isParticipant(long meetId, long userId) {
     	boolean result = new MeetingParticipantDAO().isParticipant(meetId, userId);
     	return result;
     }
+    //모임 참여 
     public boolean joinMeet(long meetId, long userId) throws Exception {
     	System.out.println("Service: joinMeet");
     	MeetingParticipantDTO participateDto = new MeetingParticipantDTO();
@@ -233,6 +239,7 @@ public class MeetingService {
     	}
     	return result;
     }
+    //모임 나오기
     public boolean quitMeet(long meetId, long userId) throws Exception {
     	System.out.println("Service: quitMeet");
     	MeetingParticipantDTO participateDto = new MeetingParticipantDTO();

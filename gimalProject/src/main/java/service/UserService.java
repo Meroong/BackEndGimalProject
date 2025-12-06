@@ -84,7 +84,7 @@ public class UserService {
     // =============================
     // 내 정보 조회
     // =============================
-    public UserDTO getMyInfo(long autoId) {
+    public UserDTO getUserInfo(long autoId) {
         return userDAO.searchByAutoId(autoId);
     }
 

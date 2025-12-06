@@ -1,23 +1,22 @@
 package controller;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
+import dto.ChatMessageDTO;
+import dto.ChatRoomDTO;
+import dto.MeetingInfoDTO;
+import dto.MeetingParticipantDTO;
+import dto.UserDTO;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import service.ChattingService;
+import service.MeetingService;
 import util.AuthUtil;
-import dto.ChatMessageDTO;
-import dto.ChatRoomDTO;
-import dto.ResponseDTO;
-import auth.JwtAuth;
-import io.jsonwebtoken.Claims;
 
 @WebServlet("/chat/*")
 public class ChattingController extends HttpServlet {
@@ -51,7 +50,7 @@ public class ChattingController extends HttpServlet {
         
         // !!---------- 선택한 채팅방 메시지 ----------  
         else if (path != null && path.startsWith("/room/")) {
-        	System.out.println("room/요청");
+            System.out.println("room/요청");
             String[] parts = path.split("/"); // ["", "room", "15"]
             if (parts.length != 3) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Room ID Missing");
@@ -60,7 +59,7 @@ public class ChattingController extends HttpServlet {
 
             Long roomId = Long.valueOf(parts[2]);
 
-            // 로그인 유저가 이 방에 속하는지 체크          보안에 신경썼다  해커가 url로 접근해도 검증을 거치기 때문에 좀 더 안전하다.
+            // 로그인 유저가 이 방에 속하는지 체크
             boolean allowed = service.checkUserInRoom(autoId, roomId);
             if (!allowed) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Not allowed");
@@ -68,13 +67,32 @@ public class ChattingController extends HttpServlet {
             }
 
             // 채팅 메시지 조회
-            ArrayList<ChatMessageDTO> messages = (ArrayList<ChatMessageDTO>) service.getMessage(roomId);
+            ArrayList<ChatMessageDTO> messages = service.getMessage(roomId);
             req.setAttribute("messages", messages);
             req.setAttribute("selectedRoomId", roomId);
+
+            // 채팅방 정보 가져오기
+            ChatRoomDTO roomDto = service.getRoomInfo(roomId);
+            req.setAttribute("roomInfo", roomDto);
+            
+
+            // 방에 속한 유저 목록 (채팅방 사용자 정보)
+            ArrayList<Long> chatUsers = service.getUsersInRoom(roomId);
+            req.setAttribute("chatUsers", chatUsers);
+            System.out.println(roomDto.getHostId());
+            
+            //호스트 여부 확인 기능 차이를 두기위해
+            boolean isHost = autoId == roomDto.getHostId();
+            if(isHost && "GROUP".equalsIgnoreCase(roomDto.getRoomType())) {
+            	ArrayList<MeetingParticipantDTO> participants = new MeetingService().getParticipantsInfo(roomDto.getMeetingId());
+            	req.setAttribute("participants", participants);
+            }
+            req.setAttribute("isHost", isHost);
 
             req.getRequestDispatcher("/views/chat/chatting.jsp").forward(req, resp);
             return;
         }
+
 
 
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -156,9 +174,37 @@ public class ChattingController extends HttpServlet {
         	resp.sendRedirect(req.getContextPath() + "/chat/roomList");
         	return;
         }
+        if ("/inviteUser".equals(path)) {
+            System.out.println("/inviteUser 요청");
+
+            try {
+                long roomId = Long.parseLong(req.getParameter("roomId"));
+                long meetId = Long.parseLong(req.getParameter("meetId"));
+                long receiverId = Long.parseLong(req.getParameter("receiverId"));
+                long hostId = autoId; // 로그인 유저가 초대 권한 있는 호스트
+
+                boolean added = service.inviteUser(meetId, roomId, hostId, receiverId);
+
+                if (added) {
+                    req.setAttribute("successMsg", "유저 초대 완료");
+                } else {
+                    req.setAttribute("errorMsg", "유저 초대 실패");
+                }
+
+                // 초대 후 다시 채팅방 상세 페이지로
+                resp.sendRedirect(req.getContextPath() + "/chat/room/" + roomId);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                req.setAttribute("errorMsg", e.getMessage());
+
+                // 실패 시에도 채팅방 상세 페이지로 포워딩
+                long roomId = Long.parseLong(req.getParameter("roomId"));
+                resp.sendRedirect(req.getContextPath() + "/chat/room/" + roomId);
+            }
+
+            return;
+        }
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
-
-
-    public void destroy() {}
 }

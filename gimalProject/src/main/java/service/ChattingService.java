@@ -7,8 +7,11 @@ import auth.JwtAuth;
 import dao.ChatMessageDAO;
 import dao.ChatRoomDAO;
 import dao.ChatRoomUserDAO;
+import dao.MeetingDAO;
+import dao.MeetingParticipantDAO;
 import dto.ChatMessageDTO;
 import dto.ChatRoomDTO;
+import dto.ChatRoomUserDTO;
 import dto.ResponseDTO;
 import io.jsonwebtoken.Claims;
 
@@ -46,7 +49,7 @@ public class ChattingService {
     	return false;
     }
     // group 채팅방 개설
-    public boolean makeGroupRoom(long meetingId, String RoomType, long hostId ) {
+    public boolean makeGroupRoom(long meetingId, String roomType, long hostId ) {
     	System.out.println("work service: makeGroupRoom");
     	ChatRoomDTO dto = new ChatRoomDTO();
     	boolean isExists = roomDao.isGroupRoomExist(meetingId, hostId);
@@ -54,6 +57,7 @@ public class ChattingService {
     	if(!isExists) {
     		dto.setMeetingId(meetingId);
         	dto.setHostId(hostId);
+        	dto.setRoomType(roomType);
         	
         	int roomId = roomDao.createChatRoom(dto);
         	System.out.println(roomId);
@@ -82,7 +86,7 @@ public class ChattingService {
 
         if (roomList != null) {
             for (Long roomId : roomList) {
-                ChatRoomDTO dto = roomDao.getChatRoomById(roomId);
+                ChatRoomDTO dto = roomDao.getChatRoomInfo(roomId);
                 if (dto != null) {
                 	chatList.add(dto);
                 }
@@ -95,6 +99,19 @@ public class ChattingService {
         	return chatList;
         }
     }
+    
+    //룸 아이디로 특정 채팅방 정보 조회
+    public ChatRoomDTO getRoomInfo(long roomId) {
+    	System.out.println("work service: getRoomInfo");
+        return roomDao.getChatRoomInfo(roomId);
+    }
+    
+    //룸 아이디로 방에 있는 모든 유저 정보 조회
+    public ArrayList<Long> getUsersInRoom(long roomId) {
+    	System.out.println("work service: getRoomUser");
+    	return roomUserDao.getUserInfo(roomId);
+    }
+    
     //채팅방에 맞는 채팅가져오기
     public ArrayList <ChatMessageDTO> getMessage (long roomId) {
     	System.out.println("work service: getMessage");
@@ -174,6 +191,32 @@ public class ChattingService {
         else {
         	System.out.println("유효하지 않은 유저");
         	return false;
+        }
+    }
+    public boolean inviteUser(long meetId, long roomId, long hostId, long receiverId) throws Exception {
+        System.out.println("work service: inviteUser");
+        
+        // 호스트인지 체크
+        if (!roomDao.isHost(roomId, hostId)) {
+            throw new Exception("초대 권한이 없습니다. (호스트만 초대 가능)");
+        }
+
+        // 초대할 유저가 모임 참가자인지 확인
+        if (!new MeetingParticipantDAO().isParticipant(meetId, receiverId)) {
+            throw new Exception("유저가 모임 참가자가 아닙니다.");
+        }
+
+        // 유저가 이미 채팅방에 있는지 확인
+        if (roomUserDao.isUserInRoom(receiverId, roomId)) {
+            throw new Exception("이미 채팅방에 있는 유저입니다.");
+        }
+
+        // 유저 추가
+        boolean result = roomUserDao.addUserToRoom(receiverId, roomId);
+        if (result) {
+            return true;
+        } else {
+            throw new Exception("유저 추가 실패");
         }
     }
 }

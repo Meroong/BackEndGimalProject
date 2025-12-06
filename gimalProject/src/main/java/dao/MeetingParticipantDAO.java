@@ -10,8 +10,8 @@ import util.JDBCUtil;
 public class MeetingParticipantDAO {
 
     // 특정 모임의 모든 참가자 목록 조회
-    public List<MeetingParticipantDTO> getParticipantsByMeeting(long meetingId) {
-        List<MeetingParticipantDTO> list = new ArrayList<>();
+    public ArrayList<MeetingParticipantDTO> getParticipantsByMeetId(long meetingId) {
+        ArrayList<MeetingParticipantDTO> list = new ArrayList<>();
         String sql = "SELECT * FROM meeting_participant WHERE meeting_id = ?";
 
         try (Connection con = JDBCUtil.jdbcCon();

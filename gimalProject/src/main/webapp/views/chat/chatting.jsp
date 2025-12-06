@@ -27,6 +27,9 @@
             font-weight: 700;
             margin-bottom: 20px;
             color: #FF7C40;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .chat-box {
@@ -103,12 +106,115 @@
         .back-link:hover {
             text-decoration: underline;
         }
+
+        /* 햄버거 버튼 */
+        .menu-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .menu-btn {
+            background-color: #FF7C40;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 180px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            z-index: 1;
+            padding: 10px;
+        }
+
+        .menu-container:hover .menu-content {
+            display: block;
+        }
+
+        .menu-content button {
+            width: 100%;
+            background: #FF7C40;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .menu-content button:hover {
+            background: #ff6720;
+        }
+
+        .participant-list {
+            margin-top: 10px;
+        }
+
+        .participant-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .participant-list button {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>채팅방 #${selectedRoomId}</h2>
+    <h2>
+        채팅방 #${selectedRoomId}
+
+        <c:if test="${isHost}">
+            <div class="menu-container">
+                <button class="menu-btn">＋</button>
+                <div class="menu-content">
+                    <c:if test="${roomInfo.roomType eq 'GROUP'}">
+                        <button type="button" onclick="endMeeting()">모임 종료</button>
+                    </c:if>
+                    <c:if test="${not empty participants}">
+                        <p>참가자 관리</p>
+                        <ul class="participant-list">
+                            <c:forEach var="p" items="${participants}">
+                                <li>
+                                    ${p.userName}
+                                    <button type="button" onclick="kickParticipant(${p.userId})">강퇴</button>
+                                </li>
+                            </c:forEach>
+                        </ul>
+                    </c:if>
+                </div>
+            </div>
+        </c:if>
+
+        <c:if test="${not isHost}">
+            <div class="menu-container">
+                <button class="menu-btn">＋</button>
+                <div class="menu-content">
+                    <button type="button" onclick="leaveRoom()">채팅방 나가기</button>
+                </div>
+            </div>
+        </c:if>
+    </h2>
 
     <div class="chat-box">
         <div class="chat-messages">
@@ -130,6 +236,30 @@
 
     <a class="back-link" href="${pageContext.request.contextPath}/chat/roomList">채팅방 목록으로 돌아가기</a>
 </div>
+
+<script>
+    function kickParticipant(userId) {
+        if(confirm("정말 강퇴하시겠습니까?")) {
+            // AJAX 호출로 서버에 강퇴 요청
+            fetch('${pageContext.request.contextPath}/meeting/kick?userId=' + userId + '&roomId=' + ${selectedRoomId})
+                .then(res => location.reload());
+        }
+    }
+
+    function endMeeting() {
+        if(confirm("모임을 종료하시겠습니까?")) {
+            fetch('${pageContext.request.contextPath}/meeting/end?roomId=' + ${selectedRoomId})
+                .then(res => location.href='${pageContext.request.contextPath}/chat/roomList');
+        }
+    }
+
+    function leaveRoom() {
+        if(confirm("채팅방을 나가시겠습니까?")) {
+            fetch('${pageContext.request.contextPath}/chat/leave?roomId=' + ${selectedRoomId})
+                .then(res => location.href='${pageContext.request.contextPath}/chat/roomList');
+        }
+    }
+</script>
 
 </body>
 </html>

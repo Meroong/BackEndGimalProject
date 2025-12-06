@@ -158,7 +158,7 @@ public class UserController extends HttpServlet {
                         newLatitude, newLongitude);
 
                 // 세션 갱신
-                UserDTO updatedUser = userService.getMyInfo(updateAutoId);
+                UserDTO updatedUser = userService.getUserInfo(updateAutoId);
                 UserAddressDTO updatedAddress = userService.getAddressInfo(updateAutoId);
                 req.getSession().setAttribute("userInfo", updatedUser);
                 req.getSession().setAttribute("addressInfo", updatedAddress);
