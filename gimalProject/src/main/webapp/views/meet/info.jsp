@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dto.MeetingInfoDTO"%>
+<%@ page import="dto.FileResourceDTO"%>
 <%@ page import="java.util.List"%>
 
 <!DOCTYPE html>
@@ -95,21 +96,20 @@ function initMap(lat, lng) {
 	<div>
 	    <!-- 대표 이미지 -->
 	    <img id="mainImage"
-	         src="<%= request.getContextPath() + (
-	                m.getImages() != null && !m.getImages().isEmpty()
-	                ? m.getImages().get(0)
+	         src="<%= (m.getImages() != null && !m.getImages().isEmpty())
+	                ? m.getImages().get(0).getFileUrl()
 	                : "/resources/images/default.png"
-	         ) %>"
+	         %>"
 	         style="width:300px; height:300px; object-fit:cover; border-radius:12px; background:#f0f0f0;" />
 	
 	    <!-- 썸네일 -->
 	    <% if (m.getImages() != null && m.getImages().size() > 1) { %>
 	        <div class="thumbnail-grid">
-	            <% for (String url : m.getImages()) {
-	                   if (url != null && !url.trim().isEmpty()) { %>
+	            <% for (FileResourceDTO img : m.getImages()) {
+	                   if (img != null && img.getFileUrl() != null && !img.getFileUrl().trim().isEmpty()) { %>
 	
-	                <img src="<%= request.getContextPath() + url %>"
-	                     onclick="setMainImage('<%= request.getContextPath() + url %>')"
+	                <img src="<%= img.getFileUrl() %>"
+	                     onclick="setMainImage('<%= img.getFileUrl() %>')"
 	                     style="cursor:pointer;" />
 	
 	            <% }} %>
@@ -156,14 +156,7 @@ function initMap(lat, lng) {
 			        </form>
 			    <% } %>
 			
-			    <%-- 3) 이미 참여자인 경우 → 참여완료 표시 (나가기 버튼 위에서 판별됨) --%>
-			    <% if(Boolean.TRUE.equals(isParticipant) && Boolean.TRUE.equals(isCreator) == false) { %>
-			        <!-- 이미 참여 상태지만, 나가기 버튼이 표시되므로 추가 버튼 생략 -->
-			    <% } else if(Boolean.TRUE.equals(isParticipant)) { %>
-			        <button class="btn" style="background:gray;" disabled>이미 참여한 모임</button>
-			    <% } %>
-			
-			    <%-- 4) 주최자인 경우 → 수정 버튼 표시 --%>
+			    <%-- 4) 주최자인 경우 → 수정 버튼 --%>
 			    <% if(Boolean.TRUE.equals(isCreator)) { %>
 			        <a class="btn" style="background:#5271FF; margin-left:10px;"
 			           href="<%= request.getContextPath() %>/meeting/edit?meetingId=<%= m.getMeetingId() %>">
@@ -173,9 +166,9 @@ function initMap(lat, lng) {
 			
 			</div>
 			
-			        </div>
-			    </div>
-			</div>
+        </div>
+    </div>
+</div>
 
 <div id="map"></div>
 <script>

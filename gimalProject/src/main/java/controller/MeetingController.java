@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 
+import dao.FileResourceDAO;
+import dto.FileResourceDTO;
 import dto.MeetingDTO;
 import dto.MeetingInfoDTO;
 import jakarta.servlet.ServletConfig;
@@ -86,8 +88,8 @@ public class MeetingController extends HttpServlet {
 
 			    System.out.println("--- 이미지 ---");
 			    if(infoDto.getImages() != null) {
-			        for(String img : infoDto.getImages()) {
-			            System.out.println("이미지 URL: " + img);
+			        for(FileResourceDTO imgDto : infoDto.getImages()) {
+			            System.out.println("이미지 URL: " + imgDto.getFileUrl());
 			        }
 			    } else {
 			        System.out.println("이미지 없음");
@@ -129,22 +131,22 @@ public class MeetingController extends HttpServlet {
         	resp.sendRedirect(req.getContextPath()+"/views/user/login.jsp");
         	return;
         }
-
+        ImageService imageService = new ImageService();
 	    String latitudeStr = req.getParameter("latitude");
 	    String longitudeStr = req.getParameter("longitude");
 
 	    double latitude = (latitudeStr != null && !latitudeStr.isEmpty()) ? Double.parseDouble(latitudeStr) : 37.1;
 	    double longitude = (longitudeStr != null && !longitudeStr.isEmpty()) ? Double.parseDouble(longitudeStr) : 107.1;
-
+	    String uploadPath = "C:/upload/meeting";
+	    String usedType = "MEETING";
+	    
 	    try {
 	    	System.out.println(path);
 	        switch (path) {
 	        
 	        
 	        
-	        /* ========================
-             * INSERT
-             * ======================== */
+	        //INSERT create로 변경할까 
             case "/insert":
                 // location insert
                 long newLocationId = meetingService.insertLocation(
@@ -182,19 +184,16 @@ public class MeetingController extends HttpServlet {
                 /* ================================
                  *   다중 이미지 업로드 처리
                  * ================================ */
-                String uploadPath = req.getServletContext().getRealPath("/uploads/meeting");
-
                 for (Part part : req.getParts()) {
                     if ("images".equals(part.getName()) && part.getSize() > 0) {
-                        new ImageService().uploadFile(
+                        imageService.uploadFile(
                                 meetingId,
                                 part,
                                 uploadPath,
-                                "MEETING");
+                                usedType);
                     }
                 }
-                System.out.println("### INSERT MEETING AFTER ### meetingId = " + meetingId);
-
+                
                 resp.sendRedirect(req.getContextPath() + "/meeting/list");
                 return;
 
@@ -236,9 +235,37 @@ public class MeetingController extends HttpServlet {
 	                        longitude,
 	                        autoId  //로그인 추가 시 해결
 	                );
+	        
+	                //이미지 삭제 처리
+	                String[] deleteIds = req.getParameterValues("deleteImageIds");
+
+	                if (deleteIds != null) {
+	                    FileResourceDAO fileDao = new FileResourceDAO();
+
+	                    for (String idStr : deleteIds) {
+
+	                        if (idStr == null || idStr.isBlank() || idStr.equals("null")) {
+	                            continue; // ← 건너뛰기
+	                        }
+
+	                        long fileId = Long.parseLong(idStr);
+	                        imageService.deleteFile(fileId, meetingUpId, usedType);
+	                    }
+	                }
+	                //새 이미지 업로드 처리
+	                for (Part part : req.getParts()) {
+	                    if ("images".equals(part.getName()) && part.getSize() > 0) {
+	                        imageService.uploadFile(
+	                                meetingUpId,
+	                                part,
+	                                uploadPath,
+	                                "MEETING"
+	                        );
+	                    }
+	                }
 
 	                // 성공 시
-	                resp.sendRedirect(req.getContextPath() + "/weatherAPI.jsp");
+	                resp.sendRedirect(req.getContextPath() + "/meeting/list");
 	                return;
 	                
 	            case "/join":

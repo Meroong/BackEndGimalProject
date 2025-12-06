@@ -39,8 +39,8 @@ public class MeetingInfoDTO {
     // === Weather ===
     private String weather;          // 날씨 (맑음/흐림/비/눈 등)
 
-    // === Image URLs (여러 장 가능) ===
-    private List<String> images;   // 이미지 리스트
+    // Image URLs (여러 장 가능) 파일을 보여주기 위해 url이 필요하고 관리하기 위해 id가 필요 
+    private List<FileResourceDTO> images;   // 이미지 리스트
 
 	public Long getLocationId() {
 		return locationId;
@@ -186,11 +186,11 @@ public class MeetingInfoDTO {
 		this.weather = weather;
 	}
 
-	public java.util.List<String> getImages() {
+	public java.util.List<FileResourceDTO> getImages() {
 		return images;
 	}
 
-	public void setImages(java.util.List<String> images) {
+	public void setImages(java.util.List<FileResourceDTO> images) {
 		this.images = images;
 	}
 

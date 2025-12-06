@@ -59,8 +59,8 @@ public class ImageController extends HttpServlet {
 		    	// 업로드된 파일 가져오기
 		        Part imgPart = req.getPart("img");
 		        
-				//저장 경로 설정 웹 경로를 실제 저장 경로로 변경
-				uploadPath = req.getServletContext().getRealPath("uploads/profile");
+				//저장 경로 설정 
+				uploadPath = "C:/upload/profile";
 
 				result =imageService.uploadFile(autoId, imgPart, uploadPath, usedType);
 				
@@ -77,7 +77,8 @@ public class ImageController extends HttpServlet {
 			
 			  case "/profileDelete": 
 				  //임시 설정용
-				  boolean deleteResult = imageService.deleteProfile(usedType, autoId, req.getServletContext().getRealPath("uploads/profile")); 
+				  uploadPath = "C:/upload/profile";
+				  boolean deleteResult = imageService.deleteProfile(usedType, autoId, uploadPath); 
 				  if(deleteResult) {
 					  resp.sendRedirect(req.getContextPath() + "/views/user/mypage.jsp");
 				  }

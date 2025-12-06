@@ -96,7 +96,7 @@ public class UserService {
         System.out.println("deleteUserService:");
 
         try {
-            boolean rs = new FileResourceDAO().deleteFile("PROFILE", autoId);
+            boolean rs = new FileResourceDAO().deleteFileByUsed("PROFILE", autoId);
             if (!rs) {
                 throw new RuntimeException("프로필 이미지 삭제 실패");
             }

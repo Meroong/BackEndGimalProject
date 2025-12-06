@@ -17,6 +17,7 @@ import com.google.gson.JsonParser;
 import dao.MeetingDAO;
 import dao.MeetingLocationDAO;
 import dao.MeetingParticipantDAO;
+import dto.FileResourceDTO;
 import dto.MeetingDTO;
 import dto.MeetingInfoDTO;
 import dto.MeetingLocationDTO;
@@ -66,7 +67,7 @@ public class MeetingService {
 
         // 이미지 정보 가져오기
         ImageService imageService = new ImageService(); 
-        List<String> imageUrls = imageService.getMeetingImage(meetingId, "MEETING");
+        List<FileResourceDTO> imageUrls = imageService.getMeetingImage(meetingId, "MEETING");
         infoDto.setImages(imageUrls);
 
         return infoDto;

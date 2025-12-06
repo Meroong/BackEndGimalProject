@@ -11,7 +11,7 @@ import dto.FileResourceDTO;
 import util.JDBCUtil;
 
 public class FileResourceDAO {
-	
+	//단일 파일 조회용 프로필용
 	public String getFileUrl(long autoId, String usedType) {
 		System.out.println("work DBquery: getFileUrl");
 		String sql = "select file_url from file_resource where used_id = ? and used_type = ?;";
@@ -35,11 +35,12 @@ public class FileResourceDAO {
        }
 	} 
 	
-	public List<String> getFileUrls(long autoId, String usedType) {
+	//다중 파일 조회용 모임용
+	public List<FileResourceDTO> getFileUrls(long autoId, String usedType) {
 		System.out.println("work DBquery: getFileUrl");
-		List<String> urls = new ArrayList<>();
-		String sql = "select file_url from file_resource where used_id = ? and used_type = ?;";
-		String oldFileName = "";
+		List<FileResourceDTO> alist = new ArrayList<>();
+		String sql = "select id, file_url from file_resource where used_id = ? and used_type = ?;";
+		
         try (Connection con = JDBCUtil.jdbcCon();
                 PreparedStatement pstmt = con.prepareStatement(sql)) {
 		
@@ -49,13 +50,17 @@ public class FileResourceDAO {
         	ResultSet rs = pstmt.executeQuery();
         	
         	while(rs.next()) {
-        		urls.add(rs.getString("file_url"));
+        		FileResourceDTO dto = new FileResourceDTO();
+        		
+        		dto.setId(rs.getLong("id"));
+        		dto.setFileUrl(rs.getString("file_url"));
+        		alist.add(dto);
         	}
-        	return urls;
+        	return alist;
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("DB 연결 또는 쿼리 오류");
-            return urls;
+            return alist;
        }
 	}
 	
@@ -98,7 +103,8 @@ public class FileResourceDAO {
                return false;
           }
       }	
-	public boolean deleteFile(String usedType, long usedId) {
+	// 아이디와 사용타입으로 사진을 전부 지울 때 사용 / 프로필 사진 삭제 혹은 모임 게시글 삭제 시   
+	public boolean deleteFileByUsed(String usedType, long usedId) {
 		System.out.println("work DBquery: deleteFile");
 		String sql = "delete from file_resource where used_type = ? and used_id = ?";
 		
@@ -121,6 +127,36 @@ public class FileResourceDAO {
                return false;
           }
 	}
+	//id컬럼으로 삭제 	|	타입과 사용자 확인으로 권한확인 
+	public boolean deleteFileById(long fileId, long ownerId, String usedType) {
+	    String sql =
+	        "DELETE fr FROM file_resource fr " +
+	        "JOIN meeting m ON fr.used_id = m.id AND fr.used_type = ? " +
+	        "WHERE fr.id = ? AND m.creator_id = ?";
+
+	    try (Connection con = JDBCUtil.jdbcCon();
+	         PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+	        pstmt.setString(1, usedType);
+	        pstmt.setLong(2, fileId);
+	        pstmt.setLong(3, ownerId);
+
+	        if(pstmt.executeUpdate() > 0) {
+	        	System.out.println("파일 삭제 성공");
+	        	return true;
+	        }
+	        else {
+	        	System.out.println("파일 삭제 실패");
+	        	return false;
+	        }
+
+	    } catch (Exception e) {
+	    	System.out.println("DB 에러");
+	        e.printStackTrace();
+	    }
+	    return false;
+	}
+	
 	public boolean isExist(long autoId, String usedType) {
 		System.out.println("work DBquery: isExist");
 		String sql = "select * from file_resource where used_type = ? and used_id = ?;";

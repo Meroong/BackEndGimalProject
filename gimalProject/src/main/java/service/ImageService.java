@@ -21,14 +21,11 @@ public class ImageService {
 		return profileUrl; 
 	}
 	//모임 사진 조회
-	public List<String> getMeetingImage(long meetingId, String usedType){
+	public List<FileResourceDTO> getMeetingImage(long meetingId, String usedType){
 		System.out.println("work service: getImages");
-		List<String> urls = new FileResourceDAO().getFileUrls(meetingId, usedType);
-		if(urls.isEmpty()) {
-			//흑백 사진으로 대체?해야함
-			urls.add("/resources/images/default_profile.png");
-		}
-		return urls;
+		List<FileResourceDTO> aList = new FileResourceDAO().getFileUrls(meetingId, usedType);
+		 
+		 return aList;
 	}
 	public boolean deleteProfile(String usedType, long autoId, String uploadPath) {
 		System.out.println("work service: deleteProfile");
@@ -45,7 +42,7 @@ public class ImageService {
             if(file.exists()) file.delete();
         }
 		
-		return new FileResourceDAO().deleteFile(usedType, autoId);
+		return new FileResourceDAO().deleteFileByUsed(usedType, autoId);
 	}
 	//이미지 업로드 서비스  usedType으로 구분하도록
 	public boolean uploadFile(long usedId, Part filePart, String uploadPath, String usedType) {
@@ -78,7 +75,7 @@ public class ImageService {
 	    }
 
 	    // DB 저장용 URL
-	    String dbUrl = "/uploads/" + usedType.toLowerCase() + "/" + savedFileName;
+	    String dbUrl = "/upload/" + usedType.toLowerCase() + "/" + savedFileName;
 
 	    FileResourceDTO dto = new FileResourceDTO();
 	    dto.setUsedId(usedId);
@@ -91,9 +88,15 @@ public class ImageService {
 
 	    // 기존 파일 삭제 여부
 	    if (usedType.equalsIgnoreCase("PROFILE") && fileDao.isExist(usedId, usedType)) {
-	        fileDao.deleteFile(usedType, usedId);
+	        fileDao.deleteFileByUsed(usedType, usedId);
 	    }
 
 	    return fileDao.insertFile(dto);
+	}
+	public boolean deleteFile(long fileId, long autoId, String usedType) {
+		System.out.println("Service: deleteFile");
+		boolean result = new FileResourceDAO().deleteFileById(fileId, autoId, usedType);
+		
+		return result;
 	}
 }
