@@ -55,10 +55,11 @@ public class ChattingService {
     		dto.setMeetingId(meetingId);
         	dto.setHostId(hostId);
         	
-        	int affectedRow = roomDao.createChatRoom(dto);
-        	
-        	if(affectedRow >0) {
+        	int roomId = roomDao.createChatRoom(dto);
+        	System.out.println(roomId);
+        	if(roomId >0) {
         		System.out.println("개설 성공");
+        		roomUserDao.addUserToRoom(hostId, roomId);
         		return true;
         	}
         	else {

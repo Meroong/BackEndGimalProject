@@ -113,19 +113,6 @@ public class ChattingController extends HttpServlet {
             req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
             return;
         }
-        // !! 모임용 채팅방 개설
-        if ("/gRoomMake".equals(path)) {
-        	System.out.println("gRoomMake 요청");
-            long meetingId = Long.parseLong(req.getParameter("meetingId"));
-            long hostId = Long.parseLong(req.getParameter("hostId"));
-
-            
-            boolean result = service.makeGroupRoom(meetingId, "Group", hostId);
-
-            
-            req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
-            return;
-        }
         
         // !! 채팅 보내기 기능
         if("/sendChat".equals(path)) {

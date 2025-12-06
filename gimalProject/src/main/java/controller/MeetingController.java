@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
+import service.ChattingService;
 import service.ImageService;
 import service.MeetingService;
 import util.AuthUtil;
@@ -193,6 +194,7 @@ public class MeetingController extends HttpServlet {
                                 usedType);
                     }
                 }
+                new ChattingService().makeGroupRoom(meetingId, "Group", autoId); // meetingId, hostId(creator)
                 
                 resp.sendRedirect(req.getContextPath() + "/meeting/list");
                 return;
@@ -263,6 +265,8 @@ public class MeetingController extends HttpServlet {
 	                        );
 	                    }
 	                }
+	                
+	                
 
 	                // 성공 시
 	                resp.sendRedirect(req.getContextPath() + "/meeting/list");

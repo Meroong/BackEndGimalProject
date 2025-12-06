@@ -56,7 +56,7 @@ public class ChatRoomDAO {
     	}
     	
     	try (Connection con = JDBCUtil.jdbcCon();
-    		 PreparedStatement pstmt = con.prepareStatement(sql);){
+    			PreparedStatement pstmt = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)){
     		
     		if(isItemRoom) {
 	    		pstmt.setLong(1, dto.getItemId());
@@ -68,14 +68,26 @@ public class ChatRoomDAO {
         		pstmt.setString(2, dto.getRoomType());
         		pstmt.setLong(3, dto.getHostId());
     		}
-    		
-    		return pstmt.executeUpdate();
-    	} catch (SQLException e) {
-    		System.out.println("채팅방 생성 중 에러!");
-    		e.printStackTrace();
-    		return 0;
-    	}
-    }
+        		int affectedRows = pstmt.executeUpdate();
+        	
+                if (affectedRows == 0) {
+                    throw new SQLException("채팅방 생성 실패, 영향 받은 행이 없습니다.");
+                }
+
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        return generatedKeys.getInt(1); // 생성된 room_id 반환
+                    } else {
+                        throw new SQLException("채팅방 생성 실패, 생성된 ID를 가져올 수 없습니다.");
+                    }
+                }
+                }catch (SQLException e) {
+		    		System.out.println("채팅방 생성 중 에러!");
+		    		e.printStackTrace();
+		    		return 0;
+                }
+                
+}
     
     //채팅방 삭제 (일단 냅두기)
     public int deleteChatRoom(long host_id, long room_id) {

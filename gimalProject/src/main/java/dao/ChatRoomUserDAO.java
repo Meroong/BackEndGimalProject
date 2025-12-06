@@ -81,5 +81,19 @@ public class ChatRoomUserDAO {
    	    }
    	}
 	
+	public int addUserToRoom(long userId, long roomId) {
+        String sql = "INSERT INTO chat_room_user (room_id, user_id) VALUES (?, ?);";
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, roomId);
+            pstmt.setLong(2, userId);
+            return pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+	
 
 }
