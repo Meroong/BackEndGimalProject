@@ -8,6 +8,7 @@ import dto.ChatRoomDTO;
 import dto.MeetingInfoDTO;
 import dto.MeetingParticipantDTO;
 import dto.UserDTO;
+import dto.chatParticipantsUserDTO;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,7 +16,9 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import service.ChattingService;
+import service.ImageService;
 import service.MeetingService;
+import service.UserService;
 import util.AuthUtil;
 
 @WebServlet("/chat/*")
@@ -50,8 +53,9 @@ public class ChattingController extends HttpServlet {
         
         // !!---------- 선택한 채팅방 메시지 ----------  
         else if (path != null && path.startsWith("/room/")) {
-            System.out.println("room/요청");
-            String[] parts = path.split("/"); // ["", "room", "15"]
+        	//chatting.jsp에서 현재 로그인 사용자 확인하기 위해 사용
+        	req.setAttribute("loginUserId", autoId);
+            String[] parts = path.split("/");
             if (parts.length != 3) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Room ID Missing");
                 return;
@@ -59,42 +63,36 @@ public class ChattingController extends HttpServlet {
 
             Long roomId = Long.valueOf(parts[2]);
 
-            // 로그인 유저가 이 방에 속하는지 체크
-            boolean allowed = service.checkUserInRoom(autoId, roomId);
-            if (!allowed) {
+            // 방 참여 여부 확인
+            if (!service.checkUserInRoom(autoId, roomId)) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Not allowed");
                 return;
             }
 
             // 채팅 메시지 조회
-            ArrayList<ChatMessageDTO> messages = service.getMessage(roomId);
-            req.setAttribute("messages", messages);
+            req.setAttribute("messages", service.getMessage(roomId));
             req.setAttribute("selectedRoomId", roomId);
 
-            // 채팅방 정보 가져오기
+            // 방 정보 조회
             ChatRoomDTO roomDto = service.getRoomInfo(roomId);
             req.setAttribute("roomInfo", roomDto);
-            
 
-            // 방에 속한 유저 목록 (채팅방 사용자 정보)
-            ArrayList<Long> chatUsers = service.getUsersInRoom(roomId);
-            req.setAttribute("chatUsers", chatUsers);
-            System.out.println(roomDto.getHostId());
-            
-            //호스트 여부 확인 기능 차이를 두기위해
-            boolean isHost = autoId == roomDto.getHostId();
-            if(isHost && "GROUP".equalsIgnoreCase(roomDto.getRoomType())) {
-            	ArrayList<MeetingParticipantDTO> participants = new MeetingService().getParticipantsInfo(roomDto.getMeetingId());
-            	req.setAttribute("participants", participants);
-            }
+            // 채팅방 참여자(UserDTO)
+            req.setAttribute("chatUsers", service.getUserInfoListInRoom(roomId));
+
+            // 호스트 여부
+            boolean isHost = (autoId == roomDto.getHostId());
             req.setAttribute("isHost", isHost);
+
+            // 그룹일 경우 → 모임 전체 참여자 정보
+            if (isHost && "GROUP".equalsIgnoreCase(roomDto.getRoomType())) {
+                ArrayList<chatParticipantsUserDTO> users = service.getParticipantUsers(roomDto);
+                req.setAttribute("participantUsers", users);
+            }
 
             req.getRequestDispatcher("/views/chat/chatting.jsp").forward(req, resp);
             return;
         }
-
-
-
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
 
@@ -174,8 +172,8 @@ public class ChattingController extends HttpServlet {
         	resp.sendRedirect(req.getContextPath() + "/chat/roomList");
         	return;
         }
-        if ("/inviteUser".equals(path)) {
-            System.out.println("/inviteUser 요청");
+        if ("/invite".equals(path)) {
+            System.out.println("/invite 요청");
 
             try {
                 long roomId = Long.parseLong(req.getParameter("roomId"));

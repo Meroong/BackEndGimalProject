@@ -113,12 +113,14 @@
     <div class="chat-grid">
         <c:forEach var="room" items="${chatList}">
             <div class="chat-card">
-                <div class="chat-title">
-                    ${room.roomType} 방 #${room.roomId}
-                </div>
+                <div class="chat-title">${room.roomType} 방 #${room.roomId}</div>
 
                 <div class="chat-actions">
-                    <a href="${pageContext.request.contextPath}/chat/room/${room.roomId}">입장</a>
+                    <!-- 팝업으로 채팅방 열기 -->
+                    <a href="${pageContext.request.contextPath}/chat/room/${room.roomId}"
+                       onclick="window.open(this.href, 'chatPopup', 'width=430,height=640,top=100,left=100,scrollbars=yes'); return false;">
+                        입장
+                    </a>
                     <form method="post" 
                           action="${pageContext.request.contextPath}/chat/roomQuit/${room.roomId}">
                         <button type="submit">방 나오기</button>

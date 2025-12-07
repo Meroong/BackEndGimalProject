@@ -1,19 +1,17 @@
 package service;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 
-import auth.JwtAuth;
 import dao.ChatMessageDAO;
 import dao.ChatRoomDAO;
 import dao.ChatRoomUserDAO;
-import dao.MeetingDAO;
 import dao.MeetingParticipantDAO;
+import dao.UserDAO;
 import dto.ChatMessageDTO;
 import dto.ChatRoomDTO;
-import dto.ChatRoomUserDTO;
-import dto.ResponseDTO;
-import io.jsonwebtoken.Claims;
+import dto.MeetingParticipantDTO;
+import dto.UserDTO;
+import dto.chatParticipantsUserDTO;
 
 public class ChattingService {
 
@@ -106,11 +104,56 @@ public class ChattingService {
         return roomDao.getChatRoomInfo(roomId);
     }
     
-    //룸 아이디로 방에 있는 모든 유저 정보 조회
-    public ArrayList<Long> getUsersInRoom(long roomId) {
-    	System.out.println("work service: getRoomUser");
-    	return roomUserDao.getUserInfo(roomId);
+    public ArrayList<UserDTO> getUserInfoListInRoom(Long roomId) {
+        ArrayList<Long> userIds = roomUserDao.getUserInfo(roomId);  // 기존: ID만 가져오는 메서드
+        ArrayList<UserDTO> users = new ArrayList<>();
+
+        for (Long id : userIds) {
+            UserDTO dto = new UserDAO().searchByAutoId(id); // 기존의 내 정보 조회 재사용 가능
+            users.add(dto);
+        }
+        return users;
     }
+    //모임 참가자 정보반환
+    public ArrayList<chatParticipantsUserDTO> getParticipantUsers(ChatRoomDTO roomDto) {
+    // 그룹 채팅 & 호스트일 때만
+    if (!"GROUP".equalsIgnoreCase(roomDto.getRoomType())) return null;
+
+    ArrayList<MeetingParticipantDTO> participants = new MeetingService().getParticipantsInfo(roomDto.getMeetingId());
+
+    ArrayList<chatParticipantsUserDTO> list = new ArrayList<>();
+    UserService userService = new UserService();
+    ImageService imageService = new ImageService();
+    
+    long roomId = roomDto.getRoomId();
+    
+    for (MeetingParticipantDTO p : participants) {
+
+        UserDTO u = userService.getUserInfo(p.getUserId());
+        if (u == null) continue;
+
+        String url = imageService.getProfileImage(p.getUserId(), "PROFILE");
+
+        chatParticipantsUserDTO dto = new chatParticipantsUserDTO();
+
+        // meeting participant 정보
+        dto.setParticipantId(p.getId());
+        dto.setMeetingId(p.getMeetingId());
+        dto.setPaid(p.isPaid());
+
+        // user 정보
+        dto.setUserId(u.getUserId());
+        dto.setNickname(u.getNickname());
+        dto.setProfileImage(url);
+        
+        boolean isChatMember = roomUserDao.isUserInRoom(p.getUserId(), roomId);
+        dto.setInChat(isChatMember);
+
+        list.add(dto);
+    }
+
+    return list;
+}
     
     //채팅방에 맞는 채팅가져오기
     public ArrayList <ChatMessageDTO> getMessage (long roomId) {
