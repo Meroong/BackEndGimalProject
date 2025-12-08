@@ -5,8 +5,11 @@ import java.util.List;
 
 import dto.AdminNoticeDTO;
 import dto.AdminStatsDTO;
+import dto.DailySignupDTO;
 import dto.ReportDTO;
+import dto.ReportStatusCountDTO;
 import dto.UserDTO;
+import dto.UserTrustRankDTO;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,12 +17,15 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import service.AdminService;
+import dto.AdminMeetingDTO;
+
 
 @WebServlet("/admin/*")
 public class AdminController extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
+    // ★ 여기 딱 한 번만 선언
     private final AdminService adminService = new AdminService();
 
     @Override
@@ -93,6 +99,11 @@ public class AdminController extends HttpServlet {
                 deleteUser(req, resp);
                 break;
 
+            // ================== 관리자 통계 ==================
+            case "/stats":
+            case "/dashboard":
+                showAdminStats(req, resp);
+                break;
             // ================== 신고 관리 ==================
             case "/report/list":
             case "/reports":
@@ -114,34 +125,66 @@ public class AdminController extends HttpServlet {
             case "/notices":
                 showNoticeList(req, resp);
                 break;
-
-            // 공지 작성 폼
+            // 공지 작성 (GET: 폼, POST: 저장)
             case "/notice/form":
             case "/notices/write":
                 if ("GET".equalsIgnoreCase(req.getMethod())) {
+                    // 새 글 작성 폼
                     showNoticeForm(req, resp);
                 } else {
+                    // 새 글 저장
+                    saveNotice(req, resp);
+                }
+                break;
+            // 공지 수정 (GET: 기존 글 폼, POST: 수정 저장)
+            case "/notice/edit":
+            case "/notices/edit":
+                if ("GET".equalsIgnoreCase(req.getMethod())) {
+                    // 수정 폼 - id 파라미터로 글 조회
+                    showNoticeForm(req, resp);
+                } else {
+                    // 수정 저장
                     saveNotice(req, resp);
                 }
                 break;
 
+            // 공지 저장 (예전 경로 호환용)
             case "/notice/save":
             case "/notices/save":
                 saveNotice(req, resp);
                 break;
-
             case "/notice/delete":
                 deleteNotice(req, resp);
                 break;
-
-            // ================== 통계 ==================
-            case "/stats":
-                showStats(req, resp);
+            // 공지 삭제
+            case "/notices/delete":
+                deleteNotice(req, resp);
                 break;
+                // ================== 모임 관리 ==================
+                case "/meeting/list":
+                case "/meetings":
+                    showMeetingList(req, resp);
+                    break;
+
+                case "/meeting/detail":
+                case "/meetings/detail":
+                    showMeetingDetail(req, resp);
+                    break;
+
+                case "/meeting/status":
+                case "/meetings/status":
+                    updateMeetingStatus(req, resp);
+                    break;
+
+                case "/meeting/delete":
+                case "/meetings/delete":
+                    deleteMeeting(req, resp);
+                    break;
 
             default:
                 System.out.println("[AdminController] 404, unknown path = " + path);
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+
         }
     }
 
@@ -261,11 +304,12 @@ public class AdminController extends HttpServlet {
 
         String idParam = req.getParameter("id");
 
+
+        // id가 있으면 = 수정 모드 → 기존 공지 조회
         if (idParam != null && !idParam.isEmpty()) {
             long id = Long.parseLong(idParam);
-            // 필요하면 수정 모드일 때 기존 공지 조회해서 세팅
-            // AdminNoticeDTO notice = adminService.getNoticeById(id);
-            // req.setAttribute("notice", notice);
+            AdminNoticeDTO notice = adminService.getNoticeById(id);
+            req.setAttribute("notice", notice);
         }
 
         RequestDispatcher rd =
@@ -304,15 +348,98 @@ public class AdminController extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/admin/notice/list");
     }
 
-    // ================== 통계 ==================
-    private void showStats(HttpServletRequest req, HttpServletResponse resp)
+    // ================== 통계 (대시보드) ==================
+    private void showAdminStats(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        AdminStatsDTO stats = adminService.getStats();
-        req.setAttribute("stats", stats);
+        // 기존 AdminStatsDTO (전체 회원 수, 전체 신고 수 등)
+        AdminStatsDTO basicStats = adminService.getStats();
+
+        // 상단 카드용
+        int totalUsers        = adminService.getTotalUsers();
+        int todayNewUsers     = adminService.getTodayNewUsers();
+        int totalItems        = adminService.getTotalItems();
+        int totalTransactions = adminService.getTotalTransactions();
+        int pendingReports    = adminService.getPendingReports();
+
+        // 그래프/표용
+        List<DailySignupDTO>       signupStats = adminService.getDailySignupStats(7);     // 최근 7일
+        List<UserTrustRankDTO>     topUsers    = adminService.getTopUsersByTrustScore(5); // TOP 5
+        List<ReportStatusCountDTO> reportStats = adminService.getReportStatusCounts();
+
+        // JSP에 전달
+        req.setAttribute("basicStats", basicStats);
+
+        req.setAttribute("totalUsers", totalUsers);
+        req.setAttribute("todayNewUsers", todayNewUsers);
+        req.setAttribute("totalItems", totalItems);
+        req.setAttribute("totalTransactions", totalTransactions);
+        req.setAttribute("pendingReports", pendingReports);
+
+        req.setAttribute("signupStats", signupStats);
+        req.setAttribute("topUsers", topUsers);
+        req.setAttribute("reportStats", reportStats);
 
         RequestDispatcher rd =
                 req.getRequestDispatcher("/WEB-INF/views/admin/stats.jsp");
         rd.forward(req, resp);
     }
+    
+    // ================== 모임 관리 ==================
+    private void showMeetingList(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        String keyword = req.getParameter("keyword");
+        String status  = req.getParameter("status");
+
+        List<AdminMeetingDTO> meetingList = adminService.getMeetingList(keyword, status);
+
+        req.setAttribute("meetingList", meetingList);
+        req.setAttribute("keyword", keyword);
+        req.setAttribute("status", status);
+
+        RequestDispatcher rd =
+                req.getRequestDispatcher("/WEB-INF/views/admin/meetingList.jsp");
+        rd.forward(req, resp);
+    }
+
+    private void showMeetingDetail(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        long id = Long.parseLong(req.getParameter("id"));
+        AdminMeetingDTO meeting = adminService.getMeetingById(id);
+
+        req.setAttribute("meeting", meeting);
+
+        RequestDispatcher rd =
+                req.getRequestDispatcher("/WEB-INF/views/admin/meetingDetail.jsp");
+        rd.forward(req, resp);
+    }
+
+    private void updateMeetingStatus(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+
+        long id = Long.parseLong(req.getParameter("id"));
+        String status = req.getParameter("status");  // OPEN / CLOSED / COMPLETED
+
+        adminService.updateMeetingStatus(id, status);
+
+        resp.sendRedirect(req.getContextPath() + "/admin/meeting/detail?id=" + id);
+    }
+
+ // 모임 삭제
+    private void deleteMeeting(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+
+        long id = Long.parseLong(req.getParameter("id"));
+        System.out.println("[AdminController] deleteMeeting id = " + id);
+
+        int result = adminService.deleteMeeting(id);
+        System.out.println("[AdminController] deleteMeeting result = " + result);
+
+        resp.sendRedirect(req.getContextPath() + "/admin/meeting/list");
+    }
+
+
 }
+
