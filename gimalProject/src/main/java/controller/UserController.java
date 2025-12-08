@@ -88,7 +88,7 @@ public class UserController extends HttpServlet {
 
                 String profileUrl = new ImageService().getProfileImage(userDto.getAutoId(), "PROFILE");
                 session.setAttribute("profileUrl", profileUrl);
-
+                
                 String jwt = JwtAuth.generateToken(userDto.getUserId(), userDto.getAutoId(), userDto.getRole());
                 session.setAttribute("Authorization", "Bearer " + jwt);
 
