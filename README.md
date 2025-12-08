@@ -285,11 +285,21 @@ ADD CONSTRAINT fk_chat_message_user
 FOREIGN KEY (sender_id) REFERENCES user(auto_id)
 ON DELETE SET NULL;
 
--- 간이 데이터
--- 📍 지역정보
--- 📍 지역정보 샘플
+🚨 신고
+CREATE TABLE report (
+id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '신고 ID',
+reporter_id BIGINT NOT NULL COMMENT '신고자 ID',
+target_user_id BIGINT NOT NULL COMMENT '대상자 ID',
+target_type ENUM('USER','ITEM','MEETING') COMMENT '대상 유형',
+reason TEXT COMMENT '신고 사유',
+status ENUM('PENDING','RESOLVED') DEFAULT 'PENDING' COMMENT '상태',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
+FOREIGN KEY (reporter_id) REFERENCES user(auto_id),
+FOREIGN KEY (target_user_id) REFERENCES user(auto_id)
+) COMMENT='신고';
 
--- 🧍 USER 샘플 이미 존재
+-- 간이 데이터
+-- 🧍 USER 샘플
 INSERT INTO user (user_id, user_password, user_name, nickname, role)
 VALUES
 ('admin01', '1234', '관리자', '관리자닉', 'ADMIN'),
@@ -354,6 +364,8 @@ VALUES
 select * from meeting;
 select * from meeting_participant;
 select * from meeting_location;
+select * from chat_room;
+select * from chat_room_user;
 select * from user;
 select * from user_address;
 select * from file_resource;
