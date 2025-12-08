@@ -92,7 +92,6 @@ public class UserController extends HttpServlet {
                 session.setAttribute("Authorization", "Bearer " + jwt);
 
              // 이전 URL 체크 후 리다이렉트
-                
                 String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
                 if (redirectUrl != null) {
                     session.removeAttribute("redirectAfterLogin"); // 한 번만 사용

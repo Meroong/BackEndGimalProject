@@ -34,6 +34,9 @@ public class ChattingService {
         	int affectedRow = roomDao.createChatRoom(dto);
         	
         	if(affectedRow >0) {
+                // 참여자 등록
+                roomUserDao.addUserToRoom(hostId, roomId);
+                roomUserDao.addUserToRoom(receiverId, roomId);
         		System.out.println("개설 성공");
         		return true;
         	}

@@ -146,12 +146,6 @@ public class ChattingController extends HttpServlet {
 
             // 개인용 채팅방 생성
             boolean result = service.makePrivateRoom(itemId, "PRIVATE", hostId, receiverId);
-            
-			/* 추후 게시판 개설 이후 수정
-			 * if(result) {
-			 * 
-			 * }
-			 */
 
             req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
             return;
