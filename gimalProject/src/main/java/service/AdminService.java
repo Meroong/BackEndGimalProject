@@ -9,12 +9,21 @@ import dao.AdminUserDAO;
 import dao.UserDAO;
 import dto.AdminNoticeDTO;
 import dto.AdminStatsDTO;
+import dto.DailySignupDTO;
 import dto.ReportDTO;
+import dto.ReportStatusCountDTO;
 import dto.UserDTO;
+import dto.UserTrustRankDTO;
+import dao.AdminMeetingDAO;
+import dto.AdminMeetingDTO;
+import dao.AdminMeetingDAO;
+import dto.AdminMeetingDTO;
+
+
 
 /**
  * 관리자 전용 서비스 레이어
- * - DB 커넥션은 각 DAO(JDBCUtil)를 통해서만 열고 닫도록 단순 위임하는 구조로 변경
+ * - DB 커넥션은 각 DAO(JDBCUtil)를 통해서만 열고 닫도록 단순 위임하는 구조
  * - 기존에 사용하던 DBUtil, Connection 파라미터 의존성 제거
  */
 public class AdminService {
@@ -66,7 +75,8 @@ public class AdminService {
         }
     }
 
- // 🔥 회원 삭제(탈퇴)
+
+    // 🔥 회원 삭제(탈퇴)
     public int deleteUser(long id) {
         System.out.println("[AdminService] deleteUser id = " + id);
         try {
@@ -135,6 +145,17 @@ public class AdminService {
         }
     }
 
+    // 공지 단건 조회
+    public AdminNoticeDTO getNoticeById(long id) {
+        try {
+            AdminNoticeDAO dao = new AdminNoticeDAO();
+            return dao.findById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public void writeNotice(AdminNoticeDTO dto) {
         try {
             AdminNoticeDAO dao = new AdminNoticeDAO();
@@ -162,7 +183,11 @@ public class AdminService {
         }
     }
 
-    // ================== 통계 ==================
+
+
+    // ================== 통계 (기본 + 확장) ==================
+
+    // 기존: 전체 회원 수 / 전체 신고 수 등 기본 통계
     public AdminStatsDTO getStats() {
         try {
             AdminStatsDAO dao = new AdminStatsDAO();
@@ -172,4 +197,147 @@ public class AdminService {
             return null;
         }
     }
+
+
+    // 상단 카드: 전체 회원 수
+    public int getTotalUsers() {
+        try {
+            AdminStatsDAO dao = new AdminStatsDAO();
+            return dao.getTotalUsers();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    // 상단 카드: 오늘 가입한 회원 수
+    public int getTodayNewUsers() {
+        try {
+            AdminStatsDAO dao = new AdminStatsDAO();
+            return dao.getTodayNewUsers();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    // 상단 카드: 전체 상품 수
+    public int getTotalItems() {
+        try {
+            AdminStatsDAO dao = new AdminStatsDAO();
+            return dao.getTotalItems();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    // 상단 카드: 전체 거래 수
+    public int getTotalTransactions() {
+        try {
+            AdminStatsDAO dao = new AdminStatsDAO();
+            return dao.getTotalTransactions();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    // 상단 카드: 미처리 신고 수
+    public int getPendingReports() {
+        try {
+            AdminStatsDAO dao = new AdminStatsDAO();
+            return dao.getPendingReports();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    // 그래프: 최근 N일 회원가입 통계
+    public List<DailySignupDTO> getDailySignupStats(int days) {
+        try {
+            AdminStatsDAO dao = new AdminStatsDAO();
+            return dao.getDailySignupStats(days);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // 표: 신뢰도 높은 유저 TOP N
+    public List<UserTrustRankDTO> getTopUsersByTrustScore(int limit) {
+        try {
+            AdminStatsDAO dao = new AdminStatsDAO();
+            return dao.getTopUsersByTrustScore(limit);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // 그래프: 신고 상태별 개수
+    public List<ReportStatusCountDTO> getReportStatusCounts() {
+        try {
+            AdminStatsDAO dao = new AdminStatsDAO();
+            return dao.getReportStatusCounts();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    // ================== 모임 관리 ==================
+    // 목록 (검색 + 상태 필터)
+    public List<AdminMeetingDTO> getMeetingList(String keyword, String status) {
+        try {
+            AdminMeetingDAO dao = new AdminMeetingDAO();
+            return dao.search(keyword, status);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // 기존 no-arg 버전 (호환용, 필요하면 남겨둠)
+    public List<AdminMeetingDTO> getMeetingList() {
+        try {
+            AdminMeetingDAO dao = new AdminMeetingDAO();
+            return dao.findAll();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public AdminMeetingDTO getMeetingById(long id) {
+        try {
+            AdminMeetingDAO dao = new AdminMeetingDAO();
+            return dao.findById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public int updateMeetingStatus(long id, String status) {
+        try {
+            AdminMeetingDAO dao = new AdminMeetingDAO();
+            return dao.updateStatus(id, status);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    public int deleteMeeting(long id) {
+        try {
+            AdminMeetingDAO dao = new AdminMeetingDAO();
+            return dao.delete(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
 }

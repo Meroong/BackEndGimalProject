@@ -44,6 +44,36 @@ public class AdminNoticeDAO {
 
         return list;
     }
+    // 공지 단건 조회
+    public AdminNoticeDTO findById(long id) {
+
+        String sql = "SELECT id, title, content, created_at "
+                   + "FROM notice "
+                   + "WHERE id = ?";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, id);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    AdminNoticeDTO dto = new AdminNoticeDTO();
+                    dto.setId(rs.getLong("id"));
+                    dto.setTitle(rs.getString("title"));
+                    dto.setContent(rs.getString("content"));
+                    dto.setCreatedAt(rs.getTimestamp("created_at"));
+                    // writer, hit 필요하면 여기서 추가 세팅
+                    return dto;
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 
     // 공지 등록
     public int insert(AdminNoticeDTO dto) {

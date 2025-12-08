@@ -68,7 +68,7 @@ button.admin-btn {
     letter-spacing: -0.02em;
     box-shadow: 0 4px 14px rgba(82, 113, 255, 0.25);
     transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
-    text-decoration: none;        /* 밑줄 제거 */
+    text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -207,6 +207,30 @@ button.admin-btn:focus {
     color: #166534;
 }
 
+/* 모임 목록용 상태 배지 */
+.badge-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.badge-open {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.badge-closed {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.badge-completed {
+    background: #dcfce7;
+    color: #15803d;
+}
+
 /* ============================================================
    관리자 메인 카드 (메인 페이지 카드 톤 맞춤)
 ============================================================ */
@@ -309,6 +333,7 @@ button.admin-btn:focus {
 .text-right { text-align: right; }
 .mt-16 { margin-top: 16px; }
 .mt-24 { margin-top: 24px; }
+
 /* 회원 목록 / 신고 목록 등에서 쓰는 '상세보기' 버튼 느낌 */
 .main-box a.detail-link {
     display: inline-block;
@@ -324,6 +349,7 @@ button.admin-btn:focus {
 .main-box a.detail-link:hover {
     background: #E0EAFF;
 }
+
 /* ===================== 회원 상세 페이지 ===================== */
 
 .user-detail-header {
@@ -432,23 +458,24 @@ button.admin-btn:focus {
 
 /* 목록으로 버튼 - 크기는 기존 log-btn 그대로, 색만 변경 */
 .btn-ghost {
-    background: #F3F4F6 !important; /* 밝은 회색 */
-    color: #111 !important;         /* 검정 텍스트 */
-    border: 1px solid #E5E7EB;      /* 연한 테두리 */
-    box-shadow: none;               /* 그림자 제거 */
+    background: #F3F4F6 !important;
+    color: #111 !important;
+    border: 1px solid #E5E7EB;
+    box-shadow: none;
 }
 
-/* hover */
 .btn-ghost:hover {
     background: #E5E7EB !important;
     border-color: #D1D5DB;
     color: #000 !important;
 }
 
-/* active */
 .btn-ghost:active {
     background: #D1D5DB !important;
 }
+
+/* ===================== 신고 상세 ===================== */
+
 /* 신고 상세 텍스트 박스 */
 .report-text-box {
     background: #F9FAFB;
@@ -461,9 +488,7 @@ button.admin-btn:focus {
     white-space: pre-line;
 }
 
-/* ===================== 신고 상태 + 토글 버튼 영역 ===================== */
-
-/* 상태 뱃지 + 버튼들을 한 줄에 정렬 */
+/* 상태 뱃지 + 토글 버튼 영역 */
 .report-status-row {
     display: flex;
     align-items: center;
@@ -488,7 +513,7 @@ button.admin-btn:focus {
 
 /* RESOLVE 처리용 초록색 버튼 */
 .btn-success {
-    background: #16A34A;                           /* 초록색 */
+    background: #16A34A;
     box-shadow: 0 4px 14px rgba(22, 163, 74, 0.25);
     color: #fff;
 }
@@ -497,8 +522,6 @@ button.admin-btn:focus {
     background: #15803D;
 }
 
-/* PENDING 되돌리기 버튼은 이미 있는 .btn-warning 사용 가능 */
-/* 목록으로 버튼은 .btn-ghost 그대로 사용 */
 /**************
  * 공지 작성/수정 페이지
  **************/
@@ -637,4 +660,209 @@ button.admin-btn:focus {
         width: 100%;
         text-align: center;
     }
+}
+
+/* ============================
+      모임 상세 페이지 ( meetingDetail )
+   ============================ */
+
+/* 상세페이지 전체 */
+.detail-container {
+    width: 900px;
+    margin: 40px auto;
+    font-family: 'Pretendard', sans-serif;
+}
+
+/* 상단 버튼 스타일 재사용 */
+.detail-container input[type="button"],
+.detail-container button {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background: #4A6CF7;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.detail-container input[type="button"]:hover,
+.detail-container button:hover {
+    background: #2f54eb;
+}
+
+/* 상세 테이블 */
+.detail-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.detail-container table th {
+    width: 160px;
+    background: #f7f8fa;
+    padding: 14px 18px;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 1px solid #e6e6e6;
+}
+
+.detail-container table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+    color: #333;
+}
+
+/* 선택박스 */
+.detail-container select {
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+/* 상태 변경 버튼 */
+.detail-container .btn-primary {
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: #4A6CF7;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.detail-container .btn-primary:hover {
+    background: #2f54eb;
+}
+
+/* ============================
+   삭제 버튼을 "관리자 메인"과 수직 기준선 맞추기
+============================ */
+
+/* 삭제 버튼을 admin-container(1200px) 기준 정렬로 이동 */
+.delete-align-wrapper {
+    width: 1200px;
+    margin: 0 auto 20px;
+    text-align: right;
+    padding-right: 46px;   /* 관리자 상단 버튼과 수직 기준선 맞추기 */
+    box-sizing: border-box;
+}
+
+/* 삭제 버튼 스타일 (위 버튼들과 통일감) */
+.delete-align-wrapper a.delete-btn {
+    display: inline-block;
+    background: #EF4444;
+    color: #fff;
+    padding: 8px 20px;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(239,68,68,0.25);
+    transition: 0.15s ease;
+}
+
+.delete-align-wrapper a.delete-btn:hover {
+    background: #DC2626;
+    transform: translateY(-1px);
+}
+
+.status-row {
+    display: flex;
+    align-items: center;
+    justify-content: center; 
+    gap: 12px;
+}
+
+.status-row .current-status {
+    font-size: 15px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.status-row select {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+    background: #fff;
+}
+
+.status-row .btn-primary {
+    padding: 9px 20px;
+    border-radius: 999px;
+    background: #4A6CF7;
+    color: white;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+
+.status-row .btn-primary:hover {
+    background: #2f54eb;
+}
+
+/* ============================
+   모임 목록 검색 영역 (meetingList.jsp)
+============================ */
+
+/* 검색 영역 박스 전체 */
+.meeting-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0 16px;
+}
+
+/* 검색 입력창 */
+.meeting-search-input {
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    font-size: 14px;
+    transition: 0.15s ease;
+}
+
+.meeting-search-input:focus {
+    background: #fff;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    outline: none;
+}
+
+/* 상태 선택 셀렉트 */
+.meeting-status-select {
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    font-size: 14px;
+    transition: 0.15s ease;
+}
+
+.meeting-status-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+    outline: none;
+}
+
+/* 검색 버튼 (기본 log-btn 스타일 + 약간 조정) */
+.meeting-search-btn {
+    padding: 10px 24px;
+}
+
+/* 검색 결과 텍스트 */
+.meeting-result-text {
+    font-size: 13px;
+    color: #6b7280;
+    margin: 4px 0 12px;
 }
