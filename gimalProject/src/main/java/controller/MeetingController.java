@@ -41,16 +41,12 @@ public class MeetingController extends HttpServlet {
 		
 		switch(path) {
 			case "/list":
-				ArrayList<MeetingDTO> aList = meetingService.getMeetingList();
-				req.setAttribute("meetingList", aList);
-				if(!aList.isEmpty()) {
-					req.getRequestDispatcher("/views/meet/list.jsp").forward(req, resp);
-					return;
-				}
-				else {
-					resp.sendError(HttpServletResponse.SC_NOT_FOUND, "잘못된 요청 경로입니다.");
-					return;
-				}
+			    ArrayList<MeetingDTO> aList = meetingService.getMeetingList();
+			    req.setAttribute("meetingList", aList);
+	
+			    // 리스트가 비어 있어도 그대로 JSP로 보냄
+			    req.getRequestDispatcher("/views/meet/list.jsp").forward(req, resp);
+			    return;
 			//게시글 상세 조회 미팅 아이디를 인자로 받음
 			case "/info":
 				
