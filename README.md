@@ -5,7 +5,7 @@
     DB_PASSWORD=1234
 
 DB 세팅
-
+drop database if exists dorandoran;
 create database dorandoran;
 use dorandoran;
 
@@ -109,20 +109,20 @@ CREATE TABLE file_resource (
 
 
 
--- 💬 중고/대여 상품 게시판
+-- 💬 드림/교환 게시판
 CREATE TABLE item (
     item_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '상품 ID',
-    seller_id BIGINT NOT NULL COMMENT '판매자 ID',
+    seller_id BIGINT NOT NULL COMMENT '드림자 ID',
     category_id BIGINT COMMENT '카테고리 ID',
     title VARCHAR(255) NOT NULL COMMENT '상품 제목',
     content TEXT COMMENT '상품 설명',
-    price INT NOT NULL COMMENT '판매 가격',
-    trade_type ENUM('SALE', 'RENTAL') DEFAULT 'SALE' COMMENT '거래 유형',
+    price INT NOT NULL COMMENT '드림 가격',
+    trade_type ENUM('SALE', 'RENTAL', 'DREAM') DEFAULT 'SALE' COMMENT '거래 유형',
     status ENUM('AVAILABLE', 'RESERVED', 'COMPLETED') DEFAULT 'AVAILABLE' COMMENT '상품 상태',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
     FOREIGN KEY (seller_id) REFERENCES user(auto_id)
-) COMMENT='중고/대여 게시판';
+) COMMENT='드림/교환 게시판';
 
 
 
@@ -359,6 +359,11 @@ VALUES
 
 -- 💾 file_resource 예시 데이터
 
+-- 💬 중고/대여 상품 게시판
+INSERT INTO item (seller_id, category_id, title, content, price, trade_type, status)
+VALUES
+(2, 1, '자전거 드림', '좋은 자전거 드림합니다.', 0, 'DREAM', 'AVAILABLE'),
+(2, 1, '책 교환', '프로그래밍 책 교환합니다', 5000, 'RENTAL', 'AVAILABLE');
 
 
 select * from meeting;
