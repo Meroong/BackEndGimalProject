@@ -5,9 +5,13 @@
     DB_PASSWORD=1234
 
 DB 세팅
+drop database if exists dorandoran;
+create database dorandoran;
+use dorandoran;
+
+
 SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS weather_data;
 -- 📍 지역정보 테이블
 DROP TABLE IF EXISTS user_address;
 -- 💬 채팅메시지
@@ -105,20 +109,20 @@ CREATE TABLE file_resource (
 
 
 
--- 💬 중고/대여 상품 게시판
+-- 💬 드림/교환 게시판
 CREATE TABLE item (
     item_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '상품 ID',
-    seller_id BIGINT NOT NULL COMMENT '판매자 ID',
+    seller_id BIGINT NOT NULL COMMENT '드림자 ID',
     category_id BIGINT COMMENT '카테고리 ID',
     title VARCHAR(255) NOT NULL COMMENT '상품 제목',
     content TEXT COMMENT '상품 설명',
-    price INT NOT NULL COMMENT '판매 가격',
-    trade_type ENUM('SALE', 'RENTAL') DEFAULT 'SALE' COMMENT '거래 유형',
+    price INT NOT NULL COMMENT '드림 가격',
+    trade_type ENUM('SALE', 'RENTAL', 'DREAM') DEFAULT 'SALE' COMMENT '거래 유형',
     status ENUM('AVAILABLE', 'RESERVED', 'COMPLETED') DEFAULT 'AVAILABLE' COMMENT '상품 상태',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
     FOREIGN KEY (seller_id) REFERENCES user(auto_id)
-) COMMENT='중고/대여 게시판';
+) COMMENT='드림/교환 게시판';
 
 
 
@@ -281,31 +285,18 @@ ADD CONSTRAINT fk_chat_message_user
 FOREIGN KEY (sender_id) REFERENCES user(auto_id)
 ON DELETE SET NULL;
 
-CREATE DATABASE IF NOT EXISTS dorandoran;
-USE dorandoran;
-
-CREATE TABLE weather_data (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    temp DOUBLE NOT NULL,
-    weather VARCHAR(50) NOT NULL,
-    pm10 INT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-
 -- 🚨 신고
 CREATE TABLE report (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '신고 ID',
-    reporter_id BIGINT NOT NULL COMMENT '신고자 ID',
-    target_user_id BIGINT NOT NULL COMMENT '대상자 ID',
-    target_type ENUM('USER','ITEM','MEETING') NOT NULL COMMENT '대상 유형',
-    reason TEXT COMMENT '신고 사유',
-    status ENUM('PENDING','RESOLVED') NOT NULL DEFAULT 'PENDING' COMMENT '상태',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
-    CONSTRAINT fk_reporter FOREIGN KEY (reporter_id) REFERENCES user(auto_id),
-    CONSTRAINT fk_target FOREIGN KEY (target_user_id) REFERENCES user(auto_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='신고';
-
+id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '신고 ID',
+reporter_id BIGINT NOT NULL COMMENT '신고자 ID',
+target_user_id BIGINT NOT NULL COMMENT '대상자 ID',
+target_type ENUM('USER','ITEM','MEETING') COMMENT '대상 유형',
+reason TEXT COMMENT '신고 사유',
+status ENUM('PENDING','RESOLVED') DEFAULT 'PENDING' COMMENT '상태',
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
+FOREIGN KEY (reporter_id) REFERENCES user(auto_id),
+FOREIGN KEY (target_user_id) REFERENCES user(auto_id)
+) COMMENT='신고';
 
 -- 간이 데이터
 -- 🧍 USER 샘플
@@ -319,14 +310,14 @@ VALUES
 (2, '서울특별시 강남구 삼성동', '서울특별시 강남구 삼성동 456', '201호', 37.514, 127.063);
 
 -- 🤝 모임 장소 샘플
--- INSERT INTO meeting_location (road_address, jibun_address, addr_detail, latitude, longitude)
--- VALUES
--- ('서울특별시 한강공원', '서울특별시 용산구 한강로', '1구역', 37.526, 126.927);
+INSERT INTO meeting_location (road_address, jibun_address, addr_detail, latitude, longitude)
+VALUES
+('서울특별시 한강공원', '서울특별시 용산구 한강로', '1구역', 37.526, 126.927);
 
 -- 🤝 모임 게시판 샘플
- INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, creator_id, weather)
- VALUES
- ('조깅 모임', '매주 토요일 조깅', '2025-11-22 09:00:00', 1, 10, 2, 0, '운동', 'OPEN', 2, '맑음');
+INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, creator_id, weather)
+VALUES
+('조깅 모임', '매주 토요일 조깅', '2025-11-22 09:00:00', 1, 10, 2, 0, '운동', 'OPEN', 2, '맑음');
 
 -- 👥 모임참여자 관리
 INSERT INTO meeting_participant (meeting_id, user_id, paid)
@@ -368,16 +359,22 @@ VALUES
 
 -- 💾 file_resource 예시 데이터
 
-select * from weather_data;
+-- 💬 중고/대여 상품 게시판
+INSERT INTO item (seller_id, category_id, title, content, price, trade_type, status)
+VALUES
+(2, 1, '자전거 드림', '좋은 자전거 드림합니다.', 0, 'DREAM', 'AVAILABLE'),
+(2, 1, '책 교환', '프로그래밍 책 교환합니다', 5000, 'RENTAL', 'AVAILABLE');
+
 
 select * from meeting;
 select * from meeting_participant;
 select * from meeting_location;
 select * from chat_room;
 select * from chat_room_user;
-insert into chat_room_user values(1,3, "2025-01-04");
 select * from user;
 select * from user_address;
 select * from file_resource;
+
+
 
 
