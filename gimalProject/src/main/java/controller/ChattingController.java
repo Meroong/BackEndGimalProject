@@ -176,6 +176,7 @@ public class ChattingController extends HttpServlet {
             System.out.println("/invite 요청");
 
             try {
+            	System.out.println(req.getParameter("meetId"));
                 long roomId = Long.parseLong(req.getParameter("roomId"));
                 long meetId = Long.parseLong(req.getParameter("meetId"));
                 long receiverId = Long.parseLong(req.getParameter("receiverId"));

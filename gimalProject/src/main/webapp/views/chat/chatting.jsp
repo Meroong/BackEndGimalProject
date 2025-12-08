@@ -17,8 +17,8 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 400px;   /* 팝업 크기 조정 */
-            height: 600px;  /* 팝업 크기 조정 */
+            width: 400px;
+            height: 600px;
             background: #fff;
             border-radius: 16px;
             box-shadow: 0 5px 18px rgba(0,0,0,0.15);
@@ -36,7 +36,7 @@
             margin: 0;
             border-bottom: 1px solid #eee;
             display: flex;
-            justify-content: center; /* 채팅방 이름 중앙 */
+            justify-content: center;
             align-items: center;
             position: relative;
         }
@@ -52,22 +52,35 @@
             text-decoration: none;
         }
 
-		.chat-box {
-		    flex: 1;
-		    display: flex;
-		    flex-direction: column;
-		    padding: 12px;
-		    overflow: hidden; /* 추가: 내부 스크롤 영역만 사용 */
-		}
-		
-		.chat-messages {
-		    flex: 1 1 auto;  /* 기존 flex:1 대신 */
-		    overflow-y: auto;
-		    padding: 8px;
-		    background: #FCFBFE;
-		    border-radius: 12px;
-		    margin-bottom: 8px; /* 입력창과 간격 */
-		}
+        /* 모임원 관리 버튼 */
+        .member-btn {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            background: none;
+            border: none;
+            color: #FF7C40;
+            cursor: pointer;
+        }
+
+        .chat-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            padding: 8px;
+            background: #FCFBFE;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
 
         .msg {
             display: flex;
@@ -117,7 +130,7 @@
             color: #555;
         }
 
-        /* 메시지 입력 영역 항상 하단 고정 */
+        /* 메시지 입력 영역 */
         .chat-form {
             display: flex;
             gap: 6px;
@@ -141,13 +154,38 @@
             cursor: pointer;
         }
 
-        /* 최소한 스크롤바 */
-        .chat-messages::-webkit-scrollbar {
-            width: 6px;
+        /* 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 5px 18px rgba(0,0,0,0.2);
+            z-index: 2000;
+            width: 300px;
         }
-        .chat-messages::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,0.2);
-            border-radius: 3px;
+
+        .modal h3 {
+            margin-top: 0;
+        }
+
+        .modal ul {
+            list-style: none;
+            padding: 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .modal li {
+            margin-bottom: 8px;
+        }
+
+        .modal form {
+            display: inline;
         }
     </style>
 </head>
@@ -158,10 +196,14 @@
     <h2>
         <a href="${pageContext.request.contextPath}/chat/roomList" class="back-btn">←</a>
         채팅방 #${selectedRoomId}
+
+        <!-- 호스트만 보이도록 + 버튼 -->
+        <c:if test="${isHost}">
+            <button class="member-btn" onclick="document.getElementById('memberModal').style.display='block';">＋</button>
+        </c:if>
     </h2>
 
     <div class="chat-box">
-
         <!-- 메시지 영역 -->
         <div class="chat-messages" id="chatMessages">
             <c:url var="defaultProfile" value="/resources/images/default.jpg"/>
@@ -187,28 +229,54 @@
         </div>
 
         <!-- 메시지 입력 -->
-        <form class="chat-form" method="post" action="${pageContext.request.contextPath}/chat/sendChat" id="chatForm">
+        <form class="chat-form" method="post" action="${pageContext.request.contextPath}/chat/sendChat">
             <input type="hidden" name="roomId" value="${selectedRoomId}"/>
             <input type="text" name="content" placeholder="메시지 입력"/>
             <button type="submit">전송</button>
         </form>
 
     </div>
-
 </div>
 
-<script>
-    // 페이지 로드 시 스크롤 항상 아래로
-    const chatMessages = document.getElementById('chatMessages');
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+<!-- 모임원 관리 모달 -->
+<c:if test="${isHost}">
+<div class="modal" id="memberModal">
+    <h3>모임원 관리</h3>
+    <ul>
+        <c:forEach var="user" items="${participantUsers}">
+            <li>
+                ${user.nickname}
+                <c:choose>
+                    <c:when test="${user.inChat}">
+                        <!-- 강퇴 -->
+                        <form method="post" action="${pageContext.request.contextPath}/chat/kick">
+                            <input type="hidden" name="roomId" value="${selectedRoomId}"/>
+                            <input type="hidden" name="meetId" value="${roomInfo.meetingId}"/>
+                            <input type="hidden" name="receiverId" value="${user.participantId}"/>
+                            <button type="submit">강퇴</button>
+                        </form>
+                    </c:when>
+                    <c:otherwise>
+                        <!-- 초대 -->
+                        <form method="post" action="${pageContext.request.contextPath}/chat/invite">
+                            <input type="hidden" name="roomId" value="${selectedRoomId}"/>
+                            <input type="hidden" name="meetId" value="${roomInfo.meetingId}"/>
+                            <input type="hidden" name="receiverId" value="${user.participantId}"/>
+                            <button type="submit">초대</button>
+                        </form>
+                    </c:otherwise>
+                </c:choose>
+            </li>
+        </c:forEach>
+    </ul>
+    <button onclick="document.getElementById('memberModal').style.display='none';">닫기</button>
+</div>
+</c:if>
 
-    // 메시지 전송 후 스크롤 아래로
-    const chatForm = document.getElementById('chatForm');
-    chatForm.addEventListener('submit', function() {
-        setTimeout(() => {
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 50); // 폼 제출 후 렌더링까지 약간 지연
-    });
+<script>
+    // 스크롤 항상 아래로
+    var chatMessages = document.getElementById('chatMessages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 </script>
 
 </body>

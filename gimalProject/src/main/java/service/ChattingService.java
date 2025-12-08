@@ -137,7 +137,7 @@ public class ChattingService {
         chatParticipantsUserDTO dto = new chatParticipantsUserDTO();
 
         // meeting participant 정보
-        dto.setParticipantId(p.getId());
+        dto.setParticipantId(p.getUserId());
         dto.setMeetingId(p.getMeetingId());
         dto.setPaid(p.isPaid());
 
