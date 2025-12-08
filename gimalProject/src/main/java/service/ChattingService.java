@@ -265,4 +265,31 @@ public class ChattingService {
             throw new Exception("유저 추가 실패");
         }
     }
+    public boolean kickUser(long hostId, long roomId, long targetUserId, long meetId) throws Exception {
+    	System.out.println("work Service: kickUser");
+        // 방장인지 확인
+        if (!roomDao.isHost(roomId, hostId)) {
+            throw new Exception("방장만 강퇴할 수 있습니다.");
+        }
+        System.out.println(roomId+" "+targetUserId);
+        // 대상 유저가 방에 있는지 확인
+        if (!roomUserDao.isUserInRoom(targetUserId, roomId)) {
+            throw new Exception("해당 유저는 채팅방에 없습니다.");
+        }
+
+        // host 자신은 kick 불가
+        if (hostId == targetUserId) {
+            throw new Exception("자기 자신은 강퇴할 수 없습니다.");
+        }
+
+        // 강퇴 실행 유저 방나가기 dao 재활용
+        int chatResult = roomUserDao.quitRoom(targetUserId, roomId);
+        if (chatResult <= 0) throw new Exception("채팅방 강퇴 실패");
+        
+        // 2. 모임 참가자에서 제외
+        boolean meetResult = new MeetingService().quitMeet(meetId, targetUserId);
+        if (!meetResult) throw new Exception("모임 참가자 강퇴 실패");
+        
+        else throw new Exception("강퇴 실패");
+    }
 }

@@ -85,7 +85,7 @@ public class ChatRoomUserDAO {
 		            return false;
 		        }
 	 }
-	//탈퇴 시 모든 채팅방 나가기
+	//탈퇴 시 모든 채팅방 나가기 
 	public int quitRoomForDeleteUser(long autoId) {
 		String sql = "delete from chat_room_user where user_id =?; ";
         try (Connection con = JDBCUtil.jdbcCon();
