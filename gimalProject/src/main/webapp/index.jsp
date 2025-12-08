@@ -1,5 +1,7 @@
+<%@page import="dto.UserAddressDTO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="util.AuthUtil" %>
+<%@ page import="util.AuthUtil"%>
+<%@ page import="dto.UserAddressDTO"%>
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -11,69 +13,8 @@
 <body>
 <div class="container">
 
-    <%-- 헤더 --%>
-	<header>
-	    <div class="logo">
-	        <img src="resources/images/logo.png" alt="logo">
-	        도란도란
-	    </div>
-
-<div class="header-buttons">
-    <%
-        Object loginUser = session.getAttribute("Authorization");
-
-        if (loginUser != null) {
-
-            // JWT 토큰
-            String token = (String) loginUser;
-
-            // JWT에서 role 추출 (사용중인 메서드명에 맞게 수정하세요)
-            String role = AuthUtil.getRole(request);
-    %>
-
-        <!-- 로그인 상태 공통: 메시지 -->
-        <button class="msg-btn"
-                onclick="location.href='<%= request.getContextPath() %>/chat/roomList'">
-            메시지
-        </button>
-
-        <%-- ADMIN: 관리자 버튼 --%>
-        <% if ("ADMIN".equals(role)) { %>
-
-            <button class="log-btn"
-                    onclick="location.href='<%=request.getContextPath()%>/admin'">
-                관리자
-            </button>
-
-        <% } else { %>
-
-        <%-- USER: 마이페이지 버튼 --%>
-            <button class="mypage-btn"
-                    onclick="location.href='<%= request.getContextPath() %>/views/user/mypage.jsp'">
-                마이페이지
-            </button>
-
-        <% } %>
-
-        <!-- 로그아웃 -->
-        <form action="<%= request.getContextPath() %>/user/logout" method="get" style="display:inline;">
-            <button type="submit" class="log-btn">Log out</button>
-        </form>
-
-    <% } else { %>
-
-        <!-- 비로그인 상태 -->
-        <button class="log-btn"
-                onclick="location.href='views/user/login.jsp'">
-            Log in
-        </button>
-
-    <% } %>
-</div>
-
-
-	</header>
-
+    <%-- 헤더 include --%>
+    <jsp:include page="/include/header.jsp" />
 
     <%-- 검색 영역 --%>
     <section class="search-section">
@@ -104,10 +45,51 @@
 
         <div class="grid-3">
 
-            <%-- 지도 영역 --%>
-            <div class="map-card">
-                <img src="resources/images/map.png" alt="map">
-            </div>
+            <%-- 지도 카드 --%>
+            <div class="map-card" id="map" style="width:100%; height:400px;"></div>
+
+            <% 
+            UserAddressDTO addressInfo = (UserAddressDTO) session.getAttribute("addressInfo");
+
+            double defaultLat = 37.501;
+            double defaultLng = 126.884;
+
+            double lat = (addressInfo != null && addressInfo.getLatitude() != null)
+                         ? addressInfo.getLatitude()
+                         : defaultLat;
+
+            double lng = (addressInfo != null && addressInfo.getLongitude() != null)
+                         ? addressInfo.getLongitude()
+                         : defaultLng;
+            %>
+
+            <script>
+                const userLat = <%= lat %>;
+                const userLng = <%= lng %>;
+            </script>
+            <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
+            <script>
+                window.onload = function() {
+                    if (!window.kakao) {
+                        alert("카카오 지도 SDK 로드 실패");
+                        return;
+                    }
+
+                    var container = document.getElementById('map');
+                    var options = {
+                        center: new kakao.maps.LatLng(userLat, userLng),
+                        level: 3
+                    };
+
+                    var map = new kakao.maps.Map(container, options);
+
+                    var markerPosition  = new kakao.maps.LatLng(userLat, userLng);
+                    var marker = new kakao.maps.Marker({ position: markerPosition });
+                    marker.setMap(map);
+
+                    console.log("카카오 지도 로드 완료");
+                }
+            </script>
 
             <%-- 가운데: 오늘의 인기 모임 --%>
             <div class="center-card">
@@ -151,7 +133,7 @@
                 </div>
             </div>
 
-            <%-- 날씨 + 활동 카드 --%>
+            <%-- 오른쪽: 날씨 + 활동 카드 --%>
             <div>
                 <div class="weather-card">
                     <div class="weather-title">현재 구로동 날씨</div>
@@ -160,18 +142,23 @@
                 </div>
 
                 <div class="activities">
-                    <div class="activity-card">
+
+                    <%-- 🔗 모임 버튼 → /meet/list 이동 --%>
+                    <a href="<%= request.getContextPath() %>/meeting/list" class="activity-card" style="text-decoration:none; color:inherit;">
                         <img src="resources/images/meeting.jpg" alt="meet">
                         <span>모임</span>
-                    </div>
+                    </a>
+
                     <div class="activity-card">
                         <img src="resources/images/trade.jpg" alt="friend">
                         <span>교환</span>
                     </div>
+
                     <div class="activity-card">
                         <img src="resources/images/giving.jpg" alt="chat">
                         <span>드림</span>
                     </div>
+
                 </div>
             </div>
 
@@ -179,10 +166,6 @@
     </section>
 
 </div>
-<button class="log-btn"
-        onclick="location.href='<%=request.getContextPath()%>/admin/stats'">
-    통계 보기
-</button>
 
 </body>
 </html>

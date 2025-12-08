@@ -141,8 +141,9 @@
              Documentation at: /docs/config/valve.html
              Note: The pattern used is equivalent to using pattern="common" -->
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs" pattern="%h %l %u %t &quot;%r&quot; %s %b" prefix="localhost_access_log" suffix=".txt"/>
-
-      <Context docBase="gimalProject" path="/dorandoran" reloadable="true" source="org.eclipse.jst.jee.server:gimalProject"/></Host>
+		<!-- 이미지 접근용 콘텍스트 설정 -->
+		<Context docBase="C:/upload" path="/upload" reloadable="false"/>
+      <Context docBase="gimalProject" path="/gimalProject" reloadable="true" source="org.eclipse.jst.jee.server:gimalProject"/></Host>
     </Engine>
   </Service>
 </Server>

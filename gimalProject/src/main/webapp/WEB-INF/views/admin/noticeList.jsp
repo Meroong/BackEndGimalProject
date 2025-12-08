@@ -1,85 +1,82 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.util.List" %>
-<%@ page import="dto.AdminNoticeDTO" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <!DOCTYPE html>
-<html lang="ko">
+<html>
 <head>
-    <meta charset="UTF-8" />
-    <title>도란도란 - 공지사항 목록</title>
-    <link rel="stylesheet" href="<%=request.getContextPath()%>/resources/css/admin.css">
+    <meta charset="UTF-8">
+    <title>관리자 공지사항 관리</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/admin.css">
 </head>
-<body>
+<body class="admin-body">
 
-<div class="container">
+<div class="admin-container">
 
+    <!-- 상단 헤더 : 제목 + 오른쪽 버튼들 -->
     <header>
-        <div class="logo">
-            <img src="<%=request.getContextPath()%>/resources/images/logo.png" alt="logo">
-            도란도란 관리자
-        </div>
-        <div class="header-buttons">
-            <button class="log-btn"
-                    onclick="location.href='<%=request.getContextPath()%>/admin'">
-                관리자 메인
-            </button>
+        <h1>관리자 공지사항 관리</h1>
 
-            <button class="log-btn"
-                    onclick="location.href='<%=request.getContextPath()%>/admin/notices/write'">
-                공지 작성
-            </button>
+        <!-- 오른쪽 상단 버튼 그룹 (홈으로 / 관리자 메인) -->
+        <div class="header-buttons">
+            <a href="${pageContext.request.contextPath}/" class="log-btn">홈으로</a>
+            <a href="${pageContext.request.contextPath}/admin" class="log-btn">관리자 메인</a>
         </div>
     </header>
 
-    <section class="main-box">
-        <div class="box-title">공지사항 목록</div>
+    <!-- 공지사항 메인 박스 -->
+    <div class="main-box">
 
-        <table border="1" style="width:100%; border-collapse:collapse; text-align:center;">
+        <!-- 제목 + 오른쪽 공지 작성 버튼 (한 줄 정렬) -->
+        <div class="notice-header-row">
+            <h2 class="box-title">공지사항 목록</h2>
+            <a href="${pageContext.request.contextPath}/admin/notices/write" class="top-btn">
+                공지 작성
+            </a>
+        </div>
+
+        <!-- 공지 목록 테이블 -->
+        <table>
             <thead>
-                <tr style="background:#f3f4f6;">
-                    <th>ID</th>
-                    <th>제목</th>
-                    <th>작성일</th>
-                    <th>삭제</th>
-                </tr>
+            <tr>
+                <th>ID</th>
+                <th>제목</th>
+                <th>작성일</th>
+                <th>수정</th>
+                <th>삭제</th>
+            </tr>
             </thead>
 
             <tbody>
-            <%
-                List<AdminNoticeDTO> noticeList = (List<AdminNoticeDTO>) request.getAttribute("noticeList");
-
-                if (noticeList == null || noticeList.isEmpty()) {
-            %>
+            <c:if test="${empty noticeList}">
                 <tr>
-                    <td colspan="4">등록된 공지사항이 없습니다.</td>
+                    <td colspan="5">등록된 공지사항이 없습니다.</td>
                 </tr>
-            <%
-                } else {
-                    for (AdminNoticeDTO n : noticeList) {
-            %>
-                <tr>
-                    <td><%= n.getId() %></td>
-                    <td><%= n.getTitle() %></td>
-                    <td><%= n.getCreatedAt() %></td>
+            </c:if>
 
-                    <!-- 삭제 버튼 -->
+            <c:forEach var="n" items="${noticeList}">
+                <tr>
+                    <td>${n.id}</td>
+                    <td>${n.title}</td>
+                    <td>${n.createdAt}</td>
                     <td>
-                        <a href="<%=request.getContextPath()%>/admin/notices/delete?id=<%= n.getId() %>"
+                        <a href="${pageContext.request.contextPath}/admin/notices/edit?id=${n.id}">
+                            수정
+                        </a>
+                    </td>
+                    <td>
+                        <a href="${pageContext.request.contextPath}/admin/notices/delete?id=${n.id}"
                            onclick="return confirm('정말 삭제하시겠습니까?');">
                             삭제
                         </a>
                     </td>
                 </tr>
-            <%
-                    }
-                }
-            %>
+            </c:forEach>
             </tbody>
         </table>
 
-    </section>
+    </div> <!-- /.main-box -->
 
-</div>
+</div> <!-- /.admin-container -->
 
 </body>
 </html>

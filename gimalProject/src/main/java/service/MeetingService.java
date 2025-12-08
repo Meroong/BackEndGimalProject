@@ -1,10 +1,348 @@
 package service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import dao.MeetingDAO;
+import dao.MeetingLocationDAO;
+import dao.MeetingParticipantDAO;
+import dto.FileResourceDTO;
+import dto.MeetingDTO;
+import dto.MeetingInfoDTO;
+import dto.MeetingLocationDTO;
+import dto.MeetingParticipantDTO;
+
 public class MeetingService {
-	//게시글 작성
-	
-	//게시글 수정
-	
-	//게시글 삭제
-	
+
+    // 특정 모임 상세 조회
+    public MeetingInfoDTO getMeetingInfo(long meetingId) {
+        System.out.println("Service: getMeeting");
+
+        MeetingInfoDTO infoDto = new MeetingInfoDTO();
+
+        // 모임정보 가져오기
+        MeetingDTO meetingDto = new MeetingDAO().getPostDetail(meetingId);
+        if (meetingDto == null) throw new IllegalArgumentException("MeetingDTO가 존재하지않습니다.");
+
+        // 주소 가져오기
+        MeetingLocationDTO locationDto = new MeetingLocationDAO().getLocation(meetingDto.getLocationId());
+        if (locationDto == null) throw new IllegalArgumentException("MeetingLocationDTO가 존재하지않습니다.");
+
+        // 모임정보 세팅
+        infoDto.setMeetingId(meetingDto.getMeetingId());
+        infoDto.setTitle(meetingDto.getTitle());
+        infoDto.setContent(meetingDto.getContent());
+        infoDto.setDate(meetingDto.getDate());
+        infoDto.setLocationId(meetingDto.getLocationId());
+        infoDto.setMaxMembers(meetingDto.getMaxMembers());
+        infoDto.setCurrentMembers(meetingDto.getCurrentMembers());
+        infoDto.setCost(meetingDto.getCost());
+        infoDto.setTag(meetingDto.getTag());
+        infoDto.setStatus(meetingDto.getStatus());
+        infoDto.setCreatedAt(meetingDto.getCreatedAt());
+        infoDto.setUpdatedAt(meetingDto.getUpdatedAt());
+        infoDto.setWeather(meetingDto.getWeather());
+        infoDto.setCreatorId(meetingDto.getCreatorId()); // 게시자 ID 추가
+
+        // 장소 정보 세팅
+        infoDto.setRoadAddress(locationDto.getRoadAddress());
+        infoDto.setJibunAddress(locationDto.getJibunAddress());
+        infoDto.setAddrDetail(locationDto.getAddrDetail());
+        System.out.println(locationDto.getAddrDetail());
+        infoDto.setLatitude(locationDto.getLatitude());
+        infoDto.setLongitude(locationDto.getLongitude());
+
+        // 이미지 정보 가져오기
+        ImageService imageService = new ImageService(); 
+        List<FileResourceDTO> imageUrls = imageService.getMeetingImage(meetingId, "MEETING");
+        infoDto.setImages(imageUrls);
+
+        return infoDto;
+    }
+    
+    //특정 모임의 모든 참가자 조회
+    public ArrayList<MeetingParticipantDTO> getParticipantsInfo(long meetingId){
+    	System.out.println("Service: getParticipantsInfo");
+    	return new MeetingParticipantDAO().getParticipantsByMeetId(meetingId);
+    }
+
+    // 게시판 리스트 조회
+    public ArrayList<MeetingDTO> getMeetingList() {
+        System.out.println("Service: getMeetingList");
+        return new MeetingDAO().getPostList();
+    }
+
+    // 모임 장소 업데이트
+    public boolean updateLocation(
+            long locationId,
+            String roadAddress,
+            String jibunAddress,
+            String addrDetail,
+            double latitude,
+            double longitude
+    ) throws Exception {
+        if (locationId <= 0) throw new IllegalArgumentException("주소정보가 없습니다.");
+
+        MeetingLocationDTO dto = new MeetingLocationDTO();
+        dto.setId(locationId);
+        dto.setRoadAddress(roadAddress);
+        dto.setJibunAddress(jibunAddress);
+        dto.setAddrDetail(addrDetail);
+        dto.setLatitude(latitude);
+        dto.setLongitude(longitude);
+
+        boolean result = new MeetingLocationDAO().updateLocation(dto);
+        if (!result) throw new Exception("모임 장소 업데이트 실패");
+        return result;
+    }
+
+    // 모임 장소 저장
+    public long insertLocation(
+            String roadAddress,
+            String jibunAddress,
+            String addrDetail,
+            double latitude,
+            double longitude
+    ) throws Exception {
+        System.out.println("Service: insertLocation");
+
+        MeetingLocationDTO dto = new MeetingLocationDTO();
+        dto.setRoadAddress(roadAddress);
+        dto.setJibunAddress(jibunAddress);
+        dto.setAddrDetail(addrDetail);
+        dto.setLatitude(latitude);
+        dto.setLongitude(longitude);
+
+        Long rs = new MeetingLocationDAO().insertLocation(dto);
+        if (rs != null) return rs;
+
+        throw new Exception("모임장소 아이디값 없음");
+    }
+
+    // 모임 생성 (게시자 ID 포함)
+    public long insertMeetingInfo(
+            String title,
+            String content,
+            Timestamp date,
+            long locationId,
+            int maxMembers,
+            int currentMembers,
+            int cost,
+            String tag,
+            String status,
+            double latitude,
+            double longitude,
+            long creatorId // 로그인 세션에서 받은 게시자 ID
+    ) throws Exception {
+        System.out.println("Service: insertMeetingInfo");
+        if (date == null) throw new IllegalArgumentException("모임 날짜가 존재하지 않습니다.");
+
+        LocalDate meetingDate = date.toLocalDateTime().toLocalDate();
+        LocalDate today = LocalDate.now();
+        int dayIndex = (int) ChronoUnit.DAYS.between(today, meetingDate);
+        if (dayIndex < 0 || dayIndex > 7) throw new RuntimeException("날씨 조회는 7일 이내 날짜만 가능합니다");
+
+        MeetingDTO dto = new MeetingDTO();
+        dto.setTitle(title);
+        dto.setContent(content);
+        dto.setDate(date);
+        dto.setLocationId(locationId);
+        dto.setMaxMembers(maxMembers);
+        dto.setCurrentMembers(currentMembers);
+        dto.setCost(cost);
+        dto.setTag(tag);
+        dto.setStatus(status);
+        dto.setCreatorId(creatorId); // 게시자 ID 세팅
+        
+        String jsonStr = callAnAPI(latitude, longitude);
+        if (jsonStr == null) dto.setWeather("정보없음");
+        else dto.setWeather(extractWeather(jsonStr, dayIndex));
+        
+        return new MeetingDAO().insert(dto);
+    }
+
+    // 모임 업데이트
+    public boolean updateMeetingInfo(
+            long meetingId,
+            String title,
+            String content,
+            Timestamp date,
+            long locationId,
+            int maxMembers,
+            int currentMembers,
+            int cost,
+            String tag,
+            String status,
+            double latitude,
+            double longitude,
+            long creatorId // 로그인 세션에서 받은 게시자 ID
+    ) throws Exception {
+        if (date == null) throw new IllegalArgumentException("모임 날짜가 존재하지 않습니다.");
+
+        LocalDate meetingDate = date.toLocalDateTime().toLocalDate();
+        LocalDate today = LocalDate.now();
+        int dayIndex = (int) ChronoUnit.DAYS.between(today, meetingDate);
+        if (dayIndex < 0 || dayIndex > 7) throw new RuntimeException("날씨 조회는 7일 이내 날짜만 가능합니다");
+
+        MeetingDTO dto = new MeetingDTO();
+        dto.setMeetingId(meetingId);
+        dto.setTitle(title);
+        dto.setContent(content);
+        dto.setDate(date);
+        dto.setLocationId(locationId);
+        dto.setMaxMembers(maxMembers);
+        dto.setCurrentMembers(currentMembers);
+        dto.setCost(cost);
+        dto.setTag(tag);
+        dto.setStatus(status);
+        dto.setCreatorId(creatorId); // 게시자 ID 세팅
+
+        String jsonStr = callAnAPI(latitude, longitude);
+        if (jsonStr == null) dto.setWeather("정보없음");
+        else dto.setWeather(extractWeather(jsonStr, dayIndex));
+
+        boolean result = new MeetingDAO().updateMeet(dto);
+        if (!result) throw new Exception("모임 정보 업데이트 실패");
+        return result;
+    }
+    //참가자인지 확인
+    public boolean isParticipant(long meetId, long userId) {
+    	boolean result = new MeetingParticipantDAO().isParticipant(meetId, userId);
+    	return result;
+    }
+    //모임 참여 
+    public boolean joinMeet(long meetId, long userId) throws Exception {
+    	System.out.println("Service: joinMeet");
+    	MeetingParticipantDTO participateDto = new MeetingParticipantDTO();
+    	participateDto.setMeetingId(meetId);
+    	participateDto.setUserId(userId);
+    			
+    	
+    	boolean result = new MeetingParticipantDAO().insertParticipant(participateDto);
+    	if(!result) {
+    		throw new Exception("참여 실패");
+    	}
+    	result = new MeetingDAO().increaseCurrentMembers(meetId);
+    	if(!result) {
+    		throw new Exception("인원수 증가 실패");
+    	}
+    	return result;
+    }
+    //모임 나오기
+    public boolean quitMeet(long meetId, long userId) throws Exception {
+    	System.out.println("Service: quitMeet");
+    	MeetingParticipantDTO participateDto = new MeetingParticipantDTO();
+    	participateDto.setMeetingId(meetId);
+    	participateDto.setUserId(userId);
+    			
+    	
+    	boolean result = new MeetingParticipantDAO().deleteParticipant(participateDto);
+    	if(!result) {
+    		throw new Exception("모임에서 나오기 실패");
+    	}
+    	result = new MeetingDAO().decreaseCurrentMembers(meetId);
+    	if(!result) {
+    		throw new Exception("인원수 감소 실패");
+    	}
+    	return result;
+    }
+
+    // 오픈웨더 API 호출
+    public String callAnAPI(double lat, double lon) {
+        String key = "fcdf715f2e4faa898d33ff124104cafe";
+        BufferedReader br = null;
+        HttpURLConnection conn = null;
+
+        String apiUrl = "https://api.openweathermap.org/data/3.0/onecall?lat=" + lat + "&lon=" + lon + "&appid=" + key + "&units=metric&lang=kr";
+
+        try {
+            URL url = new URL(apiUrl);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Content-Type", "application/json");
+
+            int status = conn.getResponseCode();
+            if (status != 200) {
+                System.out.println("요청실패: " + status);
+                throw new RuntimeException("API 요청 실패: " + status);
+            }
+
+            br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+            StringBuilder sb = new StringBuilder();
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            System.out.println(sb);
+            return sb.toString();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+
+        } finally {
+            if (br != null) try { br.close(); } catch (Exception ignored) {}
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    // 날씨 정보 추출
+    public String extractWeather(String jsonStr, int dayIndex) {
+        JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
+        JsonArray dailyArr = json.getAsJsonArray("daily");
+
+        if (dailyArr == null || dailyArr.size() <= dayIndex) {
+            System.out.println("배열 데이터 오류 or 날짜 인덱스 인자 오류");
+            return null;
+        }
+
+        JsonObject dayObj = dailyArr.get(dayIndex).getAsJsonObject();
+        JsonArray weatherArr = dayObj.getAsJsonArray("weather");
+        if (weatherArr == null || weatherArr.size() == 0) {
+            System.out.println("weather 데이터 없음");
+            return null;
+        }
+
+        JsonObject weatherObj = weatherArr.get(0).getAsJsonObject();
+        String main = weatherObj.get("main").getAsString();
+
+        switch (main) {
+            case "Clear": return "맑음";
+            case "Clouds": return "흐림";
+            case "Rain": return "비";
+            case "Drizzle": return "이슬비";
+            case "Thunderstorm": return "천둥번개";
+            case "Snow": return "눈";
+            case "Mist": return "안개";
+            case "Smoke": return "연기";
+            case "Haze": return "실안개";
+            case "Dust": return "먼지";
+            case "Fog": return "안개";
+            case "Sand": return "모래바람";
+            case "Ash": return "화산재";
+            case "Squall": return "돌풍";
+            case "Tornado": return "토네이도";
+            case "Hot": return "폭염";
+            case "Cold": return "한파";
+            case "Extreme": return "악천후";
+            default: return "기타";
+        }
+    }
+
+    // 게시글 삭제
+    public void deleteMeeting(long meetingId, long creator_id) throws Exception {
+        new MeetingDAO().delete(meetingId, creator_id);
+    }
 }

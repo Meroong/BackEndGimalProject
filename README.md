@@ -9,6 +9,10 @@ DB 세팅
 create database dorandoran;
 use dorandoran;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> forChatting
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- 📍 지역정보 테이블
@@ -203,10 +207,19 @@ CREATE TABLE meeting (
     cost INT DEFAULT 0 COMMENT '참가비',
     tag VARCHAR(100) COMMENT '모임 태그',
     status ENUM('OPEN','CLOSED','COMPLETED') DEFAULT 'OPEN' COMMENT '상태',
+<<<<<<< HEAD
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
     weather VARCHAR(20) COMMENT '날씨정보',
     FOREIGN KEY (location_id) REFERENCES meeting_location(id)
+=======
+    creator_id BIGINT NOT NULL COMMENT '게시자 ID',  -- 새로 추가
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정일시',
+    weather VARCHAR(20) COMMENT '날씨정보',
+    FOREIGN KEY (location_id) REFERENCES meeting_location(id),
+    FOREIGN KEY (creator_id) REFERENCES user(auto_id)
+>>>>>>> forChatting
 ) COMMENT='모임 게시판';
 
 
@@ -302,9 +315,15 @@ VALUES
 ('서울특별시 한강공원', '서울특별시 용산구 한강로', '1구역', 37.526, 126.927);
 
 -- 🤝 모임 게시판 샘플
+<<<<<<< HEAD
 INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, weather)
 VALUES
 ('조깅 모임', '매주 토요일 조깅', '2025-11-22 09:00:00', 1, 10, 2, 0, '운동', 'OPEN', '맑음');
+=======
+INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, creator_id, weather)
+VALUES
+('조깅 모임', '매주 토요일 조깅', '2025-11-22 09:00:00', 1, 10, 2, 0, '운동', 'OPEN', 2, '맑음');
+>>>>>>> forChatting
 
 -- 👥 모임참여자 관리
 INSERT INTO meeting_participant (meeting_id, user_id, paid)
@@ -348,9 +367,18 @@ VALUES
 
 
 
+<<<<<<< HEAD
 
+=======
+select * from meeting;
+select * from meeting_participant;
+select * from meeting_location;
+>>>>>>> forChatting
 select * from user;
 select * from user_address;
 select * from file_resource;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> forChatting

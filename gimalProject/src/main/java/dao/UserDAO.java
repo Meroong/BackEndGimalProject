@@ -23,8 +23,6 @@ public class UserDAO {
             if (dto.getUserPassword() != null) { sql.append("user_password = ?, "); fieldCount++; }
             if (dto.getNickname() != null) { sql.append("nickname = ?, "); fieldCount++; }
             if (dto.getTrustScore() != 0) { sql.append("trust_score = ?, "); fieldCount++; }
-            if (dto.getAddressId() != 0) { sql.append("address_id = ?, "); fieldCount++; }
-            if (dto.getAddressDetail() != null) { sql.append("address_detail = ?, "); fieldCount++; }
 
             if (fieldCount == 0) return; // 업데이트할 필드가 없으면 종료
 
@@ -38,8 +36,7 @@ public class UserDAO {
                 if (dto.getUserPassword() != null) pstmt.setString(index++, dto.getUserPassword());
                 if (dto.getNickname() != null) pstmt.setString(index++, dto.getNickname());
                 if (dto.getTrustScore() != 0) pstmt.setInt(index++, dto.getTrustScore());
-                if (dto.getAddressId() != 0) pstmt.setLong(index++, dto.getAddressId());
-                if (dto.getAddressDetail() != null) pstmt.setString(index++, dto.getAddressDetail());
+   
                 pstmt.setLong(index, dto.getAutoId());
 
                 pstmt.executeUpdate();
@@ -52,9 +49,12 @@ public class UserDAO {
     }
 
     // 회원가입
-    public boolean insert(UserDTO dto) {
-        String sql = "INSERT INTO user (user_id, user_password, user_name, nickname, role, address_id, address_detail) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+    public long insert(UserDTO dto) {
+    	System.out.println("UserDAO/insert method working");
+        String sql = "INSERT INTO user (user_id, user_password, user_name, nickname, role) "
+                   + "VALUES (?, ?, ?, ?, ?)";
+        long autoId = -1;
+        
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
@@ -63,17 +63,19 @@ public class UserDAO {
             pstmt.setString(3, dto.getUserName());
             pstmt.setString(4, dto.getNickname());
             pstmt.setString(5, dto.getRole());
-            pstmt.setLong(6, dto.getAddressId());
-            pstmt.setString(7, dto.getAddressDetail());
 
             int result = pstmt.executeUpdate();
-            return result > 0;
+            
+            if(result >0) {
+            	autoId = this.getAutoId(dto.getUserId());
+            	return autoId;
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("DB연결 오류 혹은 쿼리오류");
         }
-        return false;
+        return autoId;
     }
 
  // 로그인용 검색 (패스워드 제외, 세션에 저장용 전체 정보 조회)
@@ -95,8 +97,6 @@ public class UserDAO {
                     // 세션에 저장할 사용자 정보
                     dto.setUserName(rs.getString("user_name"));
                     dto.setNickname(rs.getString("nickname"));
-                    dto.setAddressId(rs.getInt("address_id"));
-                    dto.setAddressDetail(rs.getString("address_detail"));
                     dto.setTrustScore(rs.getInt("trust_score"));
                     dto.setRole(rs.getString("role"));          // JWT에 넣을 인증/권한용
                     
@@ -132,8 +132,6 @@ public class UserDAO {
                     dto.setNickname(rs.getString("nickname"));
                     dto.setTrustScore(rs.getInt("trust_score"));
                     dto.setRole(rs.getString("role"));
-                    dto.setAddressId(rs.getInt("address_id"));
-                    dto.setAddressDetail(rs.getString("address_detail"));
                     dto.setUpdatedAt(rs.getTimestamp("updated_at"));
                     dto.setCreatedAt(rs.getTimestamp("created_at"));
                     return dto;
@@ -148,18 +146,22 @@ public class UserDAO {
     }
 
     // 회원 삭제
-    public void delete(int autoId) {
+    public int delete(long autoId) {
         String sql = "DELETE FROM user WHERE auto_id = ?";
+    
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
+        	 System.out.println("deleteAddress: DB 연결 성공");
 
-
-            pstmt.setInt(1, autoId);
-            pstmt.executeUpdate();
+            pstmt.setLong(1, autoId);
+            int result = pstmt.executeUpdate();
+            System.out.println(autoId);
+            return result;
 
         } catch (SQLException e) {
             e.printStackTrace();
             System.out.println("DB연결 오류 혹은 쿼리오류");
+            return 0;
         }
     }
 
@@ -241,5 +243,28 @@ public class UserDAO {
 
         return list;
     }
+    
+    public long getAutoId(String userId) {
+    	 String sql = "select auto_id from user where user_id = ?";
+    	 long autoId = -1;
 
+         try (Connection con = JDBCUtil.jdbcCon();
+                 PreparedStatement pstmt = con.prepareStatement(sql)) 
+         {pstmt.setString(1, userId);
+            	try(ResultSet rs = pstmt.executeQuery()){
+            	
+
+			        while (rs.next()) {
+			        	autoId = rs.getLong("auto_id");
+			        	return autoId;
+			        }
+            	}
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        System.out.println("전체 회원 조회 중 오류");
+	    }
+	         return autoId;
+	    }
 }
+
+

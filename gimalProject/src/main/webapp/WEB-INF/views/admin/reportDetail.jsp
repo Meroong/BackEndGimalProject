@@ -1,69 +1,104 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="dto.ReportDTO" %>
-
-<%
-    ReportDTO r = (ReportDTO) request.getAttribute("report");
-%>
+<%@ page contentType="text/html; charset=UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>도란도란 - 신고 상세보기</title>
-   <link rel="stylesheet" href="<%=request.getContextPath()%>/resources/css/admin.css">
-</head>
-<body>
+    <title>신고 상세 정보</title>
 
-<div class="container">
+    <!-- 관리자 전용 CSS -->
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/admin.css">
+</head>
+
+<body class="admin-body">
+
+<div class="admin-container">
 
     <header>
-        <div class="logo">
-            <img src="<%=request.getContextPath()%>/resources/images/logo.png" alt="logo">
-            도란도란 관리자
-        </div>
-        <div class="header-buttons">
-            <button class="log-btn"
-                    onclick="location.href='<%=request.getContextPath()%>/admin'">
-                관리자 메인
-            </button>
-            <button class="log-btn"
-                    onclick="location.href='<%=request.getContextPath()%>/admin/reports'">
-                신고 목록
-            </button>
-        </div>
-    </header>
+        <h1>신고 상세 정보</h1>
 
-    <section class="main-box">
-        <div class="box-title">신고 상세정보</div>
-
-        <table border="1" style="width:100%; border-collapse:collapse;">
-            <tr><th>ID</th><td><%= r.getId() %></td></tr>
-            <tr><th>신고자 ID</th><td><%= r.getReporterId() %></td></tr>
-            <tr><th>대상자 ID</th><td><%= r.getTargetUserId() %></td></tr>
-            <tr><th>대상 타입</th><td><%= r.getTargetType() %></td></tr>
-            <tr><th>사유</th><td><%= r.getReason() %></td></tr>
-            <tr><th>상태</th><td><%= r.getStatus() %></td></tr>
-            <tr><th>등록일</th><td><%= r.getCreatedAt() %></td></tr>
-        </table>
-
-        <br>
-
-        <%-- 상태가 PENDING 일 때만 처리 버튼 보임 --%>
-        <% if ("PENDING".equals(r.getStatus())) { %>
-            <button class="log-btn"
-                    onclick="location.href='<%=request.getContextPath()%>/admin/reports/resolve?id=<%= r.getId() %>'">
-                신고 처리 완료
-            </button>
-            <br><br>
-        <% } %>
-
-        <button class="log-btn"
-                onclick="location.href='<%=request.getContextPath()%>/admin/reports'">
+        <button class="log-btn" onclick="location.href='${pageContext.request.contextPath}/admin/reports'">
             목록으로
         </button>
-    </section>
+    </header>
+
+    <!-- 기본 정보 -->
+    <div class="main-box">
+        <div class="box-title">기본 정보</div>
+
+        <table>
+            <tbody>
+            <tr>
+                <th>신고 ID</th>
+                <td>${report.id}</td>
+            </tr>
+            <tr>
+                <th>신고자 ID</th>
+                <td>${report.reporterId}</td>
+            </tr>
+            <tr>
+                <th>대상자 ID</th>
+                <td>${report.targetUserId}</td>
+            </tr>
+            <tr>
+                <th>타입</th>
+                <td>${report.targetType}</td>
+            </tr>
+            <tr>
+                <th>상태</th>
+                <td>
+                    <!-- ✅ 상태는 뱃지로만 표시 (버튼 X) -->
+                    <c:choose>
+                        <c:when test="${report.status == 'PENDING'}">
+                            <span class="badge badge-pending">PENDING</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="badge badge-resolved">RESOLVED</span>
+                        </c:otherwise>
+                    </c:choose>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 신고 내용 -->
+    <div class="main-box mt-24">
+        <div class="box-title">신고 내용</div>
+
+        <div style="background:#f9fafb; padding:20px; border-radius:12px;">
+            ${report.reason}
+        </div>
+    </div>
+
+    <!-- 버튼 영역 -->
+    <div style="margin-top:30px; text-align:right; display:flex; gap:10px; justify-content:flex-end;">
+
+        <!-- 상태가 RESOLVED일 때만 다시 PENDING 버튼 보여주기 -->
+        <c:if test="${report.status == 'RESOLVED'}">
+            <button class="log-btn"
+                    style="background:#6c757d;"
+                    onclick="location.href='${pageContext.request.contextPath}/admin/report/resolve?id=${report.id}'">
+                다시 PENDING으로 변경
+            </button>
+        </c:if>
+
+        <!-- 상태가 PENDING일 때만 처리 완료 버튼 보여주기 -->
+        <c:if test="${report.status == 'PENDING'}">
+            <button class="log-btn"
+                    style="background:#FF9800;"
+                    onclick="location.href='${pageContext.request.contextPath}/admin/report/resolve?id=${report.id}'">
+                처리 완료로 변경
+            </button>
+        </c:if>
+
+        <button class="log-btn"
+                onclick="location.href='${pageContext.request.contextPath}/admin/reports'">
+            목록으로
+        </button>
+    </div>
 
 </div>
-
 </body>
 </html>
