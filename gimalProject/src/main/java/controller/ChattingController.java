@@ -15,6 +15,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import service.ChattingService;
 import service.ImageService;
 import service.MeetingService;
@@ -36,10 +37,23 @@ public class ChattingController extends HttpServlet {
 
         // ---------- 로그인 검증 ----------  /util/authUtil.java 에 넣어둠 JwtAuth는 토큰 생성 검증만 하는게 좋아서
         Long autoId = AuthUtil.getAutoId(req);
-        
-        if(autoId == -1) {
-        	resp.sendRedirect("/views/user/login.jsp");
-        	return;
+
+        if (autoId == -1) {
+            HttpSession session = req.getSession();
+
+            // 현재 요청 URL + 쿼리스트링 조회
+            String currentUrl = req.getRequestURI();
+            String queryString = req.getQueryString();
+            if (queryString != null && !queryString.isEmpty()) {
+                currentUrl += "?" + queryString;
+            }
+
+            // 세션에 저장
+            session.setAttribute("redirectAfterLogin", currentUrl);
+
+            // 로그인 페이지로 이동
+            resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+            return;
         }
 
         // ---------- 채팅방 리스트 ----------
@@ -104,10 +118,23 @@ public class ChattingController extends HttpServlet {
         
         // ---------- 로그인 검증 ----------
         Long autoId = AuthUtil.getAutoId(req);
-        
-        if(autoId == -1) {
-        	resp.sendRedirect("/views/user/login.jsp");
-        	return;
+
+        if (autoId == -1) {
+            HttpSession session = req.getSession();
+
+            // 현재 요청 URL + 쿼리스트링 조회
+            String currentUrl = req.getRequestURI();
+            String queryString = req.getQueryString();
+            if (queryString != null && !queryString.isEmpty()) {
+                currentUrl += "?" + queryString;
+            }
+
+            // 세션에 저장
+            session.setAttribute("redirectAfterLogin", currentUrl);
+
+            // 로그인 페이지로 이동
+            resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+            return;
         }
         
         // !! 개인 거래채팅방 개설

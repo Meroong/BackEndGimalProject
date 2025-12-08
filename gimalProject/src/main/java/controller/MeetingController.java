@@ -15,6 +15,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import service.ChattingService;
 import service.ImageService;
@@ -127,11 +128,25 @@ public class MeetingController extends HttpServlet {
         
         // ---------- 로그인 검증 ----------
         Long autoId = AuthUtil.getAutoId(req);
-        
-        if(autoId == -1) {
-        	resp.sendRedirect(req.getContextPath()+"/views/user/login.jsp");
-        	return;
+
+        if (autoId == -1) {
+            HttpSession session = req.getSession();
+
+            // 현재 요청 URL + 쿼리스트링 조회
+            String currentUrl = req.getRequestURI();
+            String queryString = req.getQueryString();
+            if (queryString != null && !queryString.isEmpty()) {
+                currentUrl += "?" + queryString;
+            }
+
+            // 세션에 저장
+            session.setAttribute("redirectAfterLogin", currentUrl);
+
+            // 로그인 페이지로 이동
+            resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+            return;
         }
+        
         ImageService imageService = new ImageService();
 	    String latitudeStr = req.getParameter("latitude");
 	    String longitudeStr = req.getParameter("longitude");

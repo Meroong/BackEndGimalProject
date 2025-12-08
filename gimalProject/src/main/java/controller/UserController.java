@@ -40,10 +40,10 @@ public class UserController extends HttpServlet {
         if ("/logout".equals(path)) {
             
         	Long autoId = AuthUtil.getAutoId(req);
-
-            if (autoId == -1) {
-                resp.sendRedirect("/views/user/login.jsp");
-                return;
+            
+            if(autoId == -1) {
+            	resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+            	return;
             }
             HttpSession session = req.getSession(false);
             if (session != null) {
@@ -91,7 +91,16 @@ public class UserController extends HttpServlet {
                 String jwt = JwtAuth.generateToken(userDto.getUserId(), userDto.getAutoId(), userDto.getRole());
                 session.setAttribute("Authorization", "Bearer " + jwt);
 
-                resp.sendRedirect(req.getContextPath() + "/index.jsp");
+             // 이전 URL 체크 후 리다이렉트
+                
+                String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
+                if (redirectUrl != null) {
+                    session.removeAttribute("redirectAfterLogin"); // 한 번만 사용
+                    resp.sendRedirect(redirectUrl);
+                } else {
+                    resp.sendRedirect(req.getContextPath() + "/index.jsp");
+                }
+
                 return;
 
             } else {
@@ -137,12 +146,25 @@ public class UserController extends HttpServlet {
          * 회원 정보 수정 (예외 기반)
          * ========================================================== */
         case "/update":
-            Long updateAutoId = AuthUtil.getAutoId(req);
+        	Long updateAutoId = AuthUtil.getAutoId(req);
 
-            if (updateAutoId == -1) {
-                resp.sendRedirect("/views/user/login.jsp");
-                return;
-            }
+        	if (updateAutoId == -1) {
+        	    HttpSession updateSession = req.getSession();
+
+        	    // 현재 요청 URL + 쿼리스트링 조회
+        	    String currentUrl = req.getRequestURI();
+        	    String queryString = req.getQueryString();
+        	    if (queryString != null && !queryString.isEmpty()) {
+        	        currentUrl += "?" + queryString;
+        	    }
+
+        	    // 세션에 저장
+        	    updateSession.setAttribute("redirectAfterLogin", currentUrl);
+
+        	    // 로그인 페이지로 이동
+        	    resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+        	    return;
+        	}
 
             String newPassword = req.getParameter("newPassword");
             String newNickname = req.getParameter("newNickname");
@@ -176,12 +198,24 @@ public class UserController extends HttpServlet {
          * 회원 탈퇴 (예외 기반)
          * ========================================================== */
         case "/delete":
-            Long delAutoId = AuthUtil.getAutoId(req);
+        	Long delAutoId = AuthUtil.getAutoId(req);
+        	if (delAutoId == -1) {
+        	    HttpSession deleteSession = req.getSession();
 
-            if (delAutoId == -1) {
-                resp.sendRedirect("/views/user/login.jsp");
-                return;
-            }
+        	    // 현재 요청 URL + 쿼리스트링 조회
+        	    String currentUrl = req.getRequestURI();
+        	    String queryString = req.getQueryString();
+        	    if (queryString != null && !queryString.isEmpty()) {
+        	        currentUrl += "?" + queryString;
+        	    }
+
+        	    // 세션에 저장
+        	    deleteSession.setAttribute("redirectAfterLogin", currentUrl);
+
+        	    // 로그인 페이지로 이동
+        	    resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+        	    return;
+        	}
 
             try {
                 userService.deleteUser(delAutoId);

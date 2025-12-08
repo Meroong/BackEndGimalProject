@@ -45,12 +45,12 @@ public class ImageController extends HttpServlet {
 
 		// ---------- 로그인 검증 ---------- /util/authUtil.java 에 넣어둠 JwtAuth는 토큰 생성 검증만 하는게
 		// 좋아서
-		Long autoId = AuthUtil.getAutoId(req);
-
-		if (autoId == -1) {
-			resp.sendRedirect("/views/user/login.jsp");
-			return;
-		}
+    	Long autoId = AuthUtil.getAutoId(req);
+        
+        if(autoId == -1) {
+        	resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+        	return;
+        }
 		switch (path) {
 			
 		//프로필 업로드용 항상 usedType은 PROFILE로 !
