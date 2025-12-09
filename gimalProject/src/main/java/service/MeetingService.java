@@ -24,6 +24,16 @@ import dto.MeetingLocationDTO;
 import dto.MeetingParticipantDTO;
 
 public class MeetingService {
+	//회비 조회용
+	public int getMeetingCost(long meetingId) {
+	    Integer cost = new MeetingDAO().getMeetingCostByMeetingId(meetingId);
+
+	    if (cost == null) {
+	        throw new IllegalArgumentException("모임 회비 정보를 찾을 수 없습니다.");
+	    }
+
+	    return cost;
+	}
 
     // 특정 모임 상세 조회
     public MeetingInfoDTO getMeetingInfo(long meetingId) {

@@ -31,10 +31,9 @@ public class WalletController extends HttpServlet {
 
         switch (path) {
 
-        /* ==========================================================
-         * 포인트 충전
-         * ========================================================== */
+        // 포인트 충전 
         case "/charge":
+        	System.out.println("Controller: charge");
             Long autoId = AuthUtil.getAutoId(req);
 
             if (autoId == -1) {
@@ -52,17 +51,15 @@ public class WalletController extends HttpServlet {
 
                 walletService.charge(autoId, cardNumber, cvc, cardPw, amount);
 
-                //성공 시 메시지 세팅
                 req.setAttribute("successMessage", "포인트가 충전되었습니다.");
 
-                // 잔액 다시 조회해서 전달
                 int balance = walletService.getBalance(autoId);
                 req.setAttribute("walletBalance", balance);
 
                 req.getRequestDispatcher("/views/user/mypage.jsp").forward(req, resp);
                 return;
 
-            } catch (Exception e) { // ✅ 전부 RuntimeException 기반 처리
+            } catch (Exception e) {
                 req.setAttribute("errorMessage", e.getMessage());
 
                 try {
@@ -73,6 +70,40 @@ public class WalletController extends HttpServlet {
                 }
 
                 req.getRequestDispatcher("/views/user/mypage.jsp").forward(req, resp);
+                return;
+            }
+
+        // 모임 회비 결제 (채팅방에서 사용)
+        case "/pay":
+            System.out.println("Controller: meeting pay");
+
+            Long userId = AuthUtil.getAutoId(req);
+
+            if (userId == -1) {
+                resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+                return;
+            }
+
+            String meetId = req.getParameter("meetingId");
+            String amountStr2 = req.getParameter("amount");
+
+            try {
+                int amount = Integer.parseInt(amountStr2);
+
+                walletService.payForMeeting(
+                        userId,
+                        amount,
+                        "모임 회비 결제"
+                );
+
+                req.setAttribute("successMessage", "모임 회비 결제가 완료되었습니다.");
+
+                resp.sendRedirect(req.getContextPath() + "/chat/room/" + meetId);
+                return;
+
+            } catch (Exception e) {
+                req.setAttribute("errorMessage", e.getMessage());
+                req.getRequestDispatcher("/views/chat/chat_room.jsp").forward(req, resp);
                 return;
             }
 

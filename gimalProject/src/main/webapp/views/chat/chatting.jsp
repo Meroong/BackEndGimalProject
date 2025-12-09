@@ -65,6 +65,40 @@
             cursor: pointer;
         }
 
+        /*  회비 버튼 */
+        .pay-toggle-btn {
+            position: absolute;
+            right: 50px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 13px;
+            background: #2E86DE;
+            border: none;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /*  회비 결제 박스 (기본 숨김) */
+        .pay-box {
+            display: none;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            background: #F8F9FA;
+        }
+
+        .pay-box button {
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: none;
+            background: #FF7C40;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
         .chat-box {
             flex: 1;
             display: flex;
@@ -168,25 +202,6 @@
             z-index: 2000;
             width: 300px;
         }
-
-        .modal h3 {
-            margin-top: 0;
-        }
-
-        .modal ul {
-            list-style: none;
-            padding: 0;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .modal li {
-            margin-bottom: 8px;
-        }
-
-        .modal form {
-            display: inline;
-        }
     </style>
 </head>
 <body>
@@ -197,11 +212,27 @@
         <a href="${pageContext.request.contextPath}/chat/roomList" class="back-btn">←</a>
         채팅방 #${selectedRoomId}
 
+        <!-- 회비 토글 버튼 (호스트 아닐 때만) -->
+        <c:if test="${!isHost}">
+            <button class="pay-toggle-btn" onclick="togglePayBox()">회비</button>
+        </c:if>
+
         <!-- 호스트만 보이도록 + 버튼 -->
         <c:if test="${isHost}">
             <button class="member-btn" onclick="document.getElementById('memberModal').style.display='block';">＋</button>
         </c:if>
     </h2>
+
+    <!-- ✅ 회비 결제 박스 (버튼 눌렀을 때만 표시됨) -->
+    <c:if test="${!isHost}">
+        <div class="pay-box" id="payBox">
+            <form method="post" action="${pageContext.request.contextPath}/wallet/pay">
+                <input type="hidden" name="meetingId" value="${roomInfo.meetingId}">
+                <input type="hidden" name="amount" value="${meetingCost}">
+                <button type="submit">💳 회비 ${meetingCost}원 결제</button>
+            </form>
+        </div>
+    </c:if>
 
     <div class="chat-box">
         <!-- 메시지 영역 -->
@@ -248,7 +279,6 @@
                 ${user.nickname}
                 <c:choose>
                     <c:when test="${user.inChat}">
-                        <!-- 강퇴 -->
                         <form method="post" action="${pageContext.request.contextPath}/chat/kick">
                             <input type="hidden" name="roomId" value="${selectedRoomId}"/>
                             <input type="hidden" name="meetId" value="${roomInfo.meetingId}"/>
@@ -257,7 +287,6 @@
                         </form>
                     </c:when>
                     <c:otherwise>
-                        <!-- 초대 -->
                         <form method="post" action="${pageContext.request.contextPath}/chat/invite">
                             <input type="hidden" name="roomId" value="${selectedRoomId}"/>
                             <input type="hidden" name="meetId" value="${roomInfo.meetingId}"/>
@@ -277,6 +306,16 @@
     // 스크롤 항상 아래로
     var chatMessages = document.getElementById('chatMessages');
     chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // ✅ 회비 결제 박스 토글
+    function togglePayBox() {
+        var box = document.getElementById("payBox");
+        if (box.style.display === "none" || box.style.display === "") {
+            box.style.display = "block";
+        } else {
+            box.style.display = "none";
+        }
+    }
 </script>
 
 </body>
