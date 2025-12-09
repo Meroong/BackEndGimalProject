@@ -1,0 +1,121 @@
+/* 메인 콘텐츠 */
+section#main {
+    width:990px;
+    margin:auto;
+}
+/* 좌측 카테고리 + 메인 이미지 + 공지사항/고객센터 */
+section#cat1 {
+    width:200px;
+    height: 260px;
+    float:left;
+    margin-top:17px;
+    margin-right: 13px;
+    margin-bottom: 10px;
+    font-weight:bold;
+    border: 2px solid #ff7a17;
+    border-radius: 25px;
+}
+section#cat1 #cat_title {
+    padding:12px;
+    background-color:#ff7a17;
+    color:#ffffff;
+    border-radius: 20px 20px 0 0;
+    text-align:center;
+}
+section#cat1 li {
+    color:#666666;
+    padding:7px 0 7px 30px;
+    border-bottom:solid 1px #cccccc;
+}
+section#cat1 li:last-child {
+    border-bottom: 0px;
+}
+section#cat1 #service {
+    float:left;
+    margin-top:17px;
+}
+section#cat2 {
+    float:left;
+    margin-top:17px;
+}
+section#cat3 {
+    width:250px;
+    margin-left: 13px;
+    float:left;
+    margin-top:17px;
+}
+section#cat3 #customer {
+    width:239px;
+    height:180px;
+    margin-bottom: 10px;
+    background-image:url("../img/portfolio/customer.jpg");
+    background-repeat:no-repeat;
+}
+section#cat3 #customer img {
+    margin:40px 0 0 4px;
+}
+section#cat3 #latest_notice {
+    width:239px;
+    height:161px;
+    background-image:url("../img/portfolio/latest_notice.jpg");
+    background-repeat:no-repeat;
+}
+section#cat3 #latest_notice ul {
+    padding:50px 0 0 30px;
+    list-style-image:url("../img/portfolio/orange_dot.jpg");
+}
+
+/* 추천상품 */
+section#recommend {
+    height:390px;
+    margin-top:30px;
+    border-top:solid 2px  #ff7a17;
+}
+section#recommend h3 {
+  margin: 8px 0 0 10px;
+    color:black;
+}
+section#recommend .item{
+    float:left;
+    text-align:center;
+    margin:50px 0 0 32px;
+}
+section#recommend .item .subject{
+    margin-top:10px;
+    color:black;
+}
+section#recommend .item .comment{
+    margin-top:5px;
+}
+section#recommend .item .price{
+    margin-top:5px;
+    font-weight:bold;
+    color:#00258f;
+}
+/* 개별상품 */
+section#single {
+    height:760px;
+    margin-top:20px;
+    border-top:solid 2px  #ff7a17;
+}
+section#single h3 {
+  margin: 8px 0 0 10px;
+    color:black;
+}
+section#single .item{
+    float:left;
+    text-align:center;
+    margin:50px 0 0 32px;
+}
+section#single .item .subject{
+    margin-top:10px;
+    color:black;
+}
+section#single .item .comment{
+    margin-top:5px;
+}
+section#single .item .price{
+    margin-top:5px;
+    font-weight:bold;
+    color:#00258f;
+}

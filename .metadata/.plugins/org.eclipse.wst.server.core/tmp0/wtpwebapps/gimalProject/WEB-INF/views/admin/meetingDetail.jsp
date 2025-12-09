@@ -1,0 +1,318 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>모임 상세 - 관리자</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/admin.css">
+
+    <style>
+        .meeting-layout {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* 상단 제목 박스 */
+        .header-card {
+            padding: 24px 28px;
+            border-radius: 20px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .meeting-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 6px;
+        }
+
+        .meta-small {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .status-open { background:#dcfce7;color:#166534; }
+        .status-closed { background:#fef3c7;color:#92400e; }
+        .status-completed { background:#e5e7eb;color:#374151; }
+
+        /* 공통 카드 */
+        .card {
+            padding: 22px 26px;
+            border-radius: 18px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.02);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: #111827;
+        }
+
+        /* 칸칸 정보 박스들 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px 16px;
+        }
+
+        .info-box {
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
+            padding: 10px 12px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 2px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            color: #111827;
+        }
+
+        /* 상태 변경 */
+        .status-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            margin-top: 4px;
+        }
+
+        .status-select {
+            padding: 9px 14px;
+            min-width: 200px;
+            border-radius: 10px;
+            font-size: 14px;
+            border: 1px solid #d1d5db;
+        }
+
+        /* 내용 박스 */
+        .content-box {
+            padding: 20px 22px;
+            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            line-height: 1.65;
+            color: #374151;
+            white-space: pre-line;
+            font-size: 15px;
+        }
+
+        /* 삭제 영역 (맨 뒤, 오른쪽 정렬) */
+        .danger-row {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .danger-text {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .btn-delete {
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid #fca5a5;
+            background: #fee2e2;
+            color: #b91c1c;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .btn-delete:hover {
+            background: #fecaca;
+        }
+
+    </style>
+</head>
+<body class="admin-body">
+
+<div class="admin-container">
+
+    <!-- 상단 헤더 -->
+    <header>
+        <h1>모임 상세</h1>
+        <div class="header-buttons">
+        <button class="log-btn"
+                    onclick="location.href='${pageContext.request.contextPath}/'">
+                홈으로
+            </button>
+            <button class="log-btn"
+                    onclick="location.href='${pageContext.request.contextPath}/admin/meeting/list'">
+                목록으로
+            </button>
+        </div>
+    </header>
+
+    <section class="main-box meeting-layout">
+
+        <!-- 1) 제목 + 상태 -->
+        <div class="header-card">
+            <div>
+                <div class="meeting-title">
+                    <c:out value="${meeting.title}"/>
+                </div>
+                <div class="meta-small">
+                    모임 번호 #<c:out value="${meeting.id}"/> ·
+                    생성일 <fmt:formatDate value="${meeting.createdAt}" pattern="yyyy-MM-dd HH:mm"/>
+                </div>
+            </div>
+
+            <div>
+                <c:choose>
+                    <c:when test="${meeting.status == 'OPEN'}">
+                        <span class="status-badge status-open">OPEN (모집중)</span>
+                    </c:when>
+                    <c:when test="${meeting.status == 'CLOSED'}">
+                        <span class="status-badge status-closed">CLOSED (마감)</span>
+                    </c:when>
+                    <c:when test="${meeting.status == 'COMPLETED'}">
+                        <span class="status-badge status-completed">COMPLETED (종료)</span>
+                    </c:when>
+                    <c:otherwise>
+                        <span class="status-badge"><c:out value="${meeting.status}"/></span>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </div>
+
+        <!-- 2) 칸칸 기본 정보 -->
+        <div class="card">
+            <div class="card-title">기본 정보</div>
+
+            <div class="info-grid">
+
+                <!-- 모임 일시 -->
+                <div class="info-box">
+                    <div class="info-label">모임 일시</div>
+                    <div class="info-value">
+                        <fmt:formatDate value="${meeting.date}" pattern="yyyy-MM-dd HH:mm"/>
+                    </div>
+                </div>
+
+                <!-- 인원 -->
+                <div class="info-box">
+                    <div class="info-label">현재 인원 / 최대 인원</div>
+                    <div class="info-value">
+                        <c:out value="${meeting.currentMembers}"/> /
+                        <c:out value="${meeting.maxMembers}"/> 명
+                    </div>
+                </div>
+
+                <!-- 참가비 -->
+                <div class="info-box">
+                    <div class="info-label">참가비</div>
+                    <div class="info-value">
+                        <fmt:formatNumber value="${meeting.cost}" pattern="#,###"/> 원
+                    </div>
+                </div>
+
+                <!-- 태그 -->
+                <div class="info-box">
+                    <div class="info-label">태그</div>
+                    <div class="info-value">
+                        #<c:out value="${meeting.tag}"/>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 3) 상태 변경 -->
+        <div class="card">
+            <div class="card-title">상태 관리</div>
+
+            <div class="status-row">
+                <form method="post"
+                      action="${pageContext.request.contextPath}/admin/meeting/status"
+                      style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+
+                    <input type="hidden" name="id" value="${meeting.id}"/>
+
+                    <select name="status" class="status-select">
+                        <option value="OPEN" <c:if test="${meeting.status == 'OPEN'}">selected</c:if>>
+                            OPEN (모집중)
+                        </option>
+                        <option value="CLOSED" <c:if test="${meeting.status == 'CLOSED'}">selected</c:if>>
+                            CLOSED (마감)
+                        </option>
+                        <option value="COMPLETED" <c:if test="${meeting.status == 'COMPLETED'}">selected</c:if>>
+                            COMPLETED (종료)
+                        </option>
+                    </select>
+
+                    <button type="submit" class="log-btn">
+                        상태 변경
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 4) 모임 소개 -->
+        <div class="card">
+            <div class="card-title">모임 소개</div>
+            <div class="content-box" style="border:none; box-shadow:none; padding:0; border-radius:0;">
+                <c:out value="${meeting.content}"/>
+            </div>
+
+            
+        </div>
+<!-- 모임 삭제 영역 (모임 소개 카드 아래) -->
+<!-- 모임 삭제 버튼 -->
+<div style="display:flex; justify-content:flex-end; margin-top:14px; padding-right:4px;">
+    <form method="post"
+          action="${pageContext.request.contextPath}/admin/meeting/delete"
+          onsubmit="return confirm('정말로 이 모임을 삭제하시겠습니까? 되돌릴 수 없습니다.');">
+
+        <!-- ★ 여기 name="id" 꼭 있어야 함 -->
+        <input type="hidden" name="id" value="${meeting.id}" />
+
+        <button type="submit"
+                style="
+                    padding: 10px 20px;
+                    border-radius: 12px;
+                    border: 1px solid #fca5a5;
+                    background: #fee2e2;
+                    color: #b91c1c;
+                    font-weight: 600;
+                    font-size: 14px;
+                    cursor: pointer;
+                ">
+            모임 삭제
+        </button>
+    </form>
+</div>
+
+
+    </section>
+
+</div>
+
+</body>
+</html>

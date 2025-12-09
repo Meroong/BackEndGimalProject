@@ -1,0 +1,7 @@
+dbConfig.properties
+/target/
+/.metadata/
+/.classpath
+.project
+.settings/
+/.metadata

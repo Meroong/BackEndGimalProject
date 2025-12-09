@@ -1,0 +1,147 @@
+package dao;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import dto.AdminStatsDTO;
+import dto.DailySignupDTO;
+import dto.ReportStatusCountDTO;
+import util.JDBCUtil;
+
+public class AdminStatsDAO {
+
+    // =============== 기본 통계 ===============
+    public AdminStatsDTO getStats() {
+        AdminStatsDTO dto = new AdminStatsDTO();
+
+        String userSql   = "SELECT COUNT(*) AS cnt FROM user";
+        String reportSql = "SELECT COUNT(*) AS cnt FROM report";
+
+        try (Connection con = JDBCUtil.jdbcCon()) {
+
+            try (PreparedStatement pstmt = con.prepareStatement(userSql);
+                 ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) dto.setTotalUsers(rs.getInt("cnt"));
+            }
+
+            try (PreparedStatement pstmt = con.prepareStatement(reportSql);
+                 ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) dto.setTotalReports(rs.getInt("cnt"));
+            }
+
+        } catch (SQLException e) { e.printStackTrace(); }
+
+        return dto;
+    }
+
+    // 전체 회원 수
+    public int getTotalUsers() {
+        String sql = "SELECT COUNT(*) FROM user";
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    // 오늘 가입
+    public int getTodayNewUsers() {
+        String sql = "SELECT COUNT(*) FROM user WHERE DATE(created_at) = CURDATE()";
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    // 상품 수
+    public int getTotalItems() {
+        String sql = "SELECT COUNT(*) FROM item";
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    // 거래 수
+    public int getTotalTransactions() {
+        String sql = "SELECT COUNT(*) FROM transaction";
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    // 미처리 신고
+    public int getPendingReports() {
+        String sql = "SELECT COUNT(*) FROM report WHERE status = 'PENDING'";
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (Exception e) { e.printStackTrace(); }
+        return 0;
+    }
+
+    // 최근 N일 가입 통계
+    public List<DailySignupDTO> getDailySignupStats(int days) {
+
+        String sql =
+                "SELECT DATE(created_at) AS dt, COUNT(*) AS cnt " +
+                "FROM user " +
+                "WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY) " +
+                "GROUP BY DATE(created_at) ORDER BY dt";
+
+        List<DailySignupDTO> list = new ArrayList<>();
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setInt(1, days);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new DailySignupDTO(
+                            rs.getDate("dt"),
+                            rs.getInt("cnt")
+                    ));
+                }
+            }
+
+        } catch (SQLException e) { e.printStackTrace(); }
+
+        return list;
+    }
+
+    // 신고 상태별 개수
+    public List<ReportStatusCountDTO> getReportStatusCounts() {
+
+        String sql =
+                "SELECT status, COUNT(*) AS cnt " +
+                "FROM report GROUP BY status";
+
+        List<ReportStatusCountDTO> list = new ArrayList<>();
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(new ReportStatusCountDTO(
+                        rs.getString("status"),
+                        rs.getInt("cnt")
+                ));
+            }
+
+        } catch (SQLException e) { e.printStackTrace(); }
+
+        return list;
+    }
+}

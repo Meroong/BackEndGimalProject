@@ -1,0 +1,54 @@
+package auth;
+
+
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.util.Date;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.security.auth.message.config.AuthConfig;
+
+public class JwtAuth {
+
+    // 서명용 비밀키 현재 authConfig에서 처리중
+    private static final Key key =  Keys.hmacShaKeyFor(util.AuthConfig.getJWTSec().getBytes(StandardCharsets.UTF_8));
+
+ 
+    private static final long EXPIRATION_TIME = util.AuthConfig.getJWTExp();
+
+    // JWT 생성
+    public static String generateToken(String userId, long autoId, String role) {
+        return Jwts.builder()
+                .setSubject(userId)            // 로그인 ID
+                .claim("autoId", autoId)       // DB PK
+                .claim("role", role)           // 권한
+                .setIssuedAt(new Date())       // 발급 시간
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME)) // 만료 시간
+                .signWith(key)                 // 서명
+                .compact();
+    }
+
+    // JWT 검증 및 Claims 추출
+    public static Claims validateToken(String token) {
+        try {
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+        } catch (Exception e) {
+            // SignatureException, ExpiredJwtException, MalformedJwtException 등 모두 포함
+        	System.out.println("유효하지않은 토큰 | 토큰이 없습니다.");
+            return null;   // 유효하지 않으면 null 반환
+        }
+    }
+
+}
+
