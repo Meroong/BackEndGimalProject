@@ -48,8 +48,7 @@
         }
         .status-open { background:#dcfce7;color:#166534; }
         .status-closed { background:#fef3c7;color:#92400e; }
-        .status-completed { background:#e5e7eb;color:#374151; }
-
+      
         /* 공통 카드 */
         .card {
             padding: 22px 26px;
@@ -192,9 +191,7 @@
                     <c:when test="${meeting.status == 'CLOSED'}">
                         <span class="status-badge status-closed">CLOSED (마감)</span>
                     </c:when>
-                    <c:when test="${meeting.status == 'COMPLETED'}">
-                        <span class="status-badge status-completed">COMPLETED (종료)</span>
-                    </c:when>
+                    
                     <c:otherwise>
                         <span class="status-badge"><c:out value="${meeting.status}"/></span>
                     </c:otherwise>
@@ -262,9 +259,7 @@
                         <option value="CLOSED" <c:if test="${meeting.status == 'CLOSED'}">selected</c:if>>
                             CLOSED (마감)
                         </option>
-                        <option value="COMPLETED" <c:if test="${meeting.status == 'COMPLETED'}">selected</c:if>>
-                            COMPLETED (종료)
-                        </option>
+
                     </select>
 
                     <button type="submit" class="log-btn">
