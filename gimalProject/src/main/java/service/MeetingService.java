@@ -307,6 +307,21 @@ public class MeetingService {
             if (conn != null) conn.disconnect();
         }
     }
+    //지불여부 변경 용 서비스
+    public void markAsPaid(long meetingId, long userId) {
+    	System.out.println("Service: markAsPaid");
+    	boolean result = new MeetingParticipantDAO().markAsPaid(meetingId, userId);;
+        if (! result) {
+            throw new RuntimeException("회비 납부 처리 실패");
+        }
+    }
+    //지불 여부 체크
+    public boolean hasUserPaid(long meetingId, long userId) {
+    	System.out.println("Service: hasUserPaid");
+        return new MeetingParticipantDAO().hasUserPaid(meetingId, userId);
+    }
+
+
 
     // 날씨 정보 추출
     public String extractWeather(String jsonStr, int dayIndex) {

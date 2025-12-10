@@ -105,6 +105,12 @@ public class ChattingController extends HttpServlet {
                     // 회비 정보 못 가져와도 채팅방은 정상 진입하게 처리
                     req.setAttribute("meetingCost", null);
                 }
+                try {
+                    boolean hasPaid = new MeetingService().hasUserPaid(roomDto.getMeetingId(), autoId);
+                    req.setAttribute("hasPaid", hasPaid);
+                } catch (Exception e) {
+                    req.setAttribute("hasPaid", false);
+                }
             }
             
             // 호스트 여부

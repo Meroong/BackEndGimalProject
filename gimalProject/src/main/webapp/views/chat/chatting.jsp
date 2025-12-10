@@ -212,10 +212,11 @@
         <a href="${pageContext.request.contextPath}/chat/roomList" class="back-btn">←</a>
         채팅방 #${selectedRoomId}
 
-        <!-- 회비 토글 버튼 (호스트 아닐 때만) -->
-        <c:if test="${!isHost}">
-            <button class="pay-toggle-btn" onclick="togglePayBox()">회비</button>
-        </c:if>
+        <!-- 회비가 0원이 아닐 때만 버튼 표시 -->
+		<c:if test="${meetingCost != null && meetingCost > 0 && !hasPaid}">
+		    <button class="pay-toggle-btn" onclick="togglePayBox()">회비</button>
+		</c:if>
+
 
         <!-- 호스트만 보이도록 + 버튼 -->
         <c:if test="${isHost}">
@@ -223,14 +224,19 @@
         </c:if>
     </h2>
 
-    <!-- ✅ 회비 결제 박스 (버튼 눌렀을 때만 표시됨) -->
-    <c:if test="${!isHost}">
-        <div class="pay-box" id="payBox">
-            <form method="post" action="${pageContext.request.contextPath}/wallet/pay">
-                <input type="hidden" name="meetingId" value="${roomInfo.meetingId}">
-                <input type="hidden" name="amount" value="${meetingCost}">
-                <button type="submit">💳 회비 ${meetingCost}원 결제</button>
-            </form>
+    <!-- 회비 결제 박스도 동일 조건 -->
+	<c:if test="${meetingCost != null && meetingCost > 0 && !hasPaid}">
+	    <div class="pay-box" id="payBox">
+			<form method="post" action="${pageContext.request.contextPath}/wallet/pay">
+			    <!-- 회비 기록용 -->
+			    <input type="hidden" name="meetingId" value="${roomInfo.meetingId}">
+			
+			    <!-- 채팅방 복귀용 -->
+			    <input type="hidden" name="roomId" value="${selectedRoomId}">
+			
+			    <input type="hidden" name="amount" value="${meetingCost}">
+			    <button type="submit">회비 ${meetingCost}원 결제</button>
+			</form>
         </div>
     </c:if>
 
@@ -307,7 +313,7 @@
     var chatMessages = document.getElementById('chatMessages');
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    // ✅ 회비 결제 박스 토글
+    // 회비 결제 박스 토글
     function togglePayBox() {
         var box = document.getElementById("payBox");
         if (box.style.display === "none" || box.style.display === "") {

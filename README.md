@@ -185,7 +185,14 @@ CREATE TABLE review (
     FOREIGN KEY (reviewer_id) REFERENCES user(auto_id),
     FOREIGN KEY (reviewee_id) REFERENCES user(auto_id)
 ) COMMENT='리뷰';
-
+-- 날씨
+CREATE TABLE weather_data (
+    id INT AUTO_INCREMENT PRIMARY KEY COMMENT '날씨 데이터 ID',
+    temp DOUBLE NOT NULL COMMENT '현재 온도',
+    weather VARCHAR(50) NOT NULL COMMENT '날씨 상태 (맑음, 흐림, 비 등)',
+    pm10 INT NOT NULL COMMENT '미세먼지 수치',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '데이터 생성 시각'
+) COMMENT='날씨 정보 테이블';
 
 
 -- 🤝 모임 장소
@@ -207,7 +214,7 @@ CREATE TABLE meeting (
     location_id BIGINT COMMENT '장소 ID',
     max_members INT COMMENT '최대 인원',
     current_members INT COMMENT '현재 인원',
-    cost INT DEFAULT 0 COMMENT '1인당 참가비 총으로 하기에는 복잡해서',
+    cost INT DEFAULT 0 COMMENT '참가비',
     tag VARCHAR(100) COMMENT '모임 태그',
     status ENUM('OPEN','CLOSED','COMPLETED') DEFAULT 'OPEN' COMMENT '상태',
     creator_id BIGINT NOT NULL COMMENT '게시자 ID',  -- 새로 추가
@@ -291,37 +298,6 @@ ADD CONSTRAINT fk_chat_message_user
 FOREIGN KEY (sender_id) REFERENCES user(auto_id)
 ON DELETE SET NULL;
 
-
--- 모임 회비 구현용 
--- 유저 포인트 정보
-CREATE TABLE user_wallet (
-    user_id BIGINT PRIMARY KEY COMMENT '유저 ID',
-    balance INT NOT NULL DEFAULT 0 COMMENT '포인트 잔액',
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user(auto_id) ON DELETE CASCADE
-) COMMENT='유저 포인트 잔액';
-
--- 포인트 사용 내역
-CREATE TABLE wallet_history (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    type ENUM('CHARGE', 'MEETING_PAY', 'REFUND') NOT NULL,
-    amount INT NOT NULL,
-    description VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user(auto_id) ON DELETE CASCADE
-) COMMENT='포인트 변동 내역';
-
--- 결제 구현 용 목 카드 
-CREATE TABLE mock_card (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    card_number VARCHAR(30) NOT NULL,
-    cvc VARCHAR(10) NOT NULL,
-    owner_name VARCHAR(50),
-    valid_until VARCHAR(10),  -- '12/27' 이런 문자열 정도
-    password VARCHAR(20),     -- 00, 12 이런 형태
-    balance INT NOT NULL DEFAULT 100000   -- 카드에 남아있는 한도라고 가정
-);
 -- 🚨 신고
 CREATE TABLE report (
 id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '신고 ID',
@@ -334,7 +310,6 @@ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
 FOREIGN KEY (reporter_id) REFERENCES user(auto_id),
 FOREIGN KEY (target_user_id) REFERENCES user(auto_id)
 ) COMMENT='신고';
-
 
 -- 간이 데이터
 -- 🧍 USER 샘플
@@ -395,31 +370,7 @@ VALUES
 (3, 2, '오전 9시에 한강공원에서 시작합니다.'),
 (3, 1, '좋아요, 그때 봬요!');
 
--- 💰 유저 포인트 지갑 초기 데이터
-INSERT INTO user_wallet (user_id, balance)
-VALUES
-(1, 50000),   -- 관리자: 50,000 포인트
-(2, 12000);   -- 테스트 유저: 12,000 포인트
-
--- 📜 포인트 변동 내역 샘플
-INSERT INTO wallet_history (user_id, type, amount, description)
-VALUES
--- 관리자 (1번)
-(1, 'CHARGE', 50000, '카드 충전'),
-(1, 'MEETING_PAY', -10000, '조깅 모임 참가비 결제'),
-(1, 'REFUND', 10000, '모임 취소 환불'),
-
--- 테스트 유저 (2번)
-(2, 'CHARGE', 20000, '카드 충전'),
-(2, 'MEETING_PAY', -8000, '조깅 모임 참가비 결제');
-
--- 💳 테스트용 목 카드 데이터
-INSERT INTO mock_card (card_number, cvc, owner_name, valid_until, password, balance)
-VALUES
-('1111-2222-3333-4444', '123', '홍길동', '12/27', '12', 100000),
-('5555-6666-7777-8888', '456', '김테스트', '09/26', '34', 50000),
-('9999-0000-1111-2222', '789', '관리자', '01/28', '56', 300000);
-
+-- 💾 file_resource 예시 데이터
 
 -- 💬 중고/대여 상품 게시판
 INSERT INTO item (seller_id, category_id, title, content, price, trade_type, status)
@@ -433,11 +384,3 @@ select * from meeting_participant;
 select * from meeting_location;
 select * from chat_room;
 select * from chat_room_user;
-select * from user;
-select * from user_address;
-select * from file_resource;
-
-
-
-
-

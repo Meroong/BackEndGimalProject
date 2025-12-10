@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import service.MeetingService;
 import service.WalletService;
 import util.AuthUtil;
 
@@ -73,7 +74,8 @@ public class WalletController extends HttpServlet {
                 return;
             }
 
-        // 모임 회비 결제 (채팅방에서 사용)
+        
+         // 모임 회비 결제 (채팅방에서 사용)
         case "/pay":
             System.out.println("Controller: meeting pay");
 
@@ -84,28 +86,43 @@ public class WalletController extends HttpServlet {
                 return;
             }
 
-            String meetId = req.getParameter("meetingId");
+            String meetId = req.getParameter("meetingId"); // 회비 기록용
+            String roomId = req.getParameter("roomId");    // 채팅방 이동용
             String amountStr2 = req.getParameter("amount");
 
             try {
                 int amount = Integer.parseInt(amountStr2);
 
+                // 회비 차감 처리
                 walletService.payForMeeting(
                         userId,
                         amount,
-                        "모임 회비 결제"
+                        "meeting_fee"
                 );
+                new MeetingService().markAsPaid(Long.parseLong(meetId), userId);
 
-                req.setAttribute("successMessage", "모임 회비 결제가 완료되었습니다.");
-
-                resp.sendRedirect(req.getContextPath() + "/chat/room/" + meetId);
+                // 성공 처리 후 채팅방으로 이동 (roomId로 이동해야 정상)
+                req.getSession().setAttribute("successMessage", "회비 결제가 완료되었습니다.");
+                resp.sendRedirect(req.getContextPath() + "/chat/room/" + roomId);
                 return;
 
             } catch (Exception e) {
-                req.setAttribute("errorMessage", e.getMessage());
-                req.getRequestDispatcher("/views/chat/chat_room.jsp").forward(req, resp);
+
+                String msg = e.getMessage();
+
+                // 포인트 부족 시 마이페이지로 이동
+                if (msg != null && msg.contains("포인트")) {
+                    req.getSession().setAttribute("errorMessage", "포인트가 부족합니다. 충전 후 다시 결제해주세요.");
+                    resp.sendRedirect(req.getContextPath() + "/views/wallet/charge.jsp");
+                    return;
+                }
+
+                // 기타 오류는 다시 채팅방으로
+                req.getSession().setAttribute("errorMessage", msg);
+                resp.sendRedirect(req.getContextPath() + "/chat/room/" + roomId);
                 return;
             }
+
 
         default:
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
