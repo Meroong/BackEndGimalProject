@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import service.ImageService;
 import service.UserService;
+import service.WalletService;
 import util.AuthUtil;
 import dto.UserAddressDTO;
 import dto.UserDTO;
@@ -88,6 +89,11 @@ public class UserController extends HttpServlet {
 
                 String profileUrl = new ImageService().getProfileImage(userDto.getAutoId(), "PROFILE");
                 session.setAttribute("profileUrl", profileUrl);
+                
+                // 지갑 잔액 세션에 저장
+                int balance = new WalletService().getBalance(userDto.getAutoId());
+                System.out.println("AutoId: "+userDto.getAutoId()+", balance: "+balance);
+                session.setAttribute("walletBalance", balance);
                 
                 String jwt = JwtAuth.generateToken(userDto.getUserId(), userDto.getAutoId(), userDto.getRole());
                 session.setAttribute("Authorization", "Bearer " + jwt);

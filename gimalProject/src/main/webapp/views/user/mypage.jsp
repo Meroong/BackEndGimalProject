@@ -270,8 +270,8 @@
         UserDTO user = (UserDTO) session.getAttribute("userInfo");
         UserAddressDTO addr = (UserAddressDTO) session.getAttribute("addressInfo");
 
-        // 컨트롤러에서 request.setAttribute("walletBalance", int) 해준다고 가정
-        Integer walletBalance = (Integer) request.getAttribute("walletBalance");
+        // 세션에 저장된 포인트 값 가져옴
+        Integer walletBalance = (Integer) session.getAttribute("walletBalance");
         if (walletBalance == null) walletBalance = 0;
     %>
 

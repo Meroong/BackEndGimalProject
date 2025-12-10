@@ -122,6 +122,20 @@ public class ChattingController extends HttpServlet {
                 ArrayList<chatParticipantsUserDTO> users = service.getParticipantUsers(roomDto);
                 req.setAttribute("participantUsers", users);
             }
+            // 체크: wallet/pay에서 전달한 메시지 처리
+            HttpSession session = req.getSession();
+
+            String success = (String) session.getAttribute("successMessage");
+            if (success != null) {
+                req.setAttribute("successMessage", success);  // JSP에서 1회 사용
+                session.removeAttribute("successMessage");    // 1회성 메시지 제거!
+            }
+
+            String error = (String) session.getAttribute("errorMessage");
+            if (error != null) {
+                req.setAttribute("errorMessage", error);
+                session.removeAttribute("errorMessage");
+            }
 
             req.getRequestDispatcher("/views/chat/chatting.jsp").forward(req, resp);
             return;
