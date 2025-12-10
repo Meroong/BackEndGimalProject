@@ -103,5 +103,5 @@ public class AdminReportDAO {
         dto.setReason(rs.getString("reason"));
         dto.setCreatedAt(rs.getTimestamp("created_at"));
         return dto;
-    }
+    }   
 }

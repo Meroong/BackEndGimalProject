@@ -49,7 +49,7 @@ public class UserController extends HttpServlet {
             if (session != null) {
                 userService.logoutUser(session);
             }
-            resp.sendRedirect(req.getContextPath() + "/index.jsp");
+            resp.sendRedirect(req.getContextPath() + "/home");
             return;
         }
 
@@ -73,6 +73,7 @@ public class UserController extends HttpServlet {
             String pw = req.getParameter("userPassword");
             HttpSession session = req.getSession();
 
+
             UserDTO userDto = userService.loginUser(id, pw);
 
             if (userDto != null) {
@@ -87,7 +88,7 @@ public class UserController extends HttpServlet {
 
                 String profileUrl = new ImageService().getProfileImage(userDto.getAutoId(), "PROFILE");
                 session.setAttribute("profileUrl", profileUrl);
-
+                
                 String jwt = JwtAuth.generateToken(userDto.getUserId(), userDto.getAutoId(), userDto.getRole());
                 session.setAttribute("Authorization", "Bearer " + jwt);
 
@@ -97,7 +98,7 @@ public class UserController extends HttpServlet {
                     session.removeAttribute("redirectAfterLogin"); // 한 번만 사용
                     resp.sendRedirect(redirectUrl);
                 } else {
-                    resp.sendRedirect(req.getContextPath() + "/index.jsp");
+                	resp.sendRedirect(req.getContextPath() + "/home");
                 }
 
                 return;
@@ -124,7 +125,7 @@ public class UserController extends HttpServlet {
                 userService.registerUser(userId, password, nickName, userName,
                         roadAddress, jibunAddress, addrDetail);
 
-                resp.sendRedirect(req.getContextPath() + "/index.jsp");
+                resp.sendRedirect(req.getContextPath() + "/home");
                 return;
 
             }catch (Exception e) {
@@ -219,7 +220,7 @@ public class UserController extends HttpServlet {
             try {
                 userService.deleteUser(delAutoId);
                 req.getSession().invalidate();
-                resp.sendRedirect(req.getContextPath() + "/index.jsp");
+                resp.sendRedirect(req.getContextPath() + "/home");
                 return;
 
             } catch (Exception e) {

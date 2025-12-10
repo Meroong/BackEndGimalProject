@@ -282,7 +282,7 @@
                         <form method="post" action="${pageContext.request.contextPath}/chat/kick">
                             <input type="hidden" name="roomId" value="${selectedRoomId}"/>
                             <input type="hidden" name="meetId" value="${roomInfo.meetingId}"/>
-                            <input type="hidden" name="receiverId" value="${user.participantId}"/>
+                            <input type="hidden" name="targetUserId" value="${user.participantId}"/>
                             <button type="submit">강퇴</button>
                         </form>
                     </c:when>

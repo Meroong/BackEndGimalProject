@@ -1,6 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*, dto.MeetingDTO" %>
 
+<%
+    // 로그인 여부 체크
+    Object loginUser = session.getAttribute("loginUser");
+    boolean isLogin = (loginUser != null);
+%>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -83,6 +89,7 @@
             text-decoration: none;
             transition: 0.2s;
         }
+
         .write-btn:hover {
             background: #e46d33;
         }
@@ -125,6 +132,20 @@
             background: #FF7C40;
         }
     </style>
+
+	<script>
+	function needLogin() {
+	    var currentUrl = window.location.href;
+	
+	    if(confirm('로그인이 필요합니다.')) {
+	        // JSP에서 세션에 저장
+	        <%-- JS → JSP 변수 전달 --%>
+	        <% session.setAttribute("redirectAfterLogin", request.getContextPath().toString()+"/meet/list"); %>
+	
+	        location.href = "<%= request.getContextPath() %>/views/user/login.jsp";
+	    }
+	}
+	</script>
 
 </head>
 <body>
@@ -171,8 +192,12 @@
                     <input type="text" placeholder="Search Product Here">
                 </div>
 
-                <!-- 모임 생성 버튼 -->
-                <a href="<%= request.getContextPath() %>/views/meet/meetForm.jsp" class="write-btn">모임 생성 ✏️</a>
+                <!-- 모임 생성 버튼 (로그인 여부에 따라 다르게) -->
+                <% if (isLogin) { %>
+                    <a href="<%= request.getContextPath() %>/views/meet/meetForm.jsp" class="write-btn">모임 생성 ✏️</a>
+                <% } else { %>
+                    <a href="#" class="write-btn" onclick="needLogin()">모임 생성 ✏️</a>
+                <% } %>
             </div>
 
             <!-- ====== 모임 리스트 출력 ====== -->

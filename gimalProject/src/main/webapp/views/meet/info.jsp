@@ -3,6 +3,11 @@
 <%@ page import="dto.FileResourceDTO"%>
 <%@ page import="java.util.List"%>
 
+<%
+	Object loginUser = session.getAttribute("userInfo");
+    boolean isLogin = (loginUser != null);
+%>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -23,6 +28,21 @@ function initMap(lat, lng) {
     var map = new kakao.maps.Map(container, options);
     var marker = new kakao.maps.Marker({ position: new kakao.maps.LatLng(lat, lng) });
     marker.setMap(map);
+}
+
+// 로그인 필요 시 실행되는 함수
+function needLoginForJoin() {
+    var currentUrl = encodeURIComponent(window.location.href);
+    if (confirm("참여하시려면 로그인이 필요합니다.\n로그인 하시겠습니까?")) {
+    	<%
+	        String redirectUrl = request.getContextPath() 
+	                            + "/meeting/info?meetingId=" 
+	                            + request.getParameter("meetingId");
+	
+	        session.setAttribute("redirectAfterLogin", redirectUrl);
+	    %>
+    	location.href = "<%= request.getContextPath() %>/views/user/login.jsp";
+    }
 }
 </script>
 
@@ -139,33 +159,39 @@ function initMap(lat, lng) {
             </div>
 
             <div style="margin-top:10px;">
-			
-			    <%-- 1) 참여하지 않았고 주최자도 아닌 경우 → 참여하기 --%>
-			    <% if(!Boolean.TRUE.equals(isParticipant) && !Boolean.TRUE.equals(isCreator)) { %>
-			        <form action="<%= request.getContextPath() %>/meeting/join" method="post" style="display:inline;">
-			            <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
-			            <button class="btn">참여하기</button>
-			        </form>
-			    <% } %>
-			
-			    <%-- 2) 이미 참여자인데 주최자가 아닌 경우 → 모임 나가기 버튼 --%>
-			    <% if(Boolean.TRUE.equals(isParticipant) && !Boolean.TRUE.equals(isCreator)) { %>
-			        <form action="<%= request.getContextPath() %>/meeting/quit" method="post" style="display:inline; margin-left:10px;">
-			            <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
-			            <button class="btn" style="background:#555;">모임 나가기</button>
-			        </form>
-			    <% } %>
-			
-			    <%-- 4) 주최자인 경우 → 수정 버튼 --%>
-			    <% if(Boolean.TRUE.equals(isCreator)) { %>
-			        <a class="btn" style="background:#5271FF; margin-left:10px;"
-			           href="<%= request.getContextPath() %>/meeting/edit?meetingId=<%= m.getMeetingId() %>">
-			           모임 수정
-			        </a>
-			    <% } %>
-			
-			</div>
-			
+
+                <%-- 로그인하지 않은 경우 → 참여 버튼을 누르면 로그인 후 복귀 --%>
+                <% if (!isLogin) { %>
+                    <button class="btn" onclick="needLoginForJoin()">참여하기</button>
+                <% } else { %>
+
+                    <%-- 로그인된 상태에서: 참여/나가기/수정 표시 --%>
+
+                    <% if(!Boolean.TRUE.equals(isParticipant) && !Boolean.TRUE.equals(isCreator)) { %>
+                        <form action="<%= request.getContextPath() %>/meeting/join" method="post" style="display:inline;">
+                            <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
+                            <button class="btn">참여하기</button>
+                        </form>
+                    <% } %>
+
+                    <% if(Boolean.TRUE.equals(isParticipant) && !Boolean.TRUE.equals(isCreator)) { %>
+                        <form action="<%= request.getContextPath() %>/meeting/quit" method="post" style="display:inline; margin-left:10px;">
+                            <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
+                            <button class="btn" style="background:#555;">모임 나가기</button>
+                        </form>
+                    <% } %>
+
+                    <% if(Boolean.TRUE.equals(isCreator)) { %>
+                        <a class="btn" style="background:#5271FF; margin-left:10px;"
+                           href="<%= request.getContextPath() %>/meeting/edit?meetingId=<%= m.getMeetingId() %>">
+                           모임 수정
+                        </a>
+                    <% } %>
+
+                <% } %>
+
+            </div>
+
         </div>
     </div>
 </div>

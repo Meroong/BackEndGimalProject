@@ -238,6 +238,23 @@ public class ChattingController extends HttpServlet {
 
             return;
         }
+        if ("/kick".equals(path)) {
+            System.out.println("/kick 요청");
+
+            long roomId = Long.parseLong(req.getParameter("roomId"));
+            long targetUserId = Long.parseLong(req.getParameter("targetUserId")); //강퇴 대상
+            long meetingId = Long.parseLong(req.getParameter("meetId"));
+            try {
+                service.kickUser(autoId, roomId, targetUserId, meetingId);
+                resp.sendRedirect(req.getContextPath() + "/chat/room/" + roomId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                // 메시지는 JSP에서 표시되도록
+                req.getSession().setAttribute("errorMsg", e.getMessage());
+                resp.sendRedirect(req.getContextPath() + "/chat/room/" + roomId);
+            }
+            return;
+        }
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
 }

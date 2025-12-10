@@ -291,6 +291,7 @@ ADD CONSTRAINT fk_chat_message_user
 FOREIGN KEY (sender_id) REFERENCES user(auto_id)
 ON DELETE SET NULL;
 
+
 -- 모임 회비 구현용 
 -- 유저 포인트 정보
 CREATE TABLE user_wallet (
@@ -333,6 +334,7 @@ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '등록일시',
 FOREIGN KEY (reporter_id) REFERENCES user(auto_id),
 FOREIGN KEY (target_user_id) REFERENCES user(auto_id)
 ) COMMENT='신고';
+
 
 -- 간이 데이터
 -- 🧍 USER 샘플

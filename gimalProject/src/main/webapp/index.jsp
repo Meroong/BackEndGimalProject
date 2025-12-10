@@ -1,7 +1,6 @@
-<%@page import="dto.UserAddressDTO"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="util.AuthUtil"%>
 <%@ page import="dto.UserAddressDTO"%>
+<%@ page import="dto.WeatherDTO"%>
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -9,6 +8,17 @@
     <meta charset="UTF-8">
     <title>도란도란 - 우리 동네 유아·애견 커넥트</title>
     <link rel="stylesheet" href="home.css">
+    <style>
+        /* 날씨 카드 배경 적용 */
+        .weather-card {
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
@@ -48,19 +58,35 @@
             <%-- 지도 카드 --%>
             <div class="map-card" id="map" style="width:100%; height:400px;"></div>
 
-            <% 
-            UserAddressDTO addressInfo = (UserAddressDTO) session.getAttribute("addressInfo");
+            <%
+                // HomeController에서 전달된 변수
+                WeatherDTO weather = (WeatherDTO) request.getAttribute("weather");
+                String bgImage = (String) request.getAttribute("bgImage");
 
-            double defaultLat = 37.501;
-            double defaultLng = 126.884;
+                double lat = request.getAttribute("lat") != null ? (double) request.getAttribute("lat") : 37.501;
+                double lng = request.getAttribute("lng") != null ? (double) request.getAttribute("lng") : 126.884;
 
-            double lat = (addressInfo != null && addressInfo.getLatitude() != null)
-                         ? addressInfo.getLatitude()
-                         : defaultLat;
+                String dongName = "우리 동네"; // 기본값
+                UserAddressDTO addressInfo = (UserAddressDTO) session.getAttribute("addressInfo");
+                if(addressInfo != null && addressInfo.getRoadAddress() != null) {
+                    String[] parts = addressInfo.getRoadAddress().split(" ");
+                    dongName = parts[parts.length - 1];
+                }
 
-            double lng = (addressInfo != null && addressInfo.getLongitude() != null)
-                         ? addressInfo.getLongitude()
-                         : defaultLng;
+                // 날씨 표시용
+                String temp = "정보 없음";
+                String status = "정보 없음";
+                if(weather != null) {
+                    temp = String.format("%.1f°C", weather.getTemperature());
+
+                    String dustInfo;
+                    if(weather.getPm10() <= 30) dustInfo = "좋음";
+                    else if(weather.getPm10() <= 80) dustInfo = "보통";
+                    else if(weather.getPm10() <= 150) dustInfo = "나쁨";
+                    else dustInfo = "매우 나쁨";
+
+                    status = weather.getWeather() + " • 미세먼지 " + dustInfo;
+                }
             %>
 
             <script>
@@ -70,80 +96,30 @@
             <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
             <script>
                 window.onload = function() {
-                    if (!window.kakao) {
-                        alert("카카오 지도 SDK 로드 실패");
-                        return;
-                    }
-
+                    if (!window.kakao) { alert("카카오 지도 SDK 로드 실패"); return; }
                     var container = document.getElementById('map');
-                    var options = {
-                        center: new kakao.maps.LatLng(userLat, userLng),
-                        level: 3
-                    };
-
+                    var options = { center: new kakao.maps.LatLng(userLat, userLng), level: 3 };
                     var map = new kakao.maps.Map(container, options);
-
-                    var markerPosition  = new kakao.maps.LatLng(userLat, userLng);
-                    var marker = new kakao.maps.Marker({ position: markerPosition });
+                    var marker = new kakao.maps.Marker({ position: new kakao.maps.LatLng(userLat, userLng) });
                     marker.setMap(map);
-
-                    console.log("카카오 지도 로드 완료");
                 }
             </script>
 
-            <%-- 가운데: 오늘의 인기 모임 --%>
+            <%-- 가운데: 인기 모임 --%>
             <div class="center-card">
                 <div class="center-title">오늘의 인기 모임 🔥</div>
-                <div class="center-desc">지금 우리 동네에서 가장 활발한 모임을 소개해드릴게요!</div>
-
-                <div class="popular-grid">
-
-                    <div class="popular-card">
-                        <img src="resources/images/kidsPlay.jpg" alt="pop1">
-                        <div class="pop-info">
-                            <h3>주말 실내 키즈 플레이라운지</h3>
-                            <p>구로 · 5명 참여중</p>
-                        </div>
-                    </div>
-
-                    <div class="popular-card">
-                        <img src="resources/images/dogWalking.jpg" alt="pop2">
-                        <div class="pop-info">
-                            <h3>강아지 소형견 산책 모임</h3>
-                            <p>고척 · 3명 참여중</p>
-                        </div>
-                    </div>
-
-                    <div class="popular-card">
-                        <img src="resources/images/baby.jpg" alt="pop3">
-                        <div class="pop-info">
-                            <h3>첫 육아 부모 대화방</h3>
-                            <p>가리봉 · 12명 활성</p>
-                        </div>
-                    </div>
-
-                    <div class="popular-card">
-                        <img src="resources/images/doggroup.jpg" alt="pop4">
-                        <div class="pop-info">
-                            <h3>초보 펫돌보미 공유 모임</h3>
-                            <p>구로 · 7명 참여중</p>
-                        </div>
-                    </div>
-
-                </div>
+                <div class="center-desc">지금 <%= dongName %>에서 가장 활발한 모임을 소개해드릴게요!</div>
             </div>
 
             <%-- 오른쪽: 날씨 + 활동 카드 --%>
             <div>
-                <div class="weather-card">
-                    <div class="weather-title">현재 구로동 날씨</div>
-                    <div class="weather-temp">14.5°C</div>
-                    <div class="weather-status">맑음 • 미세먼지 좋음</div>
+                <div class="weather-card" style="background-image: url('<%= bgImage %>');">
+                    <div class="weather-title">현재 <%= dongName %> 날씨</div>
+                    <div class="weather-temp"><%= temp %></div>
+                    <div class="weather-status"><%= status %></div>
                 </div>
 
                 <div class="activities">
-
-                    <%-- 🔗 모임 버튼 → /meet/list 이동 --%>
                     <a href="<%= request.getContextPath() %>/meeting/list" class="activity-card" style="text-decoration:none; color:inherit;">
                         <img src="resources/images/meeting.jpg" alt="meet">
                         <span>모임</span>
@@ -158,7 +134,6 @@
                         <img src="resources/images/giving.jpg" alt="chat">
                         <span>드림</span>
                     </div>
-
                 </div>
             </div>
 
@@ -166,6 +141,5 @@
     </section>
 
 </div>
-
 </body>
 </html>
