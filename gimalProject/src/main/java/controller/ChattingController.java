@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpSession;
 import service.ChattingService;
 import service.ImageService;
 import service.MeetingService;
+import service.PollService;
 import service.UserService;
 import util.AuthUtil;
 
@@ -111,6 +112,8 @@ public class ChattingController extends HttpServlet {
                 } catch (Exception e) {
                     req.setAttribute("hasPaid", false);
                 }
+                PollService pollService = new PollService();
+                req.setAttribute("voteList", pollService.getPollListByRoom(roomId));
             }
             
             // 호스트 여부
