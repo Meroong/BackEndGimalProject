@@ -170,6 +170,7 @@
 
         <label>상세주소</label>
         <input type="text" id="addrDetail" name="addrDetail">
+        <input type="hidden" id="addrDetailValue" name="addrDetail">
 
         <input type="hidden" id="latitude" name="latitude">
         <input type="hidden" id="longitude" name="longitude">

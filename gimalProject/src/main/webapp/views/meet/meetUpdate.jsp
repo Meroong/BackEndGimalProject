@@ -183,6 +183,18 @@
 
         return false;
     }
+    const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>";
+    const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
+
+    function openJusoPopup() {
+        window.open(
+            "https://business.juso.go.kr/addrlink/addrLinkUrl.do?confmKey=" + POPUP_KEY
+            + "&returnUrl=" + encodeURIComponent(RETURN_URL)
+            + "&resultType=4",
+            "jusoPopup",
+            "width=570,height=420,scrollbars=yes,resizable=yes"
+        );
+    }
 </script>
 
 <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
@@ -220,6 +232,7 @@
 
         <label>상세주소</label>
         <input type="text" id="addrDetail" name="addrDetail" value="<%= m.getAddrDetail() %>">
+        <input type="hidden" id="addrDetailValue" name="addrDetail">
 
         <input type="hidden" id="latitude" name="latitude" value="<%= m.getLatitude() %>">
         <input type="hidden" id="longitude" name="longitude" value="<%= m.getLongitude() %>">

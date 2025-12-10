@@ -140,7 +140,7 @@
 	    if(confirm('로그인이 필요합니다.')) {
 	        // JSP에서 세션에 저장
 	        <%-- JS → JSP 변수 전달 --%>
-	        <% session.setAttribute("redirectAfterLogin", request.getContextPath().toString()+"/meet/list"); %>
+	        <% session.setAttribute("redirectAfterLogin", request.getContextPath().toString()+"/meeting/list"); %>
 	
 	        location.href = "<%= request.getContextPath() %>/views/user/login.jsp";
 	    }
