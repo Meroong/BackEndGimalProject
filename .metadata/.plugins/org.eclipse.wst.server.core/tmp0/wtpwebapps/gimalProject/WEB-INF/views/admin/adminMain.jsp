@@ -73,14 +73,14 @@
                     <div>
                         <div class="admin-card-title">신고 관리</div>
                         <div class="admin-card-sub">
-                            회원/모임 관련 신고를 확인하고 처리할 수 있어요.
+                            회원 신고를 확인하고 처리할 수 있어요.
                         </div>
                     </div>
                     <div class="admin-card-icon">⚠️</div>
                 </div>
 
                 <ul class="admin-card-meta-list">
-                    <li>PENDING → RESOLVED 처리 토글 가능</li>
+                    <li>대기 → 정지 처리 가능</li>
                     <li>신고 내용 검토 후 제재 여부 결정</li>
                 </ul>
             </a>

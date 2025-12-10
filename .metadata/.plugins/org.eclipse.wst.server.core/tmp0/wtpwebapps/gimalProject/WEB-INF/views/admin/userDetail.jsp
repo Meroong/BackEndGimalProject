@@ -61,22 +61,22 @@
                 <h3>기본 정보</h3>
 
                 <div class="user-field-row">
-                    <span class="field-label">아이디(userId)</span>
+                    <span class="field-label">아이디</span>
                     <span class="field-value">${user.userId}</span>
                 </div>
 
                 <div class="user-field-row">
-                    <span class="field-label">이름(userName)</span>
+                    <span class="field-label">이름</span>
                     <span class="field-value">${user.userName}</span>
                 </div>
 
                 <div class="user-field-row">
-                    <span class="field-label">닉네임(nickname)</span>
+                    <span class="field-label">닉네임</span>
                     <span class="field-value">${user.nickname}</span>
                 </div>
 
                 <div class="user-field-row">
-                    <span class="field-label">권한(role)</span>
+                    <span class="field-label">권한</span>
                     <span class="field-value">
                         <c:choose>
                             <c:when test="${user.role eq 'ADMIN'}">ADMIN</c:when>
@@ -87,7 +87,7 @@
                 </div>
 
                 <div class="user-field-row">
-                    <span class="field-label">신뢰도(trustScore)</span>
+                    <span class="field-label">신뢰도</span>
                     <span class="field-value">${user.trustScore}</span>
                 </div>
             </section>
@@ -97,7 +97,7 @@
                 <h3>추가 정보</h3>
 
                 <div class="user-field-row">
-                    <span class="field-label">주소 ID(addressId)</span>
+                    <span class="field-label">주소 ID</span>
                     <span class="field-value">
                         <c:choose>
                             <c:when test="${empty user.addressId}">-</c:when>
@@ -107,7 +107,7 @@
                 </div>
 
                 <div class="user-field-row">
-                    <span class="field-label">상세주소(addressDetail)</span>
+                    <span class="field-label">상세주소</span>
                     <span class="field-value">
                         <c:choose>
                             <c:when test="${empty user.addressDetail}">-</c:when>
@@ -117,12 +117,12 @@
                 </div>
 
                 <div class="user-field-row">
-                    <span class="field-label">가입일(createdAt)</span>
+                    <span class="field-label">가입일</span>
                     <span class="field-value">${user.createdAt}</span>
                 </div>
 
                 <div class="user-field-row">
-                    <span class="field-label">수정일(updatedAt)</span>
+                    <span class="field-label">수정일</span>
                     <span class="field-value">
                         <c:choose>
                             <c:when test="${empty user.updatedAt}">-</c:when>

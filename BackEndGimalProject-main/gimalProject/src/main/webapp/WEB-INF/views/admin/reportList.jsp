@@ -32,10 +32,10 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>신고자 ID(reporterId)</th>
-                    <th>대상자 ID(targetUserId)</th>
-                    <th>사유(reason)</th>
-                    <th>상태(status)</th>
+                    <th>신고자 ID</th>
+                    <th>대상자 ID</th>
+                    <th>사유</th>
+                    <th>상태</th>
                     <th>상세</th>
                 </tr>
             </thead>
@@ -61,10 +61,10 @@
                         <td>
                             <c:choose>
                                 <c:when test="${report.status eq 'PENDING'}">
-                                    <span class="badge badge-pending">PENDING</span>
+                                    <span class="badge badge-pending">대기</span>
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="badge badge-resolved">RESOLVED</span>
+                                    <span class="badge badge-resolved">정지</span>
                                 </c:otherwise>
                             </c:choose>
                         </td>

@@ -116,7 +116,7 @@
     <section class="main-box">
         <div class="box-title">도란도란 운영 현황 한눈에 보기</div>
         <p>
-            회원 증가 추이, 거래 활동, 신고 처리 현황을 한 번에 확인할 수 있는 관리자 전용 대시보드입니다.
+            회원 증가 추이와 신고 처리 현황을 한 번에 확인할 수 있는 관리자 전용 대시보드입니다.
         </p>
 
         <!-- 상단 요약 카드 -->
@@ -144,28 +144,6 @@
                 </div>
             </div>
 
-            <!-- 전체 상품 수 -->
-            <div class="stat-card">
-                <div class="stat-title">등록된 상품 수</div>
-                <div class="stat-value">
-                    <c:out value="${totalItems}" default="0"/>
-                </div>
-                <div class="stat-desc">
-                    판매/나눔을 위해 등록된 전체 상품 수입니다.
-                </div>
-            </div>
-
-            <!-- 전체 거래 수 -->
-            <div class="stat-card">
-                <div class="stat-title">누적 거래 수</div>
-                <div class="stat-value">
-                    <c:out value="${totalTransactions}" default="0"/>
-                </div>
-                <div class="stat-desc">
-                    완료된 거래(거래 내역 기준)의 누적 건수입니다.
-                </div>
-            </div>
-
             <!-- 미처리 신고 수 -->
             <div class="stat-card">
                 <div class="stat-title">미처리 신고</div>
@@ -188,7 +166,7 @@
         <c:if test="${not empty basicStats}">
             <div class="section-title">기본 통계 요약</div>
             <div class="section-sub">
-                기존에 사용하던 통계 값 (총 회원 수 / 총 신고 수)을 함께 보여줍니다.
+                기존에 사용하던 통계 값(총 회원 수 / 총 신고 수)을 함께 보여줍니다.
             </div>
 
             <div class="stats-grid">
@@ -197,7 +175,6 @@
                     <div class="stat-value">
                         <c:out value="${basicStats.totalUsers}" default="0"/>
                     </div>
-                    <div class="stat-desc">AdminStatsDTO 기반 값입니다.</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-title">총 신고 수</div>
@@ -243,7 +220,7 @@
         <!-- 신고 상태별 현황 -->
         <div class="section-title">신고 상태별 현황</div>
         <div class="section-sub">
-            PENDING / RESOLVED 등 상태별 신고 건수를 통해 현재 위험도를 파악할 수 있습니다.
+            상태별 신고 건수를 통해 현재 신고 처리 현황을 확인할 수 있습니다.
         </div>
 
         <c:choose>
@@ -261,10 +238,10 @@
                             <td>
                                 <c:choose>
                                     <c:when test="${r.status == 'PENDING'}">
-                                        <span class="badge badge-pending">PENDING</span>
+                                        <span class="badge badge-pending">대기</span>
                                     </c:when>
                                     <c:when test="${r.status == 'RESOLVED'}">
-                                        <span class="badge badge-resolved">RESOLVED</span>
+                                        <span class="badge badge-resolved">정지</span>
                                     </c:when>
                                     <c:otherwise>
                                         <span class="badge"><c:out value="${r.status}"/></span>
