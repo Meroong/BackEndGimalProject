@@ -218,6 +218,7 @@
 		</c:if>
 
 
+
         <!-- 호스트만 보이도록 + 버튼 -->
         <c:if test="${isHost}">
             <button class="member-btn" onclick="document.getElementById('memberModal').style.display='block';">＋</button>

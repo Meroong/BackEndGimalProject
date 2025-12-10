@@ -74,8 +74,7 @@ public class WalletController extends HttpServlet {
                 return;
             }
 
-        
-         // 모임 회비 결제 (채팅방에서 사용)
+        // 모임 회비 결제 (채팅방에서 사용)
         case "/pay":
             System.out.println("Controller: meeting pay");
 
@@ -113,7 +112,7 @@ public class WalletController extends HttpServlet {
                 // 포인트 부족 시 마이페이지로 이동
                 if (msg != null && msg.contains("포인트")) {
                     req.getSession().setAttribute("errorMessage", "포인트가 부족합니다. 충전 후 다시 결제해주세요.");
-                    resp.sendRedirect(req.getContextPath() + "/views/wallet/charge.jsp");
+                    resp.sendRedirect(req.getContextPath() + "/views/user/mypage.jsp");
                     return;
                 }
 
