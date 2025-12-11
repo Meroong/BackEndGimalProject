@@ -77,6 +77,31 @@ function needLoginForJoin() {
 
 /* 지도 */
 #map { width:100%; height:400px; border-radius:16px; margin-top:20px; }
+
+.report-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #FF4E4E;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.report-btn:hover {
+    background: #d93c3c;
+    transform: translateY(-2px);
+}
+
+.card-wrapper {
+    position: relative;
+}
+
 </style>
 </head>
 
@@ -110,6 +135,15 @@ function needLoginForJoin() {
 <% } else { %>
 
 <div style="position:relative;">
+
+	<div class="card-wrapper">
+
+    <!-- 신고 버튼 (오른쪽 상단 배치) -->
+    <form action="<%=request.getContextPath()%>/report/create" method="post" style="display:inline;">
+        <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
+        <button type="submit" class="report-btn">신고하기</button>
+    </form>
+	
     <div class="recruit-badge">모집인원 <%= m.getCurrentMembers() %>/<%= m.getMaxMembers() %></div>
 
     <div class="card">
