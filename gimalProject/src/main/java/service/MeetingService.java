@@ -114,7 +114,42 @@ public class MeetingService {
             }
         }
         return aList;
+        
     }
+    // 🔍 필터가 적용된 게시판 리스트 조회 (카테고리 + 기간 + 키워드 + 상태 + 날씨)
+    public ArrayList<MeetingInfoDTO> getMeetingListFiltered(String category,
+                                                            String dateFrom,
+                                                            String dateTo,
+                                                            String keyword,
+                                                            String status,
+                                                            String weather) {
+        System.out.println("Service: getMeetingListFiltered");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+        ArrayList<MeetingInfoDTO> aList =
+                new MeetingDAO().getPostListFiltered(category, dateFrom, dateTo, keyword, status, weather);
+
+        for (MeetingInfoDTO dto : aList) {
+            if (dto.getCreatedAt() != null) {
+                String timeAgo = TimeUtil.toTimeAgo(dto.getCreatedAt());
+                dto.setTimeAgo(timeAgo);
+            }
+            if (dto.getDate() != null) {
+                dto.setDateStr(sdf.format(dto.getDate()));
+            }
+            String roadAddr = dto.getRoadAddress();
+            if (roadAddr != null) {
+                String[] parts = roadAddr.split(" ");
+                if (parts.length >= 3) {
+                    dto.setDong(parts[2]);
+                }
+            }
+        }
+        return aList;
+    }
+
+
+
 
     // 모임 장소 업데이트
     public boolean updateLocation(

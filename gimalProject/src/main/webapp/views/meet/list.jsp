@@ -2,9 +2,22 @@
 <%@ page import="java.util.*, dto.MeetingInfoDTO" %>
 
 <%
-    // 로그인 여부 체크
     Object loginUser = session.getAttribute("userInfo");
     boolean isLogin = (loginUser != null);
+
+    String selectedCategory = (String) request.getAttribute("selectedCategory");
+    String selectedDateFrom = (String) request.getAttribute("selectedDateFrom");
+    String selectedDateTo   = (String) request.getAttribute("selectedDateTo");
+    String keyword          = (String) request.getAttribute("keyword");
+    String selectedStatus   = (String) request.getAttribute("selectedStatus");
+    String selectedWeather  = (String) request.getAttribute("selectedWeather");
+
+    if (selectedCategory == null || selectedCategory.isBlank()) selectedCategory = "전체";
+    if (selectedDateFrom == null) selectedDateFrom = "";
+    if (selectedDateTo   == null) selectedDateTo   = "";
+    if (keyword == null) keyword = "";
+    if (selectedStatus == null || selectedStatus.isBlank()) selectedStatus = "ALL";
+    if (selectedWeather == null || selectedWeather.isBlank()) selectedWeather = "ALL";
 %>
 
 <!DOCTYPE html>
@@ -13,7 +26,6 @@
     <meta charset="UTF-8">
     <title>동네 모임</title>
 
-    <!-- 메인 스타일 가져오기 -->
     <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/home.css">
 
     <style>
@@ -21,19 +33,15 @@
             background: #F5F6FA;
             font-family: 'Pretendard';
         }
-
         .page-wrapper {
             width: 1400px;
             margin: 0 auto;
             padding: 20px 0;
         }
-
         .layout {
             display: flex;
             gap: 30px;
         }
-
-        /* ---------- 좌측 사이드바 ---------- */
         .sidebar {
             width: 260px;
             background: white;
@@ -42,35 +50,43 @@
             box-shadow: 0 6px 20px rgba(0,0,0,0.06);
             height: auto;
         }
-
         .side-title {
             font-size: 18px;
             font-weight: 700;
             margin-bottom: 12px;
         }
-
         .filter-group {
             margin-bottom: 28px;
         }
-
+        .filter-group ul {
+            padding-left: 0;
+            margin: 0;
+        }
         .filter-group ul li {
             list-style: none;
             margin: 8px 0;
+        }
+        .filter-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: #444;
             cursor: pointer;
         }
+        .filter-label input[type="radio"] {
+            accent-color: #FF7C40;
+        }
 
-        /* ---------- 우측 콘텐츠 ---------- */
         .content {
             flex: 1;
         }
-
         .content-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 16px;
         }
-
         .search-box input {
             width: 350px;
             height: 42px;
@@ -78,7 +94,6 @@
             border-radius: 12px;
             border: 1px solid #ccc;
         }
-
         .write-btn {
             background: #FF7C40;
             color: white;
@@ -89,12 +104,28 @@
             text-decoration: none;
             transition: 0.2s;
         }
-
         .write-btn:hover {
             background: #e46d33;
         }
 
-        /* ---------- 모임 리스트 카드 ---------- */
+        .filter-submit {
+            margin-bottom: 16px;
+            text-align: right;
+        }
+        .filter-submit button {
+            background: #FF7C40;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .filter-submit button:hover {
+            background: #e46d33;
+        }
+
         .meeting-card {
             background: white;
             padding: 22px 25px;
@@ -107,7 +138,6 @@
         .meeting-card:hover {
             transform: translateY(-4px);
         }
-
         .meeting-title {
             font-size: 18px;
             font-weight: 700;
@@ -122,7 +152,6 @@
             font-size: 12px;
             color: #888;
         }
-
         .status-btn {
             float: right;
             font-size: 13px;
@@ -135,102 +164,208 @@
 
 	<script>
 	function needLogin() {
-	    var currentUrl = window.location.href;
-	
 	    if(confirm('로그인이 필요합니다.')) {
-	        // JSP에서 세션에 저장
-	        <%-- JS → JSP 변수 전달 --%>
 	        <% session.setAttribute("redirectAfterLogin", request.getContextPath().toString()+"/meeting/list"); %>
-	
 	        location.href = "<%= request.getContextPath() %>/views/user/login.jsp";
 	    }
 	}
 	</script>
+<script>
+    function autoSubmitFilter() {
+        document.getElementById('filterForm').submit();
+    }
+</script>
 
 </head>
 <body>
 
 <div class="page-wrapper">
 
-    <!-- 공통 헤더 -->
     <jsp:include page="/include/header.jsp" />
 
-    <div class="layout">
+    <!-- 전체 필터 + 검색을 하나의 GET 폼으로 -->
+    <form id="filterForm" method="get" action="<%= request.getContextPath() %>/meeting/list">
+        <div class="layout">
 
-        <!-- ---------- 좌측 필터 사이드바 ---------- -->
-        <div class="sidebar">
-            <div class="filter-group">
-                <div class="side-title">카테고리</div>
-                <ul>
-                    <li>전체</li>
-                    <li>산책</li>
-                    <li>헬스</li>
-                    <li>애견</li>
-                </ul>
-            </div>
+            <!-- 좌측 필터 사이드바 -->
+            <div class="sidebar">
 
-            <div class="filter-group">
-                <div class="side-title">모임 인원</div>
-                <ul>
-                    <li>1명 이상</li>
-                    <li>최대 10명</li>
-                </ul>
-            </div>
+                <!-- 카테고리 -->
+                <div class="filter-group">
+                    <div class="side-title">카테고리</div>
+                    <ul>
+                        <li>
+                            <label class="filter-label">
+                                <input type="radio" name="category" value="전체"
+      								 onchange="autoSubmitFilter()"
+      								  <%= "전체".equals(selectedCategory) ? "checked" : "" %>>
 
-            <div class="filter-group">
-                <div class="side-title">필터</div>
-                <input type="date" style="width:100%; padding:8px; border-radius:12px; border:1px solid #ddd;">
-            </div>
-        </div>
-
-        <!-- ---------- 우측 콘텐츠 ---------- -->
-        <div class="content">
-
-            <div class="content-header">
-                <!-- 검색 -->
-                <div class="search-box">
-                    <input type="text" placeholder="Search Product Here">
+                                전체
+                            </label>
+                        </li>
+                        <li>
+                            <label class="filter-label">
+                                <input type="radio" name="category" value="산책"
+      								 onchange="autoSubmitFilter()"
+       								<%= "산책".equals(selectedCategory) ? "checked" : "" %>>
+                                산책
+                            </label>
+                        </li>
+                        <li>
+                            <label class="filter-label">
+                                <input type="radio" name="category" value="헬스"
+                                 onchange="autoSubmitFilter()"
+                                       <%= "헬스".equals(selectedCategory) ? "checked" : "" %>>
+                                헬스
+                            </label>
+                        </li>
+                        <li>
+                            <label class="filter-label">
+                                <input type="radio" name="category" value="애견"
+                                 onchange="autoSubmitFilter()"
+                                       <%= "애견".equals(selectedCategory) ? "checked" : "" %>>
+                                애견
+                            </label>
+                        </li>
+                    </ul>
                 </div>
 
-                <!-- 모임 생성 버튼 (로그인 여부에 따라 다르게) -->
-                <% if (isLogin) { %>
-                    <a href="<%= request.getContextPath() %>/views/meet/meetForm.jsp" class="write-btn">모임 생성 ✏️</a>
-                <% } else { %>
-                    <a href="#" class="write-btn" onclick="needLogin()">모임 생성 ✏️</a>
-                <% } %>
+                <!-- 모집 상태 필터 (모집중/마감/종료) -->
+                <div class="filter-group">
+                    <div class="side-title">모집 상태</div>
+                    <ul>
+                        <li>
+                            <label class="filter-label">
+                                <input type="radio" name="status" value="ALL"
+     							  onchange="autoSubmitFilter()"
+     							  <%= "ALL".equals(selectedStatus) ? "checked" : "" %>>
+
+                                전체
+                            </label>
+                        </li>
+                        <li>
+                            <label class="filter-label">
+                                <input type="radio" name="status" value="OPEN"
+                                onchange="autoSubmitFilter()"
+                                <%= "OPEN".equals(selectedStatus) ? "checked" : "" %>>
+                                모집중
+                            </label>
+                        </li>
+                        <li>
+                            <label class="filter-label">
+                                <input type="radio" name="status" value="CLOSED"
+                                		onchange="autoSubmitFilter()"
+                                       <%= "CLOSED".equals(selectedStatus) ? "checked" : "" %>>
+                                모집 마감
+                            </label>
+                        </li>
+                        
+                </div>
+
+                <!-- 날짜 필터 -->
+                <div class="filter-group">
+                    <div class="filter-group">
+    <div class="side-title">모임 날짜</div>
+    		<div style="display:flex; align-items:center; gap:6px;">
+       			 <input type="date"
+          			    name="dateFrom"
+           	  		    value="<%= selectedDateFrom %>"
+           	  		    onchange="autoSubmitFilter()"
+               		    style="flex:1; padding:8px; border-radius:12px; border:1px solid #ddd;">
+	
+        <span style="font-size:14px; color:#666;">~</span>
+
+        <input type="date"
+               name="dateTo"
+               value="<%= selectedDateTo %>"
+               onchange="autoSubmitFilter()"
+               style="flex:1; padding:8px; border-radius:12px; border:1px solid #ddd;">
+    </div>
+    <!-- <div style="margin-top:6px; font-size:11px; color:#888;">
+        시작일 또는 종료일만 선택해도 필터됩니다.
+    </div> 해도 되고 안해도 되고 -->
+</div>
+
+                </div>
+
+                <!-- 날씨 필터 -->
+                <div class="filter-group">
+                    <div class="side-title">날씨</div>
+                    <select name="weather"
+                    		onchange="autoSubmitFilter()"
+                            style="width:100%; padding:8px; border-radius:12px; border:1px solid #ddd;">
+                        <option value="ALL" <%= "ALL".equals(selectedWeather) ? "selected" : "" %>>전체</option>
+                        <option value="맑음" <%= "맑음".equals(selectedWeather) ? "selected" : "" %>>맑음</option>
+                        <option value="흐림" <%= "흐림".equals(selectedWeather) ? "selected" : "" %>>흐림</option>
+                        <option value="비" <%= "비".equals(selectedWeather) ? "selected" : "" %>>비</option>
+                        <option value="이슬비" <%= "이슬비".equals(selectedWeather) ? "selected" : "" %>>이슬비</option>
+                        <option value="천둥번개" <%= "천둥번개".equals(selectedWeather) ? "selected" : "" %>>천둥번개</option>
+                        <option value="눈" <%= "눈".equals(selectedWeather) ? "selected" : "" %>>눈</option>
+                        <option value="기타" <%= "기타".equals(selectedWeather) ? "selected" : "" %>>기타</option>
+                    </select>
+                </div>
             </div>
 
-            <!-- ====== 모임 리스트 출력 ====== -->
-            <%
-                List<MeetingInfoDTO> list = (List<MeetingInfoDTO>) request.getAttribute("meetingList");
-                if (list == null || list.isEmpty()) {
-            %>
-                <p style="color:#555; font-size:16px;">등록된 모임이 없습니다.</p>
+            <!-- 우측 콘텐츠 -->
+            <div class="content">
 
-            <% } else {
-                   for (MeetingInfoDTO m : list) { %>
+                <div class="content-header">
+                    <!-- 검색어 -->
+                    <div class="search-box">
+                        <input type="text"
+                               name="keyword"
+                               placeholder="검색어를 입력하세요"
+                               value="<%= keyword %>">
+                    </div>
 
-            <div class="meeting-card"
-                 onclick="location.href='<%= request.getContextPath() %>/meeting/info?meetingId=<%= m.getMeetingId() %>'">
+                    <!-- 모임 생성 버튼 -->
+                    <% if (isLogin) { %>
+                        <a href="<%= request.getContextPath() %>/views/meet/meetForm.jsp" class="write-btn">모임 생성 ✏️</a>
+                    <% } else { %>
+                        <a href="#" class="write-btn" onclick="needLogin()">모임 생성 ✏️</a>
+                    <% } %>
+                </div>
 
-                <div class="meeting-title"><%= m.getTitle() %></div>
-                <div class="meeting-content"><%= m.getContent() %></div>
+               
+                <!-- 모임 리스트 -->
+                <%
+                    List<MeetingInfoDTO> list = (List<MeetingInfoDTO>) request.getAttribute("meetingList");
+                    if (list == null || list.isEmpty()) {
+                %>
+                    <p style="color:#555; font-size:16px;">등록된 모임이 없습니다.</p>
+                <% } else {
+                       for (MeetingInfoDTO m : list) { %>
 
-			<div class="meeting-meta">
-			    <span><%= m.getDateStr() %></span>
-			    <span style="margin-left:6px;"><%= m.getTimeAgo() %></span>
-			    <span style="margin-left:10px; color:#666;">📍 <%= m.getDong() %></span>
-			
-			    <span class="status-btn">모집인원</span>
-			</div>
+                <div class="meeting-card"
+                     onclick="location.href='<%= request.getContextPath() %>/meeting/info?meetingId=<%= m.getMeetingId() %>'">
+
+                    <div class="meeting-title"><%= m.getTitle() %></div>
+                    <div class="meeting-content"><%= m.getContent() %></div>
+
+                    <div class="meeting-meta">
+                        <span><%= m.getDateStr() %></span>
+                        <span style="margin-left:6px;"><%= m.getTimeAgo() %></span>
+                        <span style="margin-left:10px; color:#666;">📍 <%= m.getDong() %></span>
+                        <span style="margin-left:10px; color:#666;">☁ <%= m.getWeather() %></span>
+
+                        <span class="status-btn">
+                            <% String st = m.getStatus();
+                               String label = "모집중";
+                               if ("CLOSED".equals(st)) label = "모집 마감";
+                               else if ("COMPLETED".equals(st)) label = "종료";
+                            %>
+                            <%= label %>
+                        </span>
+                    </div>
+
+                </div>
+
+                <% } } %>
 
             </div>
-
-            <% } } %>
 
         </div>
-
-    </div>
+    </form>
 
 </div>
 
