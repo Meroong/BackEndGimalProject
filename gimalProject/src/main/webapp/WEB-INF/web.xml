@@ -30,4 +30,14 @@
     <servlet-name>PollController</servlet-name>
     <url-pattern>/PollController</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>ReportController</display-name>
+    <servlet-name>ReportController</servlet-name>
+    <servlet-class>controller.ReportController</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ReportController</servlet-name>
+    <url-pattern>/report</url-pattern>
+  </servlet-mapping>
 </web-app>

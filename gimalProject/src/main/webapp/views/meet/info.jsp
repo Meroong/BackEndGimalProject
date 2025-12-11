@@ -139,10 +139,35 @@ function needLoginForJoin() {
 	<div class="card-wrapper">
 
     <!-- 신고 버튼 (오른쪽 상단 배치) -->
-    <form action="<%=request.getContextPath()%>/report/create" method="post" style="display:inline;">
-        <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
-        <button type="submit" class="report-btn">신고하기</button>
-    </form>
+	<%
+	boolean hasReported = (Boolean) request.getAttribute("hasReported");
+	boolean isCreatorBool = (Boolean.TRUE.equals(isCreator)); 
+	%>
+	
+	<!-- 1. 게시자는 모임삭제 버튼 -->
+	<% if (isCreatorBool) { %>
+	
+	    <form action="<%= request.getContextPath() %>/meeting/delete" method="post" style="display:inline;">
+	        <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
+	        <button type="submit" class="report-btn" style="background:#444;">모임 삭제</button>
+	    </form>
+	
+	<!-- 2. 이미 신고한 유저 -->
+	<% } else if (hasReported) { %>
+	
+	    <div class="report-btn" style="background:#ccc; cursor:default;">
+	        신고 완료
+	    </div>
+	
+	<!-- 3. 신고 가능 -->
+	<% } else { %>
+	
+	    <button type="button" class="report-btn"
+	            onclick="openReportModal('MEETING', '<%= m.getCreatorId() %>', '<%= m.getMeetingId() %>')">
+	        신고하기
+	    </button>
+	
+	<% } %>
 	
     <div class="recruit-badge">모집인원 <%= m.getCurrentMembers() %>/<%= m.getMaxMembers() %></div>
 
@@ -244,5 +269,6 @@ function needLoginForJoin() {
 
 <% } %>
 </div>
+<jsp:include page="/include/reportModal.jsp" />
 </body>
 </html>

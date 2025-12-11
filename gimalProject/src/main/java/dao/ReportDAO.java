@@ -2,25 +2,76 @@ package dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import dto.ReportDTO;
+import util.JDBCUtil;
 
 public class ReportDAO {
 
-    private Connection conn;
-
-    public ReportDAO(Connection conn) {
-        this.conn = conn;
-    }
-
     // ★ 신고 상태 변경 (PENDING / RESOLVED 공통)
     public int updateReportStatus(long id, String status) throws SQLException {
+    	System.out.println("ReportDAO: updateReportStatus");
         String sql = "UPDATE report SET status = ? WHERE id = ?";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection con = JDBCUtil.jdbcCon();
+                PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setString(1, status);   // "PENDING" 또는 "RESOLVED"
             pstmt.setLong(2, id);
             return pstmt.executeUpdate();
         }
     }
+    public boolean insertReport(ReportDTO dto) {
+    	System.out.println("ReportDAO: insertReport");
+        String sql = """
+                INSERT INTO report
+                (reporter_id, target_user_id, target_type, reason)
+                VALUES (?, ?, ?, ?)
+                """;
 
-    // ... (기존 신고 목록, 상세 조회 메소드들은 그대로 두면 됩니다.)
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, dto.getReporterId());
+            pstmt.setLong(2, dto.getTargetUserId());
+            pstmt.setString(3, dto.getTargetType());
+            pstmt.setString(4, dto.getReason());
+
+            int result = pstmt.executeUpdate();
+
+            return result > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public boolean hasReported(long reporterId, long targetUserId, String targetType) {
+    	System.out.println("ReportDAO: hasReported");
+        String sql = """
+                SELECT COUNT(*) 
+                FROM report
+                WHERE reporter_id = ? AND target_user_id = ? AND target_type = ?
+                """;
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, reporterId);
+            pstmt.setLong(2, targetUserId);
+            pstmt.setString(3, targetType);
+
+            try(ResultSet rs = pstmt.executeQuery()){
+            	if (rs.next()) {
+                    return rs.getInt(1) > 0;  // 이미 신고함
+                }
+            }
+
+        } catch (Exception e) {
+        	System.out.println("DB에러");
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 }

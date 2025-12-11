@@ -96,11 +96,11 @@
     </div>
 </c:if>
 
-<!-- ✅ 채팅 영역 -->
+<!-- 채팅 영역 -->
 <div class="chat-box">
     <div class="chat-messages" id="chatMessages">
 
-        <!-- ✅ 투표 표시 -->
+        <!-- 투표 표시 -->
         <c:forEach var="vote" items="${voteList}">
             <div style="border:1px solid #ddd; padding:10px; border-radius:10px; margin-bottom:10px;">
                 <b>${vote.title}</b><br>

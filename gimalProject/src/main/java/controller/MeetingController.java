@@ -20,6 +20,7 @@ import jakarta.servlet.http.Part;
 import service.ChattingService;
 import service.ImageService;
 import service.MeetingService;
+import service.ReportService;
 import util.AuthUtil;
 
 @WebServlet("/meeting/*")
@@ -43,7 +44,7 @@ public class MeetingController extends HttpServlet {
 			case "/list":
 			    ArrayList<MeetingInfoDTO> aList = meetingService.getMeetingList();
 			    req.setAttribute("meetingList", aList);
-	
+			    System.out.println(new Timestamp(System.currentTimeMillis()));
 			    // 리스트가 비어 있어도 그대로 JSP로 보냄
 			    req.getRequestDispatcher("/views/meet/list.jsp").forward(req, resp);
 			    return;
@@ -92,6 +93,18 @@ public class MeetingController extends HttpServlet {
 			    } else {
 			        System.out.println("이미지 없음");
 			    }
+			    // 신고 여부 체크
+			    boolean hasReported = false;
+
+			    if (userId != -1) {
+			        hasReported = new ReportService().hasAlreadyReported(
+			                userId,
+			                infoDto.getCreatorId(),
+			                "MEETING"
+			        );
+			    }
+
+			    req.setAttribute("hasReported", hasReported);
 			    //조회수 증가시키기
 			    meetingService.increaseViewCount(infoDto.getMeetingId());
 			    
