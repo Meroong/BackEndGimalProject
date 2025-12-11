@@ -1,6 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*, dto.MeetingDTO" %>
-
 <%
     // 로그인 여부 체크
     Object loginUser = session.getAttribute("userInfo");
@@ -89,7 +88,6 @@
             text-decoration: none;
             transition: 0.2s;
         }
-
         .write-btn:hover {
             background: #e46d33;
         }
@@ -132,7 +130,6 @@
             background: #FF7C40;
         }
     </style>
-
 	<script>
 	function needLogin() {
 	    var currentUrl = window.location.href;
@@ -146,7 +143,6 @@
 	    }
 	}
 	</script>
-
 </head>
 <body>
 
@@ -191,7 +187,6 @@
                 <div class="search-box">
                     <input type="text" placeholder="Search Product Here">
                 </div>
-
                 <!-- 모임 생성 버튼 (로그인 여부에 따라 다르게) -->
                 <% if (isLogin) { %>
                     <a href="<%= request.getContextPath() %>/views/meet/meetForm.jsp" class="write-btn">모임 생성 ✏️</a>

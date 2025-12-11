@@ -9,7 +9,7 @@ import dto.DailySignupDTO;
 import dto.ReportDTO;
 import dto.ReportStatusCountDTO;
 import dto.UserDTO;
-import dto.UserTrustRankDTO;
+import dto.AdminMeetingDTO;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -17,8 +17,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import service.AdminService;
-import dto.AdminMeetingDTO;
-
 
 @WebServlet("/admin/*")
 public class AdminController extends HttpServlet {
@@ -104,6 +102,7 @@ public class AdminController extends HttpServlet {
             case "/dashboard":
                 showAdminStats(req, resp);
                 break;
+
             // ================== 신고 관리 ==================
             case "/report/list":
             case "/reports":
@@ -125,26 +124,24 @@ public class AdminController extends HttpServlet {
             case "/notices":
                 showNoticeList(req, resp);
                 break;
+
             // 공지 작성 (GET: 폼, POST: 저장)
             case "/notice/form":
             case "/notices/write":
                 if ("GET".equalsIgnoreCase(req.getMethod())) {
-                    // 새 글 작성 폼
-                    showNoticeForm(req, resp);
+                    showNoticeForm(req, resp);   // 새 글 작성 폼
                 } else {
-                    // 새 글 저장
-                    saveNotice(req, resp);
+                    saveNotice(req, resp);       // 새 글 저장
                 }
                 break;
+
             // 공지 수정 (GET: 기존 글 폼, POST: 수정 저장)
             case "/notice/edit":
             case "/notices/edit":
                 if ("GET".equalsIgnoreCase(req.getMethod())) {
-                    // 수정 폼 - id 파라미터로 글 조회
-                    showNoticeForm(req, resp);
+                    showNoticeForm(req, resp);   // 수정 폼
                 } else {
-                    // 수정 저장
-                    saveNotice(req, resp);
+                    saveNotice(req, resp);       // 수정 저장
                 }
                 break;
 
@@ -153,38 +150,37 @@ public class AdminController extends HttpServlet {
             case "/notices/save":
                 saveNotice(req, resp);
                 break;
-            case "/notice/delete":
-                deleteNotice(req, resp);
-                break;
+
             // 공지 삭제
+            case "/notice/delete":
             case "/notices/delete":
                 deleteNotice(req, resp);
                 break;
-                // ================== 모임 관리 ==================
-                case "/meeting/list":
-                case "/meetings":
-                    showMeetingList(req, resp);
-                    break;
 
-                case "/meeting/detail":
-                case "/meetings/detail":
-                    showMeetingDetail(req, resp);
-                    break;
+            // ================== 모임 관리 ==================
+            case "/meeting/list":
+            case "/meetings":
+                showMeetingList(req, resp);
+                break;
 
-                case "/meeting/status":
-                case "/meetings/status":
-                    updateMeetingStatus(req, resp);
-                    break;
+            case "/meeting/detail":
+            case "/meetings/detail":
+                showMeetingDetail(req, resp);
+                break;
 
-                case "/meeting/delete":
-                case "/meetings/delete":
-                    deleteMeeting(req, resp);
-                    break;
+            case "/meeting/status":
+            case "/meetings/status":
+                updateMeetingStatus(req, resp);
+                break;
+
+            case "/meeting/delete":
+            case "/meetings/delete":
+                deleteMeeting(req, resp);
+                break;
 
             default:
                 System.out.println("[AdminController] 404, unknown path = " + path);
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-
         }
     }
 
@@ -304,7 +300,6 @@ public class AdminController extends HttpServlet {
 
         String idParam = req.getParameter("id");
 
-
         // id가 있으면 = 수정 모드 → 기존 공지 조회
         if (idParam != null && !idParam.isEmpty()) {
             long id = Long.parseLong(idParam);
@@ -352,39 +347,40 @@ public class AdminController extends HttpServlet {
     private void showAdminStats(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        // 기존 AdminStatsDTO (전체 회원 수, 전체 신고 수 등)
+        // 1) 기본 통계 (전체 회원 수, 전체 신고 수 등)
         AdminStatsDTO basicStats = adminService.getStats();
 
-        // 상단 카드용
-        int totalUsers        = adminService.getTotalUsers();
-        int todayNewUsers     = adminService.getTodayNewUsers();
-        int totalItems        = adminService.getTotalItems();
-        int totalTransactions = adminService.getTotalTransactions();
-        int pendingReports    = adminService.getPendingReports();
+        // 2) 상단 카드용 요약 수치
+        int totalUsers        = adminService.getTotalUsers();          // 전체 회원 수
+        int todayNewUsers     = adminService.getTodayNewUsers();       // 오늘 가입 회원 수
+        int totalItems        = adminService.getTotalItems();          // 전체 상품 수
+        int totalTransactions = adminService.getTotalTransactions();   // 전체 거래 수
+        int pendingReports    = adminService.getPendingReports();      // 미처리(PENDING) 신고 수
 
-        // 그래프/표용
-        List<DailySignupDTO>       signupStats = adminService.getDailySignupStats(7);     // 최근 7일
-        List<UserTrustRankDTO>     topUsers    = adminService.getTopUsersByTrustScore(5); // TOP 5
-        List<ReportStatusCountDTO> reportStats = adminService.getReportStatusCounts();
+        // 3) 그래프 / 표용 상세 데이터 (신뢰도 제외)
+        List<DailySignupDTO>       signupStats = adminService.getDailySignupStats(7);  // 최근 7일
+        List<ReportStatusCountDTO> reportStats = adminService.getReportStatusCounts(); // 상태별 신고 건수
 
-        // JSP에 전달
+        // 4) JSP로 전달
         req.setAttribute("basicStats", basicStats);
+        req.setAttribute("stats", basicStats);   // 예전 JSP 호환용 이름
 
+        // 상단 카드
         req.setAttribute("totalUsers", totalUsers);
         req.setAttribute("todayNewUsers", todayNewUsers);
         req.setAttribute("totalItems", totalItems);
         req.setAttribute("totalTransactions", totalTransactions);
         req.setAttribute("pendingReports", pendingReports);
 
+        // 그래프/표 데이터
         req.setAttribute("signupStats", signupStats);
-        req.setAttribute("topUsers", topUsers);
         req.setAttribute("reportStats", reportStats);
 
         RequestDispatcher rd =
                 req.getRequestDispatcher("/WEB-INF/views/admin/stats.jsp");
         rd.forward(req, resp);
     }
-    
+
     // ================== 모임 관리 ==================
     private void showMeetingList(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -431,7 +427,17 @@ public class AdminController extends HttpServlet {
     private void deleteMeeting(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
 
-        long id = Long.parseLong(req.getParameter("id"));
+        // ★ id 파라미터 먼저 안전하게 꺼내기
+        String idParam = req.getParameter("id");
+
+        if (idParam == null || idParam.isEmpty()) {
+            System.out.println("[AdminController] deleteMeeting 호출됨 - id 파라미터가 없음");
+            // 그냥 목록으로 돌려보내고 끝내기 (500 에러 방지)
+            resp.sendRedirect(req.getContextPath() + "/admin/meeting/list");
+            return;
+        }
+
+        long id = Long.parseLong(idParam);
         System.out.println("[AdminController] deleteMeeting id = " + id);
 
         int result = adminService.deleteMeeting(id);
@@ -439,7 +445,4 @@ public class AdminController extends HttpServlet {
 
         resp.sendRedirect(req.getContextPath() + "/admin/meeting/list");
     }
-
-
 }
-

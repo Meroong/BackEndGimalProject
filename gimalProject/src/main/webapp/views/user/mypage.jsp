@@ -1,7 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="dto.UserDTO"%>
 <%@ page import="dto.UserAddressDTO"%>
+<<<<<<< HEAD
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -259,10 +261,10 @@
         }
     </script>
     <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
+
 </head>
 <body>
 <div class="container">
-
     <%-- 헤더 include --%>
     <jsp:include page="/include/header.jsp" />
 
@@ -443,6 +445,7 @@
 
 </div>
 
+
 <script>
     // 카카오 Geocoder 객체 생성
     var geocoder = new kakao.maps.services.Geocoder();
@@ -473,6 +476,7 @@
 
             geocoder.addressSearch(finalAddress, function(result, status) {
                 if (status === kakao.maps.services.Status.OK) {
+
                     let lat = result[0].y;
                     let lng = result[0].x;
 
@@ -480,6 +484,7 @@
                     document.getElementById("longitude").value = lng;
 
                     e.target.submit();
+
                 } else {
                     alert("주소 → 좌표 변환 실패: " + status);
                 }

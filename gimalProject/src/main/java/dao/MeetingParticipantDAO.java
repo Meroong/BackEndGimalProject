@@ -55,6 +55,7 @@ public class MeetingParticipantDAO {
         }
     }
     
+
     // 유저가 모임에 있는지 조회
     public boolean isParticipant(long meetingId, long userId) {
         MeetingParticipantDTO dto = null;
@@ -166,5 +167,4 @@ public class MeetingParticipantDAO {
 
         return false; // 기본값: 안 냄
     }
-
 }

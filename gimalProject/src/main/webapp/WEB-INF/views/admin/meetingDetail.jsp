@@ -1,12 +1,14 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>모임 상세</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/admin.css">
+
 </head>
 <body class="admin-body">
 
@@ -16,6 +18,7 @@
         <h1>모임 상세</h1>
 
         <div class="header-buttons">
+
             <button class="log-btn"
                     onclick="location.href='${pageContext.request.contextPath}/admin/meeting/list'">
                 목록으로
@@ -100,7 +103,6 @@
     <a href="${pageContext.request.contextPath}/admin/meeting/delete?id=${meeting.id}"
        class="delete-btn">삭제</a>
 </div>
-
         </c:if>
 
     </section>

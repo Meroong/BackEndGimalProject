@@ -57,7 +57,6 @@
 
             <%-- 지도 카드 --%>
             <div class="map-card" id="map" style="width:100%; height:400px;"></div>
-
             <%
                 // HomeController에서 전달된 변수
                 WeatherDTO weather = (WeatherDTO) request.getAttribute("weather");

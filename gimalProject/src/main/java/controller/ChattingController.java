@@ -120,7 +120,6 @@ public class ChattingController extends HttpServlet {
 					e.printStackTrace();
 				}
             }
-            
             // 호스트 여부
             boolean isHost = (autoId == roomDto.getHostId());
             req.setAttribute("isHost", isHost);

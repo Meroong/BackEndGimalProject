@@ -339,7 +339,10 @@ button.admin-btn:focus {
     display: inline-block;
     padding: 4px 10px;
     border-radius: 999px;
+<<<<<<< HEAD
     background: #EEF2FF;
+=======
+>>>>>>> admin-almost-end
     color: #2563EB;
     font-size: 12px;
     text-decoration: none;
@@ -809,6 +812,7 @@ button.admin-btn:focus {
     background: #2f54eb;
 }
 
+<<<<<<< HEAD
 /* ============================
    모임 목록 검색 영역 (meetingList.jsp)
 ============================ */
@@ -866,3 +870,5 @@ button.admin-btn:focus {
     color: #6b7280;
     margin: 4px 0 12px;
 }
+=======
+>>>>>>> admin-almost-end

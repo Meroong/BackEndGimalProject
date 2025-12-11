@@ -321,8 +321,6 @@ public class MeetingService {
         return new MeetingParticipantDAO().hasUserPaid(meetingId, userId);
     }
 
-
-
     // 날씨 정보 추출
     public String extractWeather(String jsonStr, int dayIndex) {
         JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();

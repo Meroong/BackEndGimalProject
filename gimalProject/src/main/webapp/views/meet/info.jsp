@@ -3,11 +3,11 @@
 <%@ page import="dto.FileResourceDTO"%>
 <%@ page import="java.util.List"%>
 
+<<<<<<< HEAD
 <%
 	Object loginUser = session.getAttribute("userInfo");
     boolean isLogin = (loginUser != null);
 %>
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -29,7 +29,6 @@ function initMap(lat, lng) {
     var marker = new kakao.maps.Marker({ position: new kakao.maps.LatLng(lat, lng) });
     marker.setMap(map);
 }
-
 // 로그인 필요 시 실행되는 함수
 function needLoginForJoin() {
     var currentUrl = encodeURIComponent(window.location.href);
@@ -159,7 +158,6 @@ function needLoginForJoin() {
             </div>
 
             <div style="margin-top:10px;">
-
                 <%-- 로그인하지 않은 경우 → 참여 버튼을 누르면 로그인 후 복귀 --%>
                 <% if (!isLogin) { %>
                     <button class="btn" onclick="needLoginForJoin()">참여하기</button>
@@ -191,7 +189,6 @@ function needLoginForJoin() {
                 <% } %>
 
             </div>
-
         </div>
     </div>
 </div>

@@ -73,8 +73,7 @@
                     </td>
                     <td>${u.createdAt}</td>
                     <td>
-                        <a href="${pageContext.request.contextPath}/admin/users/detail?id=${u.autoId}"
-                        class="detail-link">
+                        <a href="${pageContext.request.contextPath}/admin/users/detail?id=${u.autoId}">
                             상세보기
                         </a>
                     </td>

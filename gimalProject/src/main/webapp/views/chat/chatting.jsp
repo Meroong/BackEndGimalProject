@@ -4,6 +4,7 @@
 <html>
 <head>
     <title>채팅방 #${selectedRoomId}</title>
+<<<<<<< HEAD
 
     <!-- ✅ 기존 CSS 그대로 유지 -->
     <style>
@@ -48,43 +49,43 @@
             border: none;
             border-radius: 8px;
             background: #FF7C40;
+
             color: white;
             font-weight: bold;
             cursor: pointer;
         }
-
         .host-menu button:hover {
             background: #e96a2f;
         }
     </style>
 </head>
 
+
 <body>
 
 <div class="container">
-
 <h2>
     <a href="${pageContext.request.contextPath}/chat/roomList" class="back-btn">←</a>
     채팅방 #${selectedRoomId}
 
-    <!-- ✅ 회비 버튼 유지 -->
+    <!--  회비 버튼 유지 -->
     <c:if test="${meetingCost != null && meetingCost > 0 && !hasPaid}">
         <button class="pay-toggle-btn" onclick="togglePayBox()">회비</button>
     </c:if>
 
-    <!-- ✅ 플러스 버튼 (호스트 전용 메뉴 호출) -->
+    <!-- 플러스 버튼 (호스트 전용 메뉴 호출) -->
     <c:if test="${isHost}">
         <button class="member-btn" onclick="toggleHostMenu()">＋</button>
     </c:if>
 </h2>
 
-<!-- ✅ 호스트 전용 메뉴 -->
+<!-- 호스트 전용 메뉴 -->
 <div id="hostMenu" class="host-menu">
     <button onclick="openMemberModal()">👥 모임원 관리</button>
     <button onclick="openVoteModal()">📊 투표 만들기</button>
 </div>
 
-<!-- ✅ 회비 박스 -->
+<!-- 회비 박스 -->
 <c:if test="${meetingCost != null && meetingCost > 0 && !hasPaid}">
     <div class="pay-box" id="payBox">
         <form method="post" action="${pageContext.request.contextPath}/wallet/pay">
@@ -96,11 +97,11 @@
     </div>
 </c:if>
 
-<!-- ✅ 채팅 영역 -->
+<!-- 채팅 영역 -->
 <div class="chat-box">
     <div class="chat-messages" id="chatMessages">
 
-        <!-- ✅ 투표 표시 -->
+        <!-- 투표 표시 -->
         <c:forEach var="vote" items="${voteList}">
             <div style="border:1px solid #ddd; padding:10px; border-radius:10px; margin-bottom:10px;">
                 <b>${vote.title}</b><br>
@@ -123,7 +124,7 @@
             </div>
         </c:forEach>
 
-        <!-- ✅ 기존 메시지 -->
+        <!-- 기존 메시지 -->
         <c:url var="defaultProfile" value="/resources/images/default.jpg"/>
         <c:forEach var="msg" items="${messages}">
             <c:choose>
@@ -143,7 +144,7 @@
         </c:forEach>
     </div>
 
-    <!-- ✅ 메시지 입력 -->
+    <!-- 메시지 입력 -->
     <form class="chat-form" method="post" action="${pageContext.request.contextPath}/chat/sendChat">
         <input type="hidden" name="roomId" value="${selectedRoomId}"/>
         <input type="text" name="content" placeholder="메시지 입력"/>
@@ -153,7 +154,7 @@
 
 </div>
 
-<!-- ✅ 모임원 관리 모달 -->
+<!-- 모임원 관리 모달 -->
 <div class="modal" id="memberModal">
     <h3>모임원 관리</h3>
     <ul>
@@ -164,7 +165,7 @@
     <button onclick="closeMemberModal()">닫기</button>
 </div>
 
-<!-- ✅ 투표 생성 모달 -->
+<!-- 투표 생성 모달 -->
 <div class="modal" id="voteModal">
     <h3>투표 만들기</h3>
 
@@ -209,6 +210,7 @@ function openMemberModal() {
 function closeMemberModal() {
     document.getElementById("memberModal").style.display = "none";
 }
+
 </script>
 
 </body>

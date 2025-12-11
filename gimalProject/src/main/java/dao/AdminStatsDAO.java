@@ -1,30 +1,21 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 import dto.AdminStatsDTO;
 import dto.DailySignupDTO;
-import dto.UserTrustRankDTO;
 import dto.ReportStatusCountDTO;
 import util.JDBCUtil;
 
 public class AdminStatsDAO {
 
-    // ===========================
-    // 기본 통계 (기존 코드 유지)
-    // ===========================
+    // =============== 기본 통계 ===============
     public AdminStatsDTO getStats() {
         AdminStatsDTO dto = new AdminStatsDTO();
 
-        // 1) 전체 회원 수
         String userSql   = "SELECT COUNT(*) AS cnt FROM user";
-
-        // 2) 전체 신고 수
         String reportSql = "SELECT COUNT(*) AS cnt FROM report";
 
         try (Connection con = JDBCUtil.jdbcCon()) {
@@ -32,7 +23,6 @@ public class AdminStatsDAO {
             // 전체 회원 수
             try (PreparedStatement pstmt = con.prepareStatement(userSql);
                  ResultSet rs = pstmt.executeQuery()) {
-
                 if (rs.next()) {
                     dto.setTotalUsers(rs.getInt("cnt"));
                 }
@@ -41,7 +31,6 @@ public class AdminStatsDAO {
             // 전체 신고 수
             try (PreparedStatement pstmt = con.prepareStatement(reportSql);
                  ResultSet rs = pstmt.executeQuery()) {
-
                 if (rs.next()) {
                     dto.setTotalReports(rs.getInt("cnt"));
                 }
@@ -54,10 +43,7 @@ public class AdminStatsDAO {
         return dto;
     }
 
-
-    // ===========================
-    // ① 상단 요약 카드용 통계
-    // ===========================
+    // =============== 상단 카드용 통계 ===============
 
     // 전체 회원 수
     public int getTotalUsers() {
@@ -68,11 +54,13 @@ public class AdminStatsDAO {
 
             if (rs.next()) return rs.getInt(1);
 
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return 0;
     }
 
-    // 오늘 새로 가입한 회원 수
+    // 오늘 가입 회원 수
     public int getTodayNewUsers() {
         String sql = "SELECT COUNT(*) FROM user WHERE DATE(created_at) = CURDATE()";
         try (Connection con = JDBCUtil.jdbcCon();
@@ -81,11 +69,13 @@ public class AdminStatsDAO {
 
             if (rs.next()) return rs.getInt(1);
 
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return 0;
     }
 
-    // 전체 상품 수
+    // 상품 수
     public int getTotalItems() {
         String sql = "SELECT COUNT(*) FROM item";
         try (Connection con = JDBCUtil.jdbcCon();
@@ -94,11 +84,13 @@ public class AdminStatsDAO {
 
             if (rs.next()) return rs.getInt(1);
 
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return 0;
     }
 
-    // 전체 거래 수
+    // 거래 수
     public int getTotalTransactions() {
         String sql = "SELECT COUNT(*) FROM transaction";
         try (Connection con = JDBCUtil.jdbcCon();
@@ -107,7 +99,9 @@ public class AdminStatsDAO {
 
             if (rs.next()) return rs.getInt(1);
 
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return 0;
     }
 
@@ -120,14 +114,15 @@ public class AdminStatsDAO {
 
             if (rs.next()) return rs.getInt(1);
 
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return 0;
     }
 
+    // =============== 그래프/표용 상세 통계 ===============
 
-    // ===========================
-    // ② 최근 N일 회원가입 통계
-    // ===========================
+    // 최근 N일 가입 통계
     public List<DailySignupDTO> getDailySignupStats(int days) {
 
         String sql =
@@ -146,9 +141,10 @@ public class AdminStatsDAO {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    DailySignupDTO dto =
-                            new DailySignupDTO(rs.getDate("dt"), rs.getInt("cnt"));
-                    list.add(dto);
+                    list.add(new DailySignupDTO(
+                            rs.getDate("dt"),
+                            rs.getInt("cnt")
+                    ));
                 }
             }
 
@@ -159,47 +155,7 @@ public class AdminStatsDAO {
         return list;
     }
 
-
-    // ===========================
-    // ③ 신뢰도 높은 유저 TOP N
-    // ===========================
-    public List<UserTrustRankDTO> getTopUsersByTrustScore(int limit) {
-
-        String sql =
-                "SELECT user_id, nickname, trust_score, created_at " +
-                "FROM user " +
-                "ORDER BY trust_score DESC, created_at ASC " + 
-                "LIMIT ?";
-
-        List<UserTrustRankDTO> list = new ArrayList<>();
-
-        try (Connection con = JDBCUtil.jdbcCon();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
-
-            pstmt.setInt(1, limit);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    UserTrustRankDTO dto = new UserTrustRankDTO();
-                    dto.setUserId(rs.getString("user_id"));
-                    dto.setNickname(rs.getString("nickname"));
-                    dto.setTrustScore(rs.getInt("trust_score"));
-                    dto.setCreatedAt(rs.getTimestamp("created_at"));
-                    list.add(dto);
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return list;
-    }
-
-
-    // ===========================
-    // ④ 신고 상태별 개수 (PENDING / RESOLVED)
-    // ===========================
+    // 신고 상태별 개수
     public List<ReportStatusCountDTO> getReportStatusCounts() {
 
         String sql =
@@ -214,10 +170,10 @@ public class AdminStatsDAO {
              ResultSet rs = pstmt.executeQuery()) {
 
             while (rs.next()) {
-                ReportStatusCountDTO dto =
-                        new ReportStatusCountDTO(rs.getString("status"),
-                                                 rs.getInt("cnt"));
-                list.add(dto);
+                list.add(new ReportStatusCountDTO(
+                        rs.getString("status"),
+                        rs.getInt("cnt")
+                ));
             }
 
         } catch (SQLException e) {

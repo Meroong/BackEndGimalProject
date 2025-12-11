@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="<%=request.getContextPath()%>/resources/css/admin.css">
 </head>
 <body>
-
 <div class="admin-page">
     <div class="admin-page-header">
         <h1 class="admin-page-title">

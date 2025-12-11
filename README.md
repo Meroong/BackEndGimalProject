@@ -6,35 +6,46 @@
 
 DB 세팅
 
-DROP DATABASE IF EXISTS dorandoran;
-CREATE DATABASE dorandoran;
-USE dorandoran;
+create database dorandoran;
+use dorandoran;
+
 
 SET FOREIGN_KEY_CHECKS = 0;
 
--- ================================
--- 🔥 DROP TABLES (FK 순서 안전)
--- ================================
-DROP TABLE IF EXISTS report;
-DROP TABLE IF EXISTS chat_message;
-DROP TABLE IF EXISTS chat_room_user;
-DROP TABLE IF EXISTS chat_room;
-DROP TABLE IF EXISTS meeting_participant;
-DROP TABLE IF EXISTS meeting;
-DROP TABLE IF EXISTS meeting_location;
-DROP TABLE IF EXISTS wallet_history;
-DROP TABLE IF EXISTS user_wallet;
-DROP TABLE IF EXISTS mock_card;
-DROP TABLE IF EXISTS notice;
-DROP TABLE IF EXISTS review;
-DROP TABLE IF EXISTS transaction;
-DROP TABLE IF EXISTS wishlist;
-DROP TABLE IF EXISTS rental_info;
-DROP TABLE IF EXISTS item;
-DROP TABLE IF EXISTS file_resource;
-DROP TABLE IF EXISTS user_tag;
+-- 📍 지역정보 테이블
 DROP TABLE IF EXISTS user_address;
-DROP TABLE IF EXISTS weather_data;
+-- 💬 채팅메시지
+DROP TABLE IF EXISTS chat_message;
+
+DROP TABLE IF EXISTS chat_room_user;
+-- 💬 채팅방
+DROP TABLE IF EXISTS chat_room;
+
+-- 🚨 신고
+DROP TABLE IF EXISTS report;
+-- ⭐ 리뷰
+DROP TABLE IF EXISTS review;
+-- 💳 거래기록
+DROP TABLE IF EXISTS transaction;
+-- ❤️ 찜 목록
+DROP TABLE IF EXISTS wishlist;
+-- 🔁 대여 상세정보
+DROP TABLE IF EXISTS rental_info;
+-- 💬 중고/대여 상품 게시판
+DROP TABLE IF EXISTS item;
+-- 💾 이미지 테이블
+DROP TABLE IF EXISTS file_resource;
+-- 🏷️ 유저 태그
+DROP TABLE IF EXISTS user_tag;
+-- 🤝 모임참여자 관리
+DROP TABLE IF EXISTS meeting_location;
+-- 🤝 모임참여자 관리
+DROP TABLE IF EXISTS meeting_participant;
+-- 🤝 모임 게시판
+DROP TABLE IF EXISTS meeting;
+-- 📢 공지게시판
+DROP TABLE IF EXISTS notice;
+-- 🧍 USER 관련
 DROP TABLE IF EXISTS user;
 
 SET FOREIGN_KEY_CHECKS = 1;
@@ -361,7 +372,6 @@ INSERT INTO user (user_id, user_password, user_name, nickname, role)
 VALUES
 ('admin01', '1234', '관리자', '관리자닉', 'ADMIN'),
 ('test01', '1234', '테스트', '닉테스트', 'USER');
-
 INSERT INTO user_address (user_id, road_address, jibun_address, addr_detail, latitude, longitude)
 VALUES
 (1, '서울특별시 은평구 역촌동', '서울특별시 은평구 역촌동 123', '101호', 37.602, 126.927),
@@ -388,32 +398,23 @@ VALUES
 (2, 1),(2, 2),
 (3, 1),(3, 2);
 
+-- 💭 채팅 메시지
 INSERT INTO chat_message (room_id, sender_id, content)
 VALUES
 (1, 1, '안녕하세요, 자전거 구매하고 싶습니다.'),
 (1, 2, '안녕하세요! 가격 흥정 가능해요.'),
+(1, 1, '좋습니다. 그럼 언제 만날까요?'),
 (2, 1, '책 대여 가능할까요?'),
-(2, 2, '일주일 대여 가능합니다.'),
-(3, 1, '이번주 토요일 모임은 몇 시인가요?'),
-(3, 2, '오전 9시 한강공원입니다.');
+(2, 2, '네, 일주일 대여 가능합니다.'),
+(2, 1, '좋아요, 내일 수령할게요.'),
+(3, 1, '이번 주 토요일 모임 몇 시에 시작하나요?'),
+(3, 2, '오전 9시에 한강공원에서 시작합니다.'),
+(3, 1, '좋아요, 그때 봬요!');
 
-INSERT INTO user_wallet (user_id, balance)
-VALUES
-(1, 50000),
-(2, 12000);
-
-INSERT INTO wallet_history (user_id, type, amount, description)
-VALUES
-(2, 'CHARGE', 20000, '카드 충전');
-
-INSERT INTO mock_card (card_number, cvc, owner_name, valid_until, password, balance)
-VALUES
-('1111-2222-3333-4444', '123', '홍길동', '12/27', '12', 100000);
+-- 💾 file_resource 예시 데이터
 
 
-select * from user_wallet;
-select * from mock_card;
-select * from wallet_history;
+
 select * from meeting;
 select * from meeting_participant;
 select * from meeting_location;
