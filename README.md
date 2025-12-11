@@ -312,6 +312,31 @@ CREATE TABLE notice (
     content TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE TABLE poll (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    room_id BIGINT NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    expire_at DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (room_id) REFERENCES chat_room(room_id) ON DELETE CASCADE
+);
+CREATE TABLE poll_option (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    poll_id BIGINT NOT NULL,
+    option_text VARCHAR(255) NOT NULL,
+    FOREIGN KEY (poll_id) REFERENCES poll(id) ON DELETE CASCADE
+);
+CREATE TABLE poll_vote (
+    poll_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    option_id BIGINT NOT NULL,
+    voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (poll_id, user_id),  -- 사용자당 1회 제한
+    FOREIGN KEY (poll_id) REFERENCES poll(id) ON DELETE CASCADE,
+    FOREIGN KEY (option_id) REFERENCES poll_option(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES user(auto_id)
+);
+
 
 -- ================================
 -- 🚨 REPORT
