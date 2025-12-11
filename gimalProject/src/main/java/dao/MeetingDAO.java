@@ -29,6 +29,7 @@ public class MeetingDAO {
         	        m.current_members,
         	        m.tag,
         	        m.status,
+        	        m.view_count,
         	        m.created_at,
 
         	        l.road_address
@@ -52,6 +53,7 @@ public class MeetingDAO {
                 dto.setCurrentMembers(rs.getInt("current_members"));
                 dto.setTag(rs.getString("tag"));
                 dto.setStatus(rs.getString("status"));
+                dto.setViewCount(rs.getInt("view_count"));
                 dto.setCreatedAt(rs.getTimestamp("created_at"));
                 dto.setRoadAddress(rs.getString("road_address"));
                 aList.add(dto);
@@ -84,6 +86,7 @@ public class MeetingDAO {
                     dto.setCost(rs.getInt("cost"));
                     dto.setTag(rs.getString("tag"));
                     dto.setStatus(rs.getString("status"));
+                    dto.setViewCount(rs.getInt("view_count"));
                     dto.setWeather(rs.getString("weather")); //날씨 정보
                     dto.setCreatorId(rs.getLong("creator_id")); // 게시자 ID
                     dto.setCreatedAt(rs.getTimestamp("created_at"));
@@ -157,8 +160,8 @@ public class MeetingDAO {
 
     // 게시글 작성 (생성된 meeting_id 반환)
     public long insert(MeetingDTO dto) {
-        String sql = "INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, weather, creator_id) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, view_count, weather, creator_id) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -172,8 +175,9 @@ public class MeetingDAO {
             pstmt.setInt(7, dto.getCost());
             pstmt.setString(8, dto.getTag());
             pstmt.setString(9, dto.getStatus());
-            pstmt.setString(10, dto.getWeather());
-            pstmt.setLong(11, dto.getCreatorId()); // 게시자 ID
+            pstmt.setInt(10, 0);
+            pstmt.setString(11, dto.getWeather());
+            pstmt.setLong(12, dto.getCreatorId()); // 게시자 ID
 
             int result = pstmt.executeUpdate();
 
@@ -274,5 +278,19 @@ public class MeetingDAO {
         }
 
         return null; // 모임 없을 때
+    }
+    public boolean increaseViewCount(long meetingId) {
+        String sql = "UPDATE meeting SET view_count = view_count + 1 WHERE id = ?";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, meetingId);
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

@@ -95,42 +95,93 @@
         }
 
         /* ---------- 모임 리스트 카드 ---------- */
-        .meeting-card {
-            background: white;
-            padding: 22px 25px;
-            margin-bottom: 18px;
-            border-radius: 20px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .meeting-card:hover {
-            transform: translateY(-4px);
-        }
+        /* ============================
+   meeting-card 스타일만 수정
+============================ */
 
-        .meeting-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 6px;
-        }
-        .meeting-content {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-        .meeting-meta {
-            font-size: 12px;
-            color: #888;
-        }
+/* 카드 */
+.meeting-card {
+    background: white;
+    padding: 22px 25px;
+    margin-bottom: 18px;
+    border-radius: 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    cursor: pointer;
+    transition: 0.2s;
+}
+.meeting-card:hover {
+    transform: translateY(-4px);
+}
 
-        .status-btn {
-            float: right;
-            font-size: 13px;
-            padding: 5px 12px;
-            border-radius: 8px;
-            color: white;
-            background: #FF7C40;
-        }
+/* 제목 */
+.meeting-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: #222;
+}
+
+/* 내용 요약 */
+.meeting-content {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+/* ========= 날짜 + 동네 (1줄) ========= */
+.meeting-meta-top {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ========= 조회수 + 몇분전 + 모집인원 버튼 (2줄) ========= */
+.meeting-meta-bottom {
+    font-size: 12px;
+    color: #777;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 조회수 */
+.view-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.view-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+    margin-right: 4px;
+}
+
+.view-count {
+    color: #666;
+    font-size: 12px;
+}
+
+/* 몇분전 */
+.time-ago {
+    color: #777;
+}
+
+/* 오른쪽 배치되는 버튼 */
+.status-btn {
+    margin-left: auto;
+    font-size: 13px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    color: white;
+    background: #FF7C40;
+    font-weight: 600;
+}
+
+        
     </style>
 
 	<script>
@@ -201,32 +252,41 @@
             </div>
 
             <!-- ====== 모임 리스트 출력 ====== -->
-            <%
-                List<MeetingInfoDTO> list = (List<MeetingInfoDTO>) request.getAttribute("meetingList");
-                if (list == null || list.isEmpty()) {
-            %>
-                <p style="color:#555; font-size:16px;">등록된 모임이 없습니다.</p>
-
-            <% } else {
-                   for (MeetingInfoDTO m : list) { %>
-
-            <div class="meeting-card"
-                 onclick="location.href='<%= request.getContextPath() %>/meeting/info?meetingId=<%= m.getMeetingId() %>'">
-
-                <div class="meeting-title"><%= m.getTitle() %></div>
-                <div class="meeting-content"><%= m.getContent() %></div>
-
-			<div class="meeting-meta">
-			    <span><%= m.getDateStr() %></span>
-			    <span style="margin-left:6px;"><%= m.getTimeAgo() %></span>
-			    <span style="margin-left:10px; color:#666;">📍 <%= m.getDong() %></span>
+			<%
+			    List<MeetingInfoDTO> list = (List<MeetingInfoDTO>) request.getAttribute("meetingList");
+			    if (list == null || list.isEmpty()) {
+			%>
+			    <p style="color:#555; font-size:16px;">등록된 모임이 없습니다.</p>
 			
-			    <span class="status-btn">모집인원</span>
+			<% } else {
+			       for (MeetingInfoDTO m : list) { %>
+			
+			<div class="meeting-card"
+			     onclick="location.href='<%= request.getContextPath() %>/meeting/info?meetingId=<%= m.getMeetingId() %>'">
+			
+			    <div class="meeting-title"><%= m.getTitle() %></div>
+			    <div class="meeting-content"><%= m.getContent() %></div>
+			
+			    <div class="meeting-meta-top">
+				    <span class="meet-date"><%= m.getDateStr() %></span>
+				    <span class="meet-dong"><%= m.getDong() %></span>
+				</div>
+				
+				<div class="meeting-meta-bottom">
+				    <span class="view-wrapper">
+				        <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" class="view-icon">
+				        <span class="view-count"><%= m.getViewCount() %></span>
+				    </span>
+				    <span class="time-ago"><%= m.getTimeAgo() %></span>
+				
+				    <span class="status-btn">모집인원</span>
+				</div>
+
+			
 			</div>
-
-            </div>
-
-            <% } } %>
+			
+			<% } } %>
+            
 
         </div>
 
@@ -235,4 +295,12 @@
 </div>
 
 </body>
+<script>
+window.onpageshow = function(event) {
+    if (event.persisted) {
+        // 캐시에서 복원된 경우 → 강제 새로고침
+        location.reload();
+    }
+};
+</script>
 </html>

@@ -92,6 +92,9 @@ public class MeetingController extends HttpServlet {
 			    } else {
 			        System.out.println("이미지 없음");
 			    }
+			    //조회수 증가시키기
+			    meetingService.increaseViewCount(infoDto.getMeetingId());
+			    
 			    if(AuthUtil.getAutoId(req) == infoDto.getCreatorId()) {
 			    	boolean isCreator =true;
 			    	req.setAttribute("isCreator", isCreator);

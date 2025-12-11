@@ -204,7 +204,10 @@ public class MeetingService {
         
         return new MeetingDAO().insert(dto);
     }
+    public boolean increaseViewCount(long meetId) {
+    	return new MeetingDAO().increaseViewCount(meetId);
 
+    }
     // 모임 업데이트
     public boolean updateMeetingInfo(
             long meetingId,
