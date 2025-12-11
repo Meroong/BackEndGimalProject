@@ -41,7 +41,7 @@ public class MeetingController extends HttpServlet {
 		
 		switch(path) {
 			case "/list":
-			    ArrayList<MeetingDTO> aList = meetingService.getMeetingList();
+			    ArrayList<MeetingInfoDTO> aList = meetingService.getMeetingList();
 			    req.setAttribute("meetingList", aList);
 	
 			    // 리스트가 비어 있어도 그대로 JSP로 보냄

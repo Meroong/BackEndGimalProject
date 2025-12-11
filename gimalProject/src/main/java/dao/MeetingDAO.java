@@ -9,22 +9,40 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import dto.MeetingDTO;
+import dto.MeetingInfoDTO;
 import util.JDBCUtil;
 
 public class MeetingDAO {
 
     //게시판 목록을 위한 조회
-    public ArrayList<MeetingDTO> getPostList(){
+    public ArrayList<MeetingInfoDTO> getPostList(){
         //모임 아이디 제목 날짜 상태 태그
-        ArrayList<MeetingDTO> aList = new ArrayList<MeetingDTO>();
-        String sql = "select id, title, content, date, location_id, max_members, current_members, cost, tag, status, weather, creator_id from meeting;";
+        ArrayList<MeetingInfoDTO> aList = new ArrayList<MeetingInfoDTO>();
+        String sql = """
+        	    SELECT 
+        	        m.id,
+        	        m.title,
+        	        m.content,
+        	        m.date,
+        	        m.location_id,
+        	        m.max_members,
+        	        m.current_members,
+        	        m.tag,
+        	        m.status,
+        	        m.created_at,
+
+        	        l.road_address
+
+        	    FROM meeting m
+        	    JOIN meeting_location l ON m.location_id = l.id
+        	""";
 
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
 
             while(rs.next()) {
-                MeetingDTO dto = new MeetingDTO();
+                MeetingInfoDTO dto = new MeetingInfoDTO();
                 dto.setMeetingId(rs.getLong("id"));
                 dto.setTitle(rs.getString("title"));
                 dto.setContent(rs.getString("content"));
@@ -32,11 +50,10 @@ public class MeetingDAO {
                 dto.setLocationId(rs.getLong("location_id"));
                 dto.setMaxMembers(rs.getInt("max_members"));
                 dto.setCurrentMembers(rs.getInt("current_members"));
-                dto.setCost(rs.getInt("cost"));
                 dto.setTag(rs.getString("tag"));
                 dto.setStatus(rs.getString("status"));
-                dto.setWeather(rs.getString("weather")); //날씨 정보
-                dto.setCreatorId(rs.getLong("creator_id")); // 게시자 ID
+                dto.setCreatedAt(rs.getTimestamp("created_at"));
+                dto.setRoadAddress(rs.getString("road_address"));
                 aList.add(dto);
             }
         } catch(SQLException e) {

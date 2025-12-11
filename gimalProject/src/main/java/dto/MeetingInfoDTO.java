@@ -25,6 +25,48 @@ public class MeetingInfoDTO {
     private String status;           // OPEN / CLOSED / COMPLETED
     private long creatorId;        // 게시자 ID (새로 추가)
     
+	private Timestamp createdAt;     // 생성일
+    private Timestamp updatedAt;     // 수정일
+    
+	//백에서만 사용하는 코드 
+    private String timeAgo;
+    
+    private String dateStr;
+    
+
+    // === Weather ===
+    private String weather;          // 날씨 (맑음/흐림/비/눈 등)
+
+    // Image URLs (여러 장 가능) 파일을 보여주기 위해 url이 필요하고 관리하기 위해 id가 필요 
+    private List<FileResourceDTO> images;   // 이미지 리스트
+    
+    private String dong;
+
+    public String getDong() {
+        return dong;
+    }
+
+    public void setDong(String dong) {
+        this.dong = dong;
+    }
+
+    
+    public String getTimeAgo() {
+		return timeAgo;
+	}
+
+	public void setTimeAgo(String timeAgo) {
+		this.timeAgo = timeAgo;
+	}
+	
+    public String getDateStr() {
+        return dateStr;
+    }
+
+    public void setDateStr(String dateStr) {
+        this.dateStr = dateStr;
+    }
+    
     public long getCreatorId() {
 		return creatorId;
 	}
@@ -32,16 +74,7 @@ public class MeetingInfoDTO {
 	public void setCreatorId(long creatorId) {
 		this.creatorId = creatorId;
 	}
-
-	private Timestamp createdAt;     // 생성일
-    private Timestamp updatedAt;     // 수정일
-
-    // === Weather ===
-    private String weather;          // 날씨 (맑음/흐림/비/눈 등)
-
-    // Image URLs (여러 장 가능) 파일을 보여주기 위해 url이 필요하고 관리하기 위해 id가 필요 
-    private List<FileResourceDTO> images;   // 이미지 리스트
-
+	
 	public Long getLocationId() {
 		return locationId;
 	}

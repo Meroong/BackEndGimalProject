@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import dto.MeetingDTO;
 import dto.MeetingInfoDTO;
 import dto.MeetingLocationDTO;
 import dto.MeetingParticipantDTO;
+import util.TimeUtil;
 
 public class MeetingService {
 	//회비 조회용
@@ -88,9 +90,30 @@ public class MeetingService {
     }
 
     // 게시판 리스트 조회
-    public ArrayList<MeetingDTO> getMeetingList() {
+    public ArrayList<MeetingInfoDTO> getMeetingList() {
         System.out.println("Service: getMeetingList");
-        return new MeetingDAO().getPostList();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        ArrayList<MeetingInfoDTO> aList =  new MeetingDAO().getPostList();
+        
+        for (MeetingInfoDTO dto : aList) {
+        	//timeAgo 세팅 몇분전
+            if (dto.getCreatedAt() != null) {
+                String timeAgo = TimeUtil.toTimeAgo(dto.getCreatedAt());
+                dto.setTimeAgo(timeAgo);
+            }
+            //데이트 추출 후 문자열로 포멧팅
+            if (dto.getDate() != null) {
+                dto.setDateStr(sdf.format(dto.getDate()));
+            }
+            String roadAddr = dto.getRoadAddress(); // 예: "서울시 강남구 삼성동 123"
+            if (roadAddr != null) {
+                String[] parts = roadAddr.split(" ");
+                if (parts.length >= 3) {
+                    dto.setDong(parts[2]);   // 삼성동
+                }
+            }
+        }
+        return aList;
     }
 
     // 모임 장소 업데이트

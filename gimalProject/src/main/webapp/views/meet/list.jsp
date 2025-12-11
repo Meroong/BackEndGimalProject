@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.*, dto.MeetingDTO" %>
+<%@ page import="java.util.*, dto.MeetingInfoDTO" %>
 
 <%
     // 로그인 여부 체크
@@ -202,13 +202,13 @@
 
             <!-- ====== 모임 리스트 출력 ====== -->
             <%
-                List<MeetingDTO> list = (List<MeetingDTO>) request.getAttribute("meetingList");
+                List<MeetingInfoDTO> list = (List<MeetingInfoDTO>) request.getAttribute("meetingList");
                 if (list == null || list.isEmpty()) {
             %>
                 <p style="color:#555; font-size:16px;">등록된 모임이 없습니다.</p>
 
             <% } else {
-                   for (MeetingDTO m : list) { %>
+                   for (MeetingInfoDTO m : list) { %>
 
             <div class="meeting-card"
                  onclick="location.href='<%= request.getContextPath() %>/meeting/info?meetingId=<%= m.getMeetingId() %>'">
@@ -216,10 +216,13 @@
                 <div class="meeting-title"><%= m.getTitle() %></div>
                 <div class="meeting-content"><%= m.getContent() %></div>
 
-                <div class="meeting-meta">
-                    <%= m.getDate() %>
-                    <span class="status-btn">모집인원</span>
-                </div>
+			<div class="meeting-meta">
+			    <span><%= m.getDateStr() %></span>
+			    <span style="margin-left:6px;"><%= m.getTimeAgo() %></span>
+			    <span style="margin-left:10px; color:#666;">📍 <%= m.getDong() %></span>
+			
+			    <span class="status-btn">모집인원</span>
+			</div>
 
             </div>
 
