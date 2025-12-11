@@ -3,7 +3,7 @@
 
 <%
     // 로그인 여부 체크
-    Object loginUser = session.getAttribute("loginUser");
+    Object loginUser = session.getAttribute("userInfo");
     boolean isLogin = (loginUser != null);
 %>
 

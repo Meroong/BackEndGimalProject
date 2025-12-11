@@ -24,6 +24,16 @@ import dto.MeetingLocationDTO;
 import dto.MeetingParticipantDTO;
 
 public class MeetingService {
+	//회비 조회용
+	public int getMeetingCost(long meetingId) {
+	    Integer cost = new MeetingDAO().getMeetingCostByMeetingId(meetingId);
+
+	    if (cost == null) {
+	        throw new IllegalArgumentException("모임 회비 정보를 찾을 수 없습니다.");
+	    }
+
+	    return cost;
+	}
 
     // 특정 모임 상세 조회
     public MeetingInfoDTO getMeetingInfo(long meetingId) {
@@ -297,6 +307,21 @@ public class MeetingService {
             if (conn != null) conn.disconnect();
         }
     }
+    //지불여부 변경 용 서비스
+    public void markAsPaid(long meetingId, long userId) {
+    	System.out.println("Service: markAsPaid");
+    	boolean result = new MeetingParticipantDAO().markAsPaid(meetingId, userId);;
+        if (! result) {
+            throw new RuntimeException("회비 납부 처리 실패");
+        }
+    }
+    //지불 여부 체크
+    public boolean hasUserPaid(long meetingId, long userId) {
+    	System.out.println("Service: hasUserPaid");
+        return new MeetingParticipantDAO().hasUserPaid(meetingId, userId);
+    }
+
+
 
     // 날씨 정보 추출
     public String extractWeather(String jsonStr, int dayIndex) {

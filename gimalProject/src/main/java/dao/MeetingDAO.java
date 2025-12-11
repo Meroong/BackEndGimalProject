@@ -237,4 +237,25 @@ public class MeetingDAO {
             return false;
         }
     }
+    // 회비 전용 조회 메서드 (채팅/결제용)
+    public Integer getMeetingCostByMeetingId(long meetingId) {
+        String sql = "SELECT cost FROM meeting WHERE id = ?";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, meetingId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("cost");
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null; // 모임 없을 때
+    }
 }

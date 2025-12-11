@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpSession;
 import service.ChattingService;
 import service.ImageService;
 import service.MeetingService;
+import service.PollService;
 import service.UserService;
 import util.AuthUtil;
 
@@ -93,7 +94,33 @@ public class ChattingController extends HttpServlet {
 
             // 채팅방 참여자(UserDTO)
             req.setAttribute("chatUsers", service.getUserInfoListInRoom(roomId));
+            
+            // 그룹인 경우 회비정보 가져오기
+            if ("GROUP".equalsIgnoreCase(roomDto.getRoomType())
+                    && roomDto.getMeetingId() != null) {
 
+                try {
+                    int meetingCost = new MeetingService().getMeetingCost(roomDto.getMeetingId());
+                    req.setAttribute("meetingCost", meetingCost);
+                } catch (Exception e) {
+                    // 회비 정보 못 가져와도 채팅방은 정상 진입하게 처리
+                    req.setAttribute("meetingCost", null);
+                }
+                try {
+                    boolean hasPaid = new MeetingService().hasUserPaid(roomDto.getMeetingId(), autoId);
+                    req.setAttribute("hasPaid", hasPaid);
+                } catch (Exception e) {
+                    req.setAttribute("hasPaid", false);
+                }
+                PollService pollService = new PollService();
+                try {
+					req.setAttribute("voteList", pollService.getPollListByRoom(roomId));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+            }
+            
             // 호스트 여부
             boolean isHost = (autoId == roomDto.getHostId());
             req.setAttribute("isHost", isHost);

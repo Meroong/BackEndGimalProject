@@ -205,6 +205,8 @@ public class MeetingController extends HttpServlet {
                                 usedType);
                     }
                 }
+                //호스트 모임참가자에 넣기 
+                meetingService.joinMeet(meetingId, autoId);
                 new ChattingService().makeGroupRoom(meetingId, "Group", autoId); // meetingId, hostId(creator)
                 
                 resp.sendRedirect(req.getContextPath() + "/meeting/list");

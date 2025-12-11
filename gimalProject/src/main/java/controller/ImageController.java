@@ -19,7 +19,7 @@ import service.ImageService;
 import service.UserService;
 import util.AuthUtil;
 
-@WebServlet("/upload/*")
+@WebServlet("/image/*")
 @MultipartConfig(
         fileSizeThreshold = 1024 * 1024,     // 1MB 메모리 임계값
         maxFileSize = 1024 * 1024 * 10,      // 파일 최대 10MB

@@ -37,7 +37,24 @@ public class MeetingParticipantDAO {
 
         return list;
     }
+    
+    public boolean markAsPaid(long meetingId, long userId) {
+        String sql = "UPDATE meeting_participant SET paid = TRUE WHERE meeting_id = ? AND user_id = ?";
+        
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
 
+            pstmt.setLong(1, meetingId);
+            pstmt.setLong(2, userId);
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
     // 유저가 모임에 있는지 조회
     public boolean isParticipant(long meetingId, long userId) {
         MeetingParticipantDTO dto = null;
@@ -126,4 +143,28 @@ public class MeetingParticipantDAO {
 
         return false;
     }
+    //유저 회비 지불 여부 체크 
+    public boolean hasUserPaid(long meetingId, long userId) {
+
+        String sql = "SELECT paid FROM meeting_participant WHERE meeting_id = ? AND user_id = ?";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, meetingId);
+            pstmt.setLong(2, userId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getBoolean("paid"); // true면 결제 완료
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false; // 기본값: 안 냄
+    }
+
 }
