@@ -93,10 +93,85 @@ public class ImageService {
 
 	    return fileDao.insertFile(dto);
 	}
+	
+	public boolean uploadFileForPost(long usedId, Part filePart, String uploadPath, String usedType, long dreamId) {
+	    System.out.println("Service: uploadFile " + usedType);
+
+	    FileResourceDAO fileDao = new FileResourceDAO();
+
+	    String ogName = filePart.getSubmittedFileName();
+	    String fileType = filePart.getContentType();
+	    long size = filePart.getSize();
+
+	    // 확장자
+	    String ext = "";
+	    int dotIndex = ogName.lastIndexOf(".");
+	    if (dotIndex != -1) ext = ogName.substring(dotIndex);
+
+	    // 저장 파일명
+	    String savedFileName = UUID.randomUUID().toString() + ext;
+
+	    // 폴더 생성
+	    File dir = new File(uploadPath);
+	    if (!dir.exists()) dir.mkdirs();
+
+	    // 저장
+	    try {
+	        filePart.write(uploadPath + File.separator + savedFileName);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return false;
+	    }
+
+	    // DB 저장용 URL
+	    String dbUrl = "/upload/" + usedType.toLowerCase() + "/" + dreamId + "/" + savedFileName;
+
+	    FileResourceDTO dto = new FileResourceDTO();
+	    dto.setUsedId(usedId);
+	    dto.setUsedType(usedType.toUpperCase());
+	    dto.setOriginalName(ogName);
+	    dto.setFileName(savedFileName);
+	    dto.setFileType(fileType);
+	    dto.setSize(size);
+	    dto.setFileUrl(dbUrl);
+
+	    // 기존 파일 삭제 여부
+	    if (usedType.equalsIgnoreCase("PROFILE") && fileDao.isExist(usedId, usedType)) {
+	        fileDao.deleteFileByUsed(usedType, usedId);
+	    }
+
+	    return fileDao.insertFile(dto);
+	}
 	public boolean deleteFile(long fileId, long autoId, String usedType) {
 		System.out.println("Service: deleteFile");
 		boolean result = new FileResourceDAO().deleteFileById(fileId, autoId, usedType);
 		
 		return result;
 	}
+	
+	public boolean deletePostImage(long usedId, long dreamId, String fileUrl, String uploadRoot) {
+	    System.out.println("Service: deletePostImage");
+
+	    if (fileUrl == null || fileUrl.isEmpty()) {
+	        return false;
+	    }
+
+	    // 1) 로컬 파일 삭제
+	    // uploadRoot 예: "C:/upload/post"
+	    String dirPath = uploadRoot + File.separator + dreamId;
+	    File dir = new File(dirPath);
+	    if (dir.exists() && dir.isDirectory()) {
+	        String fileName = fileUrl.substring(fileUrl.lastIndexOf('/') + 1);
+	        File file = new File(dir, fileName);
+	        if (file.exists()) {
+	            boolean deleted = file.delete();
+	            System.out.println("로컬 파일 삭제: " + deleted + " (" + file.getAbsolutePath() + ")");
+	        }
+	    }
+
+	    // 2) DB 삭제
+	    FileResourceDAO dao = new FileResourceDAO();
+	    return dao.deletePostFileByUrl(usedId, "POST", fileUrl);
+	}
+
 }

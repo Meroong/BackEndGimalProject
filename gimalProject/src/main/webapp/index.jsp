@@ -132,7 +132,7 @@
 
                     <div class="activity-card">
                         <img src="resources/images/giving.jpg" alt="chat">
-                        <span>드림</span>
+                        <a href="dream/list.do">드림</a>
                     </div>
                 </div>
             </div>

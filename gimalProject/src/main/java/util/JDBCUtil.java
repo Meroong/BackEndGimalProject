@@ -37,7 +37,7 @@ public class JDBCUtil {
 		
 		
 	}
-	public void close(Connection con, ResultSet rs, PreparedStatement pstmt) {
+	public static void close(Connection con, ResultSet rs, PreparedStatement pstmt) {
 		try {
 			if (pstmt != null) pstmt.close();
 			if (rs != null) rs.close();
@@ -49,7 +49,7 @@ public class JDBCUtil {
 		}
 		
 	}
-	public void close(Connection con, PreparedStatement pstmt) {
+	public static void close(Connection con, PreparedStatement pstmt) {
 		try {
 			if (pstmt != null) pstmt.close();
 			if (con != null) con.close();
