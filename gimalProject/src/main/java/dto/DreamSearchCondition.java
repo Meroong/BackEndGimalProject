@@ -11,6 +11,7 @@ public class DreamSearchCondition {
     private boolean newOnly;            // 새상품만 보기
     private List<String> conditionCodes; // 상태 체크박스들(NEW / LIKE_NEW / USED)
     private String sort; 				 // LATEST / OLDEST
+    private Long writerId;   // 내 글만 보기용
     
     public String getDong() {
         return dong;
@@ -66,5 +67,13 @@ public class DreamSearchCondition {
 
     public void setSort(String sort) {
         this.sort = sort;
+    }
+    
+    public Long getWriterId() {
+        return writerId;
+    }
+
+    public void setWriterId(Long writerId) {
+        this.writerId = writerId;
     }
 }

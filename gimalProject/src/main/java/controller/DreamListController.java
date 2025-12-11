@@ -9,6 +9,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import util.AuthUtil;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -39,6 +40,17 @@ public class DreamListController extends HttpServlet {
             sort = "LATEST"; // 기본은 최신순
         }
         
+     	// [추가] 내 글만 보기 여부
+        boolean mine = "Y".equals(request.getParameter("mine"));
+
+        // [추가] 로그인 사용자 ID
+        Long autoId = AuthUtil.getAutoId(request);   // 로그인 안 되어 있으면 -1 또는 null이라고 가정
+
+        // 로그인 안 했는데 mine=Y가 들어온 경우는 무시
+        if (mine && (autoId == null || autoId <= 0L)) {
+            mine = false;
+        }
+        
         String[] conditionArr = request.getParameterValues("condition");
         List<String> conditionCodes =
                 (conditionArr != null) ? Arrays.asList(conditionArr) : Collections.emptyList();
@@ -57,17 +69,24 @@ public class DreamListController extends HttpServlet {
         cond.setConditionCodes(conditionCodes);
         cond.setSort(sort);
         
+        // mine이 켜져 있으면 이 사용자가 쓴 글만
+        if (mine && autoId != null && autoId > 0L) {
+            cond.setWriterId(autoId);
+        }
+        
         DreamPostDAO dpDao = new DreamPostDAO();
-
         List<DreamPostDTO> dreamList = dpDao.getDreamPostList(cond);
 
         request.setAttribute("cond", cond);
         request.setAttribute("dreamList", dreamList);
 
-     // JSP에서 체크박스 상태로 사용할 값들
+        // JSP에서 체크박스 상태로 사용할 값들
         request.setAttribute("conditionNew", conditionNew);
         request.setAttribute("conditionLikeNew", conditionLikeNew);
         request.setAttribute("conditionUsed", conditionUsed);
+        
+        // JSP에서 체크박스 상태 찍을 때 쓰기 위함
+        request.setAttribute("mine", mine);
         
         RequestDispatcher rd = request.getRequestDispatcher("/dream/list.jsp");
         rd.forward(request, response);

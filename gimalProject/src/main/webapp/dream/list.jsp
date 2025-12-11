@@ -96,6 +96,20 @@
         <aside class="dream-filter">
           <h2 class="dream-filter-title">필터</h2>
 
+		  <c:if test="${not empty loginUser}">
+		    <section class="dream-filter-section">
+		      <h3 class="dream-filter-section-title">내 드림</h3>
+		      <label class="dream-checkbox">
+		        <input type="checkbox"
+		               class="js-auto-submit"
+		               name="mine"
+		               value="Y"
+		               <c:if test="${param.mine eq 'Y' || mine}">checked</c:if> />
+		        <span>내가 올린 글만 보기</span>
+		      </label>
+		    </section>
+		  </c:if>
+		
           <!-- 나눔 설정 -->
           <section class="dream-filter-section">
             <h3 class="dream-filter-section-title">나눔 설정</h3>

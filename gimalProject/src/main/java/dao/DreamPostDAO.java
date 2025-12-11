@@ -78,11 +78,6 @@ public class DreamPostDAO {
                 sql.append("   AND status <> 'CLOSE' ");
             }
 
-            if (cond.isNewOnly()) {
-                // 새상품만 보기 = NEW 상태만
-                sql.append("   AND condition_code = '새거' ");
-            }
-
             if (cond.getCategoryCode() != null && !cond.getCategoryCode().isEmpty()) {
                 sql.append("   AND category_code = ? ");
                 params.add(cond.getCategoryCode());
@@ -98,6 +93,12 @@ public class DreamPostDAO {
                     params.add(cond.getConditionCodes().get(i));
                 }
                 sql.append(") ");
+            }
+            
+            // 내 글만 보기: writer_id 필터
+            if (cond.getWriterId() != null) {
+                sql.append("   AND writer_id = ? ");
+                params.add(cond.getWriterId());
             }
 
             if (cond.getKeyword() != null && !cond.getKeyword().isEmpty()) {
