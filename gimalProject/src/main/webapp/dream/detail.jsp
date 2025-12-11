@@ -167,7 +167,7 @@
           <section class="dream-detail-section">
             <h2 class="dream-detail-section-title">상세 설명</h2>
             <pre class="dream-detail-content">
-				${fn:escapeXml(post.content)}
+${fn:escapeXml(post.content)}
             </pre>
           </section>
 
