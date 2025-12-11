@@ -342,6 +342,42 @@ public class MeetingController extends HttpServlet {
 	                        req.getRequestDispatcher("/meeting/info?meetingId=" + quitMeetId).forward(req, resp);
 	                    }
 	                    return;
+	                    
+	                case "/delete":
+	                    long deleteMeetingId = Long.parseLong(req.getParameter("meetingId"));
+	                    Long loginUserId = AuthUtil.getAutoId(req);
+
+	                    // 로그인 검증(이미 위에서 처리되지만 혹시 모르니)
+	                    if (loginUserId == -1) {
+	                        resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+	                        return;
+	                    }
+
+	                    // 해당 모임 정보 조회
+	                    MeetingInfoDTO meetingInfo = meetingService.getMeetingInfo(deleteMeetingId);
+
+	                    if (meetingInfo == null) {
+	                        resp.sendError(HttpServletResponse.SC_NOT_FOUND, "삭제할 모임을 찾을 수 없습니다.");
+	                        return;
+	                    }
+
+	                    // 작성자 검증
+	                    if (!loginUserId.equals(meetingInfo.getCreatorId())) {
+	                        resp.sendError(HttpServletResponse.SC_FORBIDDEN, "모임 작성자만 삭제할 수 있습니다.");
+	                        return;
+	                    }
+
+	                    // 삭제 실행
+	                    boolean deleted = meetingService.deleteMeeting(deleteMeetingId, loginUserId);
+
+	                    if (deleted) {
+	                        resp.sendRedirect(req.getContextPath() + "/meeting/list");
+	                    } else {
+	                        resp.setContentType("text/html; charset=UTF-8");
+	                        resp.getWriter().println("<script>alert('삭제 실패. 관리자에게 문의하세요.'); history.back();</script>");
+	                    }
+	                    return;
+
 
 
 

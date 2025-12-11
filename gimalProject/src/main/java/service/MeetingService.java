@@ -393,7 +393,29 @@ public class MeetingService {
     }
 
     // 게시글 삭제
-    public void deleteMeeting(long meetingId, long creator_id) throws Exception {
-        new MeetingDAO().delete(meetingId, creator_id);
+    public void deleteMeeting(long meetingId, long creatorId) throws Exception {
+
+        MeetingDAO dao = new MeetingDAO();
+        ImageService imgService = new ImageService();
+
+        // 1. 작성자 검증
+        if (!dao.isCreator(meetingId, creatorId)) {
+            throw new Exception("삭제 권한이 없습니다.");
+        }
+
+        // 2. 이미지 삭제 (DB + 물리 파일)
+        List<FileResourceDTO> imgs = dao.getMeetingImages(meetingId);
+        for (FileResourceDTO img : imgs) {
+            imgService.deleteFile(img.getId(), meetingId, "MEETING");
+        }
+
+        // 3. location 삭제
+        Long locationId = dao.getLocationIdByMeeting(meetingId);
+        if (locationId != null) {
+            dao.deleteLocation(locationId);
+        }
+
+        // 4. meeting 삭제 → chat_room, participants, chat_message, poll... 자동 삭제됨
+        dao.deleteMeeting(meetingId, creatorId);
     }
 }
