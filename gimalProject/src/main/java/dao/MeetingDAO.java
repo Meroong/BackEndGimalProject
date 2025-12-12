@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.List;
 
 import dto.MeetingDTO;
 import dto.MeetingInfoDTO;
@@ -15,54 +16,142 @@ import util.JDBCUtil;
 public class MeetingDAO {
 
     //게시판 목록을 위한 조회
-    public ArrayList<MeetingInfoDTO> getPostList(){
-        //모임 아이디 제목 날짜 상태 태그
-        ArrayList<MeetingInfoDTO> aList = new ArrayList<MeetingInfoDTO>();
-        String sql = """
-        	    SELECT 
-        	        m.id,
-        	        m.title,
-        	        m.content,
-        	        m.date,
-        	        m.location_id,
-        	        m.max_members,
-        	        m.current_members,
-        	        m.tag,
-        	        m.status,
-        	        m.view_count,
-        	        m.created_at,
+    /**
+     * 필터 없이 전체 목록 조회 (기존 사용 메서드)
+     */
+    public ArrayList<MeetingInfoDTO> getPostList() {
+        // 내부에서 필터 공통 메서드 호출 (필터 없음)
+        return getPostListFiltered(null, null, null, null, null, null);
+    }
 
-        	        l.road_address
+    /**
+     * ✅ 필터 기능이 붙은 목록 조회 메서드
+     *
+     * @param category  카테고리(산책/헬스/애견 등) -> tag 컬럼 LIKE 검색
+     * @param dateStr   yyyy-MM-dd 형식 날짜
+     * @param keyword   제목/내용 검색어
+     * @param status    모임 상태 (OPEN, CLOSED, COMPLETED) / null 또는 "ALL" 이면 전체
+     * @param weather   날씨 (맑음, 흐림, 비, 이슬비, 천둥번개, 눈, 기타) / null 또는 "ALL" 이면 전체
+     */
+    public ArrayList<MeetingInfoDTO> getPostListFiltered(String category,
+    													String dateFrom,
+    													String dateTo,
+    													String keyword,
+    													String status,
+    													String weather) {
 
-        	    FROM meeting m
-        	    JOIN meeting_location l ON m.location_id = l.id
-        	""";
+
+        ArrayList<MeetingInfoDTO> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder();
+        sql.append("""
+                SELECT 
+                    m.id,
+                    m.title,
+                    m.content,
+                    m.date,
+                    m.location_id,
+                    m.max_members,
+                    m.current_members,
+                    m.tag,
+                    m.status,
+                    m.view_count,
+                    m.weather,
+                    m.created_at,
+                    l.road_address
+                FROM meeting m
+                JOIN meeting_location l ON m.location_id = l.id
+                WHERE 1 = 1
+                """);
+
+        // 동적 파라미터
+        List<Object> params = new ArrayList<>();
+
+        // 1) 카테고리 필터 (tag 컬럼 LIKE 검색)
+        if (category != null && !category.isBlank() && !"전체".equals(category)) {
+            sql.append(" AND m.tag LIKE ? ");
+            params.add("%" + category + "%");
+        }
+
+        
+        // 2) 날짜 범위 필터 (yyyy-MM-dd ~ yyyy-MM-dd)
+        // dateFrom, dateTo 둘 다 있으면 BETWEEN, 하나만 있으면 >= 또는 <=
+        boolean hasFrom = (dateFrom != null && !dateFrom.isBlank());
+        boolean hasTo   = (dateTo   != null && !dateTo.isBlank());
+
+        if (hasFrom && hasTo) {
+            sql.append(" AND DATE(m.date) BETWEEN ? AND ? ");
+            params.add(java.sql.Date.valueOf(dateFrom));
+            params.add(java.sql.Date.valueOf(dateTo));
+        } else if (hasFrom) {
+            sql.append(" AND DATE(m.date) >= ? ");
+            params.add(java.sql.Date.valueOf(dateFrom));
+        } else if (hasTo) {
+            sql.append(" AND DATE(m.date) <= ? ");
+            params.add(java.sql.Date.valueOf(dateTo));
+        }
+
+
+        // 3) 키워드 필터 (제목 + 내용)
+        if (keyword != null && !keyword.isBlank()) {
+            sql.append(" AND (m.title LIKE ? OR m.content LIKE ?) ");
+            String like = "%" + keyword + "%";
+            params.add(like);
+            params.add(like);
+        }
+
+        // 4) 모집 상태 필터 (OPEN / CLOSED / COMPLETED)
+        if (status != null && !status.isBlank() && !"ALL".equals(status)) {
+            sql.append(" AND m.status = ? ");
+            params.add(status);
+        }
+
+        // 5) 날씨 필터 (맑음/흐림/비/이슬비/천둥번개/눈/기타)
+        if (weather != null && !weather.isBlank() && !"ALL".equals(weather)) {
+            sql.append(" AND m.weather = ? ");
+            params.add(weather);
+        }
+
+        // 정렬: 가까운 모임 날짜 순으로
+        sql.append(" ORDER BY m.date ASC ");
 
         try (Connection con = JDBCUtil.jdbcCon();
-             PreparedStatement pstmt = con.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            while(rs.next()) {
-                MeetingInfoDTO dto = new MeetingInfoDTO();
-                dto.setMeetingId(rs.getLong("id"));
-                dto.setTitle(rs.getString("title"));
-                dto.setContent(rs.getString("content"));
-                dto.setDate(rs.getTimestamp("date"));
-                dto.setLocationId(rs.getLong("location_id"));
-                dto.setMaxMembers(rs.getInt("max_members"));
-                dto.setCurrentMembers(rs.getInt("current_members"));
-                dto.setTag(rs.getString("tag"));
-                dto.setStatus(rs.getString("status"));
-                dto.setViewCount(rs.getInt("view_count"));
-                dto.setCreatedAt(rs.getTimestamp("created_at"));
-                dto.setRoadAddress(rs.getString("road_address"));
-                aList.add(dto);
+             PreparedStatement pstmt = con.prepareStatement(sql.toString())) {
+            int idx = 1;
+            for (Object p : params) {
+                if (p instanceof java.sql.Date) {
+                    pstmt.setDate(idx++, (java.sql.Date) p);
+                } else {
+                    pstmt.setObject(idx++, p);
+                }
             }
-        } catch(SQLException e) {
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    MeetingInfoDTO dto = new MeetingInfoDTO();
+                    dto.setMeetingId(rs.getLong("id"));
+                    dto.setTitle(rs.getString("title"));
+                    dto.setContent(rs.getString("content"));
+                    dto.setDate(rs.getTimestamp("date"));
+                    dto.setLocationId(rs.getLong("location_id"));
+                    dto.setMaxMembers(rs.getInt("max_members"));
+                    dto.setCurrentMembers(rs.getInt("current_members"));
+                    dto.setTag(rs.getString("tag"));
+                    dto.setStatus(rs.getString("status"));
+                    dto.setViewCount(rs.getInt("view_count"));
+                    dto.setWeather(rs.getString("weather"));
+                    dto.setCreatedAt(rs.getTimestamp("created_at"));
+                    dto.setRoadAddress(rs.getString("road_address"));
+                    list.add(dto);
+                }
+            }
+
+        } catch (SQLException e) {
             System.out.println("sql 쿼리 오류");
             e.printStackTrace();
         }
-        return aList;
+
+        return list;
     }
 
     //게시글 상세조회 (모든 필드)
@@ -73,7 +162,7 @@ public class MeetingDAO {
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
-            pstmt.setLong(1, meetingId); // <-- meetingId 세팅
+            pstmt.setLong(1, meetingId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if(rs.next()) {
                     dto.setMeetingId(rs.getLong("id"));
@@ -125,7 +214,6 @@ public class MeetingDAO {
                 return false;
             }
 
-            // 마지막 콤마 제거
             sql.setLength(sql.length() - 2);
             sql.append(" WHERE id = ? and creator_id = ?");
 
@@ -182,13 +270,12 @@ public class MeetingDAO {
             int result = pstmt.executeUpdate();
 
             if (result == 0) {
-                return -1;  // INSERT 실패
+                return -1;
             }
 
-            // 생성된 PK 가져오기
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 if (rs.next()) {
-                    return rs.getLong(1); // 생성된 meeting_id
+                    return rs.getLong(1);
                 }
             }
 
@@ -200,15 +287,11 @@ public class MeetingDAO {
         return -1;
     }
 
-    // 제목으로 검색
     public MeetingDTO searchByTitle(String title) {
-        // 구현 가능
         return null;
     }
 
-    // 내용으로 검색
     public MeetingDTO searchByContent(String content) {
-        // 구현 가능
         return null;
     }
 
@@ -225,6 +308,7 @@ public class MeetingDAO {
         }
         return false;
     }
+
     public boolean increaseCurrentMembers(long meetingId) {
         String sql = "UPDATE meeting SET current_members = current_members + 1 WHERE id = ?";
 
@@ -241,6 +325,7 @@ public class MeetingDAO {
             return false;
         }
     }
+
     public boolean decreaseCurrentMembers(long meetingId) {
         String sql = "UPDATE meeting " +
                      "SET current_members = CASE WHEN current_members > 0 THEN current_members - 1 ELSE 0 END " +
@@ -259,7 +344,7 @@ public class MeetingDAO {
             return false;
         }
     }
-    // 회비 전용 조회 메서드 (채팅/결제용)
+
     public Integer getMeetingCostByMeetingId(long meetingId) {
         String sql = "SELECT cost FROM meeting WHERE id = ?";
 
@@ -278,7 +363,7 @@ public class MeetingDAO {
             e.printStackTrace();
         }
 
-        return null; // 모임 없을 때
+        return null;
     }
     public boolean increaseViewCount(long meetingId) {
         String sql = "UPDATE meeting SET view_count = view_count + 1 WHERE id = ?";
