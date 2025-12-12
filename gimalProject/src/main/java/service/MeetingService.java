@@ -15,6 +15,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import dao.FileResourceDAO;
 import dao.MeetingDAO;
 import dao.MeetingLocationDAO;
 import dao.MeetingParticipantDAO;
@@ -393,29 +394,21 @@ public class MeetingService {
     }
 
     // 게시글 삭제
-    public void deleteMeeting(long meetingId, long creatorId) throws Exception {
+    public boolean deleteMeeting(long meetingId, long creatorId) {
 
-        MeetingDAO dao = new MeetingDAO();
-        ImageService imgService = new ImageService();
+        MeetingDAO meetingDao = new MeetingDAO();
+        ImageService imageService = new ImageService();
 
-        // 1. 작성자 검증
-        if (!dao.isCreator(meetingId, creatorId)) {
-            throw new Exception("삭제 권한이 없습니다.");
-        }
+        // 모임 이미지 전체 삭제
+        imageService.deleteAllByUsed("MEETING", meetingId);
 
-        // 2. 이미지 삭제 (DB + 물리 파일)
-        List<FileResourceDTO> imgs = dao.getMeetingImages(meetingId);
-        for (FileResourceDTO img : imgs) {
-            imgService.deleteFile(img.getId(), meetingId, "MEETING");
-        }
-
-        // 3. location 삭제
-        Long locationId = dao.getLocationIdByMeeting(meetingId);
+        // location 삭제
+        Long locationId = meetingDao.getLocationIdByMeetingId(meetingId);
         if (locationId != null) {
-            dao.deleteLocation(locationId);
+            new MeetingLocationDAO().deleteLocation(locationId);
         }
 
-        // 4. meeting 삭제 → chat_room, participants, chat_message, poll... 자동 삭제됨
-        dao.deleteMeeting(meetingId, creatorId);
+        // meeting 삭제 (CASCADE)
+        return meetingDao.delete(meetingId, creatorId);
     }
 }

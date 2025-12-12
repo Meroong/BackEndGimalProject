@@ -99,4 +99,16 @@ public class ImageService {
 		
 		return result;
 	}
+	//  다중 파일 삭제용 사용타입 + 사용ID 기준 전체 이미지 삭제
+	public boolean deleteAllByUsed(String usedType, long usedId) {
+
+	    FileResourceDAO fileDao = new FileResourceDAO();
+	    List<FileResourceDTO> files = fileDao.getFileUrls(usedId, usedType);
+
+	    for (FileResourceDTO file : files) {
+	        deleteFile(file.getId(), usedId, usedType);
+	    }
+
+	    return true;
+	}
 }

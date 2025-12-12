@@ -103,6 +103,26 @@ public class MeetingLocationDAO {
            }
            return false;
     }
+    
+    // 주소 삭제 (모임 삭제 시 사용)
+    public boolean deleteLocation(long locationId) {
+        String sql = "DELETE FROM meeting_location WHERE id = ?;";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, locationId);
+
+            int result = pstmt.executeUpdate();
+            return result > 0;
+
+        } catch (SQLException e) {
+            System.out.println("주소 삭제 중 오류 발생");
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
 
 }

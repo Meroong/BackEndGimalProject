@@ -213,16 +213,17 @@ public class MeetingDAO {
     }
 
     // 게시글 삭제
-    public void delete(long meetingId, long creator_id) {
+    public boolean delete(long meetingId, long creator_id) {
         String sql = "DELETE FROM meeting WHERE id = ? and creator_id = ?";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
             pstmt.setLong(1, meetingId);
             pstmt.setLong(2, creator_id);
-            pstmt.executeUpdate();
+            return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return false;
     }
     public boolean increaseCurrentMembers(long meetingId) {
         String sql = "UPDATE meeting SET current_members = current_members + 1 WHERE id = ?";
@@ -292,5 +293,27 @@ public class MeetingDAO {
             e.printStackTrace();
             return false;
         }
+    }
+    // meetingId로 location_id 조회
+    public Long getLocationIdByMeetingId(long meetingId) {
+        String sql = "SELECT location_id FROM meeting WHERE id = ?";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, meetingId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("location_id");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("location_id 조회 중 SQL 오류");
+            e.printStackTrace();
+        }
+
+        return null; // 조회 실패 또는 존재하지 않는 meeting
     }
 }
