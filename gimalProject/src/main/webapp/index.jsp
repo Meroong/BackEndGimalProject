@@ -1,6 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.List"%>
 <%@ page import="dto.UserAddressDTO"%>
 <%@ page import="dto.WeatherDTO"%>
+<%@ page import="dto.MeetingInfoDTO"%>
 
 <!DOCTYPE html>
 <html lang="ko">
@@ -8,8 +10,8 @@
     <meta charset="UTF-8">
     <title>도란도란 - 우리 동네 유아·애견 커넥트</title>
     <link rel="stylesheet" href="home.css">
+
     <style>
-        /* 날씨 카드 배경 적용 */
         .weather-card {
             padding: 15px;
             border-radius: 10px;
@@ -23,7 +25,7 @@
 <body>
 <div class="container">
 
-    <%-- 헤더 include --%>
+    <%-- 헤더 --%>
     <jsp:include page="/include/header.jsp" />
 
     <%-- 검색 영역 --%>
@@ -49,97 +51,140 @@
         <div class="title-sub">오늘의 추천활동은 실내 모임이에요 😊</div>
     </section>
 
-    <%-- 메인 추천 영역 --%>
+    <%-- 메인 영역 --%>
     <section class="main-box">
         <div class="box-title">우리 동네 기반 맞춤 추천</div>
 
         <div class="grid-3">
 
-            <%-- 지도 카드 --%>
+            <%-- 지도 영역 --%>
             <div class="map-card" id="map" style="width:100%; height:400px;"></div>
 
             <%
-                // HomeController에서 전달된 변수
                 WeatherDTO weather = (WeatherDTO) request.getAttribute("weather");
                 String bgImage = (String) request.getAttribute("bgImage");
 
                 double lat = request.getAttribute("lat") != null ? (double) request.getAttribute("lat") : 37.501;
                 double lng = request.getAttribute("lng") != null ? (double) request.getAttribute("lng") : 126.884;
 
-                String dongName = "우리 동네"; // 기본값
+                List<MeetingInfoDTO> meetings =
+                    (List<MeetingInfoDTO>) request.getAttribute("meetings");
+
+                String dongName = "우리 동네";
                 UserAddressDTO addressInfo = (UserAddressDTO) session.getAttribute("addressInfo");
-                if(addressInfo != null && addressInfo.getRoadAddress() != null) {
+                if (addressInfo != null && addressInfo.getRoadAddress() != null) {
                     String[] parts = addressInfo.getRoadAddress().split(" ");
                     dongName = parts[parts.length - 1];
                 }
 
-                // 날씨 표시용
                 String temp = "정보 없음";
                 String status = "정보 없음";
-                if(weather != null) {
+                if (weather != null) {
                     temp = String.format("%.1f°C", weather.getTemperature());
 
                     String dustInfo;
-                    if(weather.getPm10() <= 30) dustInfo = "좋음";
-                    else if(weather.getPm10() <= 80) dustInfo = "보통";
-                    else if(weather.getPm10() <= 150) dustInfo = "나쁨";
+                    if (weather.getPm10() <= 30) dustInfo = "좋음";
+                    else if (weather.getPm10() <= 80) dustInfo = "보통";
+                    else if (weather.getPm10() <= 150) dustInfo = "나쁨";
                     else dustInfo = "매우 나쁨";
 
                     status = weather.getWeather() + " • 미세먼지 " + dustInfo;
                 }
             %>
 
+            <%-- 지도 데이터 JS 전달 --%>
             <script>
                 const userLat = <%= lat %>;
                 const userLng = <%= lng %>;
-            </script>
-            <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
-            <script>
-                window.onload = function() {
-                    if (!window.kakao) { alert("카카오 지도 SDK 로드 실패"); return; }
-                    var container = document.getElementById('map');
-                    var options = { center: new kakao.maps.LatLng(userLat, userLng), level: 3 };
-                    var map = new kakao.maps.Map(container, options);
-                    var marker = new kakao.maps.Marker({ position: new kakao.maps.LatLng(userLat, userLng) });
-                    marker.setMap(map);
-                }
+
+                const meetings = [
+                    <% if (meetings != null) {
+                        for (MeetingInfoDTO m : meetings) { %>
+                    {
+                        id: <%= m.getMeetingId() %>,
+                        title: "<%= m.getTitle() %>",
+                        lat: <%= m.getLatitude() %>,
+                        lng: <%= m.getLongitude() %>
+                    },
+                    <% }} %>
+                ];
             </script>
 
-            <%-- 가운데: 인기 모임 --%>
+            <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
+
+            <script>
+                window.onload = function () {
+                    if (!window.kakao) {
+                        alert("카카오 지도 SDK 로드 실패");
+                        return;
+                    }
+
+                    const container = document.getElementById('map');
+                    const map = new kakao.maps.Map(container, {
+                        center: new kakao.maps.LatLng(userLat, userLng),
+                        level: 4
+                    });
+
+                    // 내 위치
+                    new kakao.maps.Marker({
+                        position: new kakao.maps.LatLng(userLat, userLng),
+                        map: map
+                    });
+
+                    // 모임 마커
+                    meetings.forEach(m => {
+                        const marker = new kakao.maps.Marker({
+                            position: new kakao.maps.LatLng(m.lat, m.lng),
+                            map: map
+                        });
+
+                        const info = new kakao.maps.InfoWindow({
+                            content: `<div style="padding:6px;font-size:13px;">${m.title}</div>`
+                        });
+
+                        kakao.maps.event.addListener(marker, 'mouseover', () => info.open(map, marker));
+                        kakao.maps.event.addListener(marker, 'mouseout', () => info.close());
+                        kakao.maps.event.addListener(marker, 'click', () => {
+                            location.href =
+                                "<%= request.getContextPath() %>/meeting/detail?id=" + m.id;
+                        });
+                    });
+                };
+            </script>
+
+            <%-- 가운데 카드 --%>
             <div class="center-card">
                 <div class="center-title">오늘의 인기 모임 🔥</div>
-                <div class="center-desc">지금 <%= dongName %>에서 가장 활발한 모임을 소개해드릴게요!</div>
+                <div class="center-desc">
+                    지금 <%= dongName %>에서 가장 활발한 모임을 소개해드릴게요!
+                </div>
             </div>
 
-            <%-- 오른쪽: 날씨 + 활동 카드 --%>
+            <%-- 오른쪽 카드 --%>
             <div>
-                <div class="weather-card" style="background-image: url('<%= bgImage %>');">
+                <div class="weather-card" style="background-image:url('<%= bgImage %>');">
                     <div class="weather-title">현재 <%= dongName %> 날씨</div>
                     <div class="weather-temp"><%= temp %></div>
                     <div class="weather-status"><%= status %></div>
                 </div>
 
                 <div class="activities">
-                    <a href="<%= request.getContextPath() %>/meeting/list" class="activity-card" style="text-decoration:none; color:inherit;">
+                    <a href="<%= request.getContextPath() %>/meeting/list"
+                       class="activity-card" style="text-decoration:none;color:inherit;">
                         <img src="resources/images/meeting.jpg" alt="meet">
                         <span>모임</span>
                     </a>
 
-                    <div class="activity-card">
-                        <img src="resources/images/trade.jpg" alt="friend">
-                        <span>교환</span>
-                    </div>
-
-                    <div class="activity-card">
-                        <img src="resources/images/giving.jpg" alt="chat">
-                        <a href="dream/list.do">드림</a>
-                    </div>
+                    <a href="<%= request.getContextPath() %>/dream/list.do"
+                       class="activity-card" style="text-decoration:none;color:inherit;">
+                        <img src="resources/images/giving.jpg" alt="dream">
+                        <span>드림</span>
+                    </a>
                 </div>
             </div>
 
         </div>
     </section>
-
 </div>
 </body>
 </html>

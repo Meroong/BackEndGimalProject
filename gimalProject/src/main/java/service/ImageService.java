@@ -28,22 +28,33 @@ public class ImageService {
 		 return aList;
 	}
 	public boolean deleteProfile(String usedType, long autoId, String uploadPath) {
-		System.out.println("work service: deleteProfile");
-		
-		String oldFileName = new FileResourceDAO().getFileUrl(autoId, usedType);
-		
-		//디렉토리 설정
-		File uploadDir = new File(uploadPath);
-		if (!uploadDir.exists()) uploadDir.mkdirs();
-		
-        //실제 파일 삭제 (기본 이미지면 삭제하지 않음)
-        if(oldFileName != null && !oldFileName.isEmpty()) {
-            File file = new File(uploadDir, oldFileName.substring(oldFileName.lastIndexOf('/')+1));
-            if(file.exists()) file.delete();
-        }
-		
-		return new FileResourceDAO().deleteFileByUsed(usedType, autoId);
+
+	    FileResourceDAO dao = new FileResourceDAO();
+
+	    // DB에서 파일 URL 먼저 가져오기
+	    String fileUrl = dao.getFileUrl(autoId, usedType);
+
+	    // DB 먼저 삭제
+	    boolean dbDeleted = dao.deleteFileByUsed(usedType, autoId);
+
+	    // 실제 파일 삭제
+	    if (fileUrl != null && !fileUrl.isEmpty()) {
+	        String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+	        File file = new File(uploadPath + File.separator + fileName);
+
+	        System.out.println("삭제 시도 파일: " + file.getAbsolutePath());
+
+	        if (file.exists()) {
+	            boolean deleted = file.delete();
+	            System.out.println("파일 삭제 결과: " + deleted);
+	        } else {
+	            System.out.println("파일이 존재하지 않음");
+	        }
+	    }
+
+	    return dbDeleted;
 	}
+
 	//이미지 업로드 서비스  usedType으로 구분하도록
 	public boolean uploadFile(long usedId, Part filePart, String uploadPath, String usedType) {
 	    System.out.println("Service: uploadFile " + usedType);
@@ -141,12 +152,6 @@ public class ImageService {
 	    }
 
 	    return fileDao.insertFile(dto);
-	}
-	public boolean deleteFile(long fileId, long autoId, String usedType) {
-		System.out.println("Service: deleteFile");
-		boolean result = new FileResourceDAO().deleteFileById(fileId, autoId, usedType);
-		
-		return result;
 	}
 	//  다중 파일 삭제용 사용타입 + 사용ID 기준 전체 이미지 삭제
 	public boolean deleteAllByUsed(String usedType, long usedId, String uploadRoot) {

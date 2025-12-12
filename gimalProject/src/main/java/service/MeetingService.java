@@ -521,4 +521,9 @@ public class MeetingService {
         }
         return "구로동";
     }
+    //홈 지도용 - 활성 모임 조회 (최소 정보)
+    public List<MeetingInfoDTO> getActiveMeetingsForMap() {
+        return new MeetingDAO().findActiveMeetingsForMap();
+    }
+ 
 }

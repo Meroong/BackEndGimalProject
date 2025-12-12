@@ -7,8 +7,26 @@ public class WeatherDTO {
     private String weather;     // 날씨 상태 (맑음, 흐림, 비 등)
     private int pm10;           // 미세먼지 농도
     private Timestamp createdAt; // 데이터 생성 시각
+    private Double latitude;         // 위도
+    private Double longitude;        // 경도
 
-    // 기본 생성자
+    public Double getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Double latitude) {
+		this.latitude = latitude;
+	}
+
+	public Double getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Double longitude) {
+		this.longitude = longitude;
+	}
+
+	// 기본 생성자
     public WeatherDTO() {}
 
     // 생성자

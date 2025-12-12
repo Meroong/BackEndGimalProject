@@ -80,13 +80,13 @@ public class ImageController extends HttpServlet {
 				  uploadPath = "C:/upload/profile";
 				  boolean deleteResult = imageService.deleteProfile(usedType, autoId, uploadPath); 
 				  if(deleteResult) {
+					  req.getSession().removeAttribute("profileUrl");
 					  resp.sendRedirect(req.getContextPath() + "/views/user/mypage.jsp");
 				  }
 				  else {
 					  resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 				  } 
 				  break;  
-			 
 		}
 
     }

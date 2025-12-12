@@ -438,4 +438,44 @@ public class MeetingDAO {
             return 0;
         }
     }
+    public List<MeetingInfoDTO> findActiveMeetingsForMap() {
+
+        String sql = """
+            SELECT 
+                m.id,
+                m.title,
+                l.latitude,
+                l.longitude,
+                m.meeting_time AS date
+            FROM meeting m
+            JOIN meeting_location l ON m.location_id = l.id
+            WHERE m.status = 'OPEN'
+              AND m.meeting_time > NOW()
+              AND l.latitude IS NOT NULL
+              AND l.longitude IS NOT NULL
+        """;
+
+        List<MeetingInfoDTO> list = new ArrayList<>();
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                MeetingInfoDTO dto = new MeetingInfoDTO();
+                dto.setMeetingId(rs.getLong("id"));
+                dto.setTitle(rs.getString("title"));
+                dto.setLatitude(rs.getDouble("latitude"));
+                dto.setLongitude(rs.getDouble("longitude"));
+                dto.setDate(rs.getTimestamp("date")); 
+                list.add(dto);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
 }
