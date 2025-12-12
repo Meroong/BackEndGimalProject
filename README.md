@@ -239,7 +239,7 @@ CREATE TABLE chat_room (
     host_id BIGINT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (host_id) REFERENCES user(auto_id),
-    FOREIGN KEY (meeting_id) REFERENCES meeting(id)
+    FOREIGN KEY (meeting_id) REFERENCES meeting(id) ON DELETE CASCADE
 );
 
 -- ================================
