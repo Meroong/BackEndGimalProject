@@ -535,5 +535,10 @@ public class MeetingService {
     	System.out.println("Service: getActiveMeeintgsForMap");
         return new MeetingDAO().findActiveMeetingsForMap();
     }
+    // 인기 게시글 조회
+    public List<MeetingInfoDTO> getPopularMeetings(int limit) {
+    	System.out.println("Service: findPopularMeeting");
+        return new MeetingDAO().findPopularMeetings(limit);
+    }
  
 }

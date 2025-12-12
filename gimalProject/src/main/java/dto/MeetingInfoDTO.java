@@ -25,11 +25,24 @@ public class MeetingInfoDTO {
     private String status;           // OPEN / CLOSED / COMPLETED
     private int viewCount;
     private long creatorId;        // 게시자 ID (새로 추가)
-    
 	private Timestamp createdAt;     // 생성일
     private Timestamp updatedAt;     // 수정일
     private boolean creator;
     private boolean	participant;
+    
+	//백에서만 사용하는 코드 
+    private String timeAgo;
+    
+    private String dateStr;
+    
+
+    // === Weather ===
+    private String weather;          // 날씨 (맑음/흐림/비/눈 등)
+
+    // Image URLs (여러 장 가능) 파일을 보여주기 위해 url이 필요하고 관리하기 위해 id가 필요 
+    private List<FileResourceDTO> images;   // 이미지 리스트
+    
+    private String dong;
     
 	public boolean isCreator() {
 		return creator;
@@ -54,20 +67,17 @@ public class MeetingInfoDTO {
 	public void setViewCount(int viewCount) {
 		this.viewCount = viewCount;
 	}
-
-	//백에서만 사용하는 코드 
-    private String timeAgo;
     
-    private String dateStr;
-    
+    // 홈, 리스트, 썸네일용
+    private String thumbnailUrl;
 
-    // === Weather ===
-    private String weather;          // 날씨 (맑음/흐림/비/눈 등)
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
 
-    // Image URLs (여러 장 가능) 파일을 보여주기 위해 url이 필요하고 관리하기 위해 id가 필요 
-    private List<FileResourceDTO> images;   // 이미지 리스트
-    
-    private String dong;
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
 
     public String getDong() {
         return dong;

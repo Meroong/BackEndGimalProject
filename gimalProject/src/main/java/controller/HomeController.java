@@ -25,7 +25,7 @@ public class HomeController extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = req.getSession();
-
+        MeetingService meetingService = new MeetingService();
         double lat = 37.501;
         double lon = 126.884;
 
@@ -52,11 +52,14 @@ public class HomeController extends HttpServlet {
 
         String bgImage = getBackgroundImage(weather.getWeather());
         req.setAttribute("bgImage", bgImage);
-
-        List<MeetingInfoDTO> meetings = new MeetingService().getActiveMeetingsForMap();
+        
+        //지도용 모임 데이터
+        List<MeetingInfoDTO> meetings = meetingService.getActiveMeetingsForMap();
         for( MeetingInfoDTO dto : meetings) {
         	System.out.println(dto.getTitle());
         }
+        // 인기 모임 가져오기
+        List<MeetingInfoDTO> popularMeetings = meetingService.getPopularMeetings(3);
         
         //JSP 전달
         req.setAttribute("meetings", meetings);
@@ -64,6 +67,7 @@ public class HomeController extends HttpServlet {
         req.setAttribute("lat", lat);
         req.setAttribute("lng", lon);
         req.setAttribute("weather", weather);
+        req.setAttribute("popularMeetings", popularMeetings);
 
         // 포워드
         req.getRequestDispatcher("/index.jsp").forward(req, resp);

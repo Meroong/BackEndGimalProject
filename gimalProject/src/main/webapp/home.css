@@ -308,7 +308,9 @@ select:focus, input:focus {
     width: 40px;
     height: 40px;
 }
-
+.activity-card img {
+    display: block;
+}
 .activity-card span {
     display: block;
     margin-top: 6px;
@@ -357,3 +359,120 @@ select:focus, input:focus {
     border-style: solid;
     border-color: white transparent transparent;
 }
+/* 활동 카드(a태그) 밑줄/색 강제 제거 */
+.activities a.activity-card,
+.activities a.activity-card:link,
+.activities a.activity-card:visited,
+.activities a.activity-card:hover,
+.activities a.activity-card:active {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+/* 혹시 span에 밑줄이 적용되는 경우까지 차단 */
+.activities a.activity-card span {
+  text-decoration: none !important;
+}
+
+/* a 태그가 inline이면 이상한 선/간격 생길 수 있어서 block/flex로 고정 */
+.activities a.activity-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 가로 인기 모임 카드 */
+.popular-meeting-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;   /* ⬆ 기존 18 → 22 */
+}
+
+.popular-meeting-item {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+    text-decoration: none;
+    color: #222;
+    transition: 0.25s;
+    display: flex;
+    flex-direction: column;
+}
+
+.popular-meeting-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.1);
+}
+
+/* 이미지 */
+.pmi-image {
+    width: 100%;
+    height: 140px;
+    overflow: hidden;
+    border-radius: 12px 12px 0 0;
+}
+
+.pmi-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* 이미지 없을 때 */
+.pmi-image.no-image {
+    background: linear-gradient(135deg, #F1F5F9, #E5E7EB);
+}
+/* 본문 */
+.pmi-body {
+    padding: 20px 18px;     /* ⬆ 상하 여백 증가 */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;              /* ⭐ 핵심 */
+}
+
+.pmi-title {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.5;       /* ⭐ 숨통 */
+    margin-bottom: 2px;
+}
+
+.pmi-meta {
+    display: flex;
+    flex-direction: column;   /* ⭐ 가로 → 세로 */
+    gap: 4px;                 /* 숨 쉬는 공간 */
+    font-size: 13.5px;
+    color: #666;
+}
+
+.pmi-footer {
+    margin-top: 12px;   /* ⭐ 본문과 분리 */
+    padding-top: 8px;
+    border-top: 1px solid #F1F1F1; /* 심리적 구분선 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pmi-people {
+    font-size: 13px;
+    color: #444;
+}
+
+.pmi-status {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+}
+
+.pmi-status.open {
+    background: #FFE5D0;
+    color: #FF7C40;
+}
+
+.pmi-status.closed {
+    background: #EEE;
+    color: #777;
+}
+

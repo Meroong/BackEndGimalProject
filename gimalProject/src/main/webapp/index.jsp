@@ -204,12 +204,72 @@
 			</script>
 
             <!-- 가운데 카드 -->
-            <div class="center-card">
-                <div class="center-title">오늘의 인기 모임 🔥</div>
-                <div class="center-desc">
-                    지금 <%= dongName %>에서 가장 활발한 모임을 소개해드릴게요!
-                </div>
-            </div>
+	<div class="center-card">
+	    <div class="center-title">오늘의 인기 모임 🔥</div>
+	    <div class="center-desc">
+	        지금 <%= dongName %>에서 가장 활발한 모임이에요
+	    </div>
+	
+		<div class="popular-meeting-row">
+		
+		<%
+		    List<MeetingInfoDTO> popularMeetings =
+		        (List<MeetingInfoDTO>) request.getAttribute("popularMeetings");
+		
+		    if (popularMeetings != null && !popularMeetings.isEmpty()) {
+		        for (MeetingInfoDTO m : popularMeetings) {
+		%>
+		
+		<a href="<%= request.getContextPath() %>/meeting/info?meetingId=<%= m.getMeetingId() %>"
+		   class="popular-meeting-item">
+		
+		    <!-- 이미지 영역 -->
+		    <div class="pmi-image <%= (m.getThumbnailUrl() == null ? "no-image" : "") %>">
+		        <% if (m.getThumbnailUrl() != null) { %>
+		            <img src="<%= request.getContextPath() + "/" + m.getThumbnailUrl() %>"
+		                 alt="모임 이미지">
+		        <% } %>
+		    </div>
+		
+		    <!-- 본문 -->
+		    <div class="pmi-body">
+		
+		        <div class="pmi-title">
+		            <%= m.getTitle() %>
+		        </div>
+		
+		        <div class="pmi-meta">
+		            <span>📍 <%= m.getDong() != null ? m.getDong() : "우리 동네" %></span>
+		            <span>⏰ <%= m.getTimeAgo() != null ? m.getTimeAgo() : "방금 전" %></span>
+		        </div>
+		
+		        <div class="pmi-footer">
+		            <span class="pmi-people">
+		                👥 <%= m.getCurrentMembers() %> / <%= m.getMaxMembers() %>명
+		            </span>
+		
+		            <span class="pmi-status <%= "OPEN".equals(m.getStatus()) ? "open" : "closed" %>">
+		                <%= "OPEN".equals(m.getStatus()) ? "모집중" : "마감" %>
+		            </span>
+		        </div>
+		
+		    </div>
+		</a>
+		
+		<%
+		        }
+		    } else {
+		%>
+		    <div style="padding:24px;color:#888;text-align:center;">
+		        아직 인기 모임이 없어요 😢
+		    </div>
+		<%
+		    }
+		%>
+		
+		</div>
+		</div>
+
 
             <!-- 오른쪽 카드 -->
             <div>
@@ -221,11 +281,10 @@
 
                 <div class="activities">
                     <a href="<%= request.getContextPath() %>/meeting/list"
-                       class="activity-card">
+                       class="activity-card" >
                         <img src="resources/images/meeting.jpg">
                         <span>모임</span>
                     </a>
-
                     <a href="<%= request.getContextPath() %>/dream/list.do"
                        class="activity-card">
                         <img src="resources/images/giving.jpg">
