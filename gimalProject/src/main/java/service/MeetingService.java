@@ -30,6 +30,7 @@ import util.TimeUtil;
 public class MeetingService {
 	//회비 조회용
 	public int getMeetingCost(long meetingId) {
+		System.out.println("Service: getMeetingCost");
 	    Integer cost = new MeetingDAO().getMeetingCostByMeetingId(meetingId);
 
 	    if (cost == null) {
@@ -167,6 +168,7 @@ public class MeetingService {
             double latitude,
             double longitude
     ) throws Exception {
+    	System.out.println("Service: updateLocation");
         if (locationId <= 0) throw new IllegalArgumentException("주소정보가 없습니다.");
 
         MeetingLocationDTO dto = new MeetingLocationDTO();
@@ -266,6 +268,7 @@ public class MeetingService {
             double longitude,
             long creatorId // 로그인 세션에서 받은 게시자 ID
     ) throws Exception {
+    	System.out.println("Service: updateMeetingInfo");
         if (date == null) throw new IllegalArgumentException("모임 날짜가 존재하지 않습니다.");
 
         LocalDate meetingDate = date.toLocalDateTime().toLocalDate();
@@ -338,6 +341,7 @@ public class MeetingService {
 
     // 오픈웨더 API 호출
     public String callAnAPI(double lat, double lon) {
+    	System.out.println("Service: callAnApi");
         String key = "fcdf715f2e4faa898d33ff124104cafe";
         BufferedReader br = null;
         HttpURLConnection conn = null;
@@ -393,6 +397,7 @@ public class MeetingService {
 
     // 날씨 정보 추출
     public String extractWeather(String jsonStr, int dayIndex) {
+    	System.out.println("Service: extractWeather");
         JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
         JsonArray dailyArr = json.getAsJsonArray("daily");
 
@@ -436,7 +441,7 @@ public class MeetingService {
 
     // 게시글 삭제
     public boolean deleteMeeting(long meetingId, long creatorId) {
-
+    	System.out.println("Service: deleteMeeting");
         MeetingDAO meetingDao = new MeetingDAO();
         ImageService imageService = new ImageService();
 
@@ -457,6 +462,7 @@ public class MeetingService {
     }
     
     public void updateMeetingStatus(long meetingId, String status) {
+    	System.out.println("Service: updateMeetingStatus");
         if (!"OPEN".equals(status) && !"CLOSED".equals(status)) {
             throw new IllegalArgumentException("잘못된 상태값");
         }
@@ -467,6 +473,7 @@ public class MeetingService {
         }
     }
     private String processTags(String rawTag) {
+    	System.out.println("Service: processTags");
         if (rawTag == null || rawTag.isBlank()) return null;
 
         String[] arr = rawTag.split(",");
@@ -483,6 +490,7 @@ public class MeetingService {
         return set.isEmpty() ? null : String.join(",", set);
     }
     public void reopenMeeting(long meetingId, Long loginUserId) {
+    	System.out.println("Service: reopenMeeting");
         MeetingDTO meeting = new MeetingDAO().getPostDetail(meetingId);
 
         if (meeting == null) {
@@ -503,6 +511,7 @@ public class MeetingService {
         new MeetingDAO().updateStatus(meetingId, "OPEN");
     }
     private String extractAreaUnit(String jibunAddress) {
+    	System.out.println("Service: extractAreaUnit");
         if (jibunAddress == null || jibunAddress.isBlank()) {
             return "구로동"; // 기본값
         }
@@ -523,6 +532,7 @@ public class MeetingService {
     }
     //홈 지도용 - 활성 모임 조회 (최소 정보)
     public List<MeetingInfoDTO> getActiveMeetingsForMap() {
+    	System.out.println("Service: getActiveMeeintgsForMap");
         return new MeetingDAO().findActiveMeetingsForMap();
     }
  

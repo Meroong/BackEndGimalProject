@@ -8,7 +8,7 @@ import java.sql.*;
 public class WeatherDAO {
 
     public int insertWeather(WeatherDTO dto) {
-        String sql = "INSERT INTO weather_data (temp, weather, pm10, created_at) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO weather_data (temp, weather, pm10, created_at, latitude, longitude ) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
@@ -16,6 +16,8 @@ public class WeatherDAO {
             pstmt.setString(2, dto.getWeather());
             pstmt.setInt(3, dto.getPm10());
             pstmt.setTimestamp(4, dto.getCreatedAt());
+            pstmt.setDouble(5, dto.getLatitude());
+            pstmt.setDouble(6,  dto.getLongitude());
 
             return pstmt.executeUpdate();
 

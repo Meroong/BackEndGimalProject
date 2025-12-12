@@ -86,7 +86,7 @@
 <!-- 헤더 HTML -->
 <header>
     <div class="logo">
-        <a href="<%= request.getContextPath() %>/index.jsp">
+        <a href="<%= request.getContextPath() %>/home">
             <img src="<%= request.getContextPath() %>/resources/images/logo.png" alt="logo">
         </a>
     </div>

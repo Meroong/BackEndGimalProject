@@ -446,11 +446,11 @@ public class MeetingDAO {
                 m.title,
                 l.latitude,
                 l.longitude,
-                m.meeting_time AS date
+                m.date AS date
             FROM meeting m
             JOIN meeting_location l ON m.location_id = l.id
             WHERE m.status = 'OPEN'
-              AND m.meeting_time > NOW()
+              AND m.date > NOW()
               AND l.latitude IS NOT NULL
               AND l.longitude IS NOT NULL
         """;

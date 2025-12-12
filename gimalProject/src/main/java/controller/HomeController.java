@@ -57,9 +57,9 @@ public class HomeController extends HttpServlet {
         for( MeetingInfoDTO dto : meetings) {
         	System.out.println(dto.getLatitude());
         }
-        req.setAttribute("meetings", meetings);
         
         //JSP 전달
+        req.setAttribute("meetings", meetings);
         req.setAttribute("weather", weather);
         req.setAttribute("lat", lat);
         req.setAttribute("lng", lon);
