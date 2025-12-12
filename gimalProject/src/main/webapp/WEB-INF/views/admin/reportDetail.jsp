@@ -7,10 +7,8 @@
     <meta charset="UTF-8">
     <title>신고 상세 정보</title>
 
-    <!-- 관리자 전용 CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/admin.css">
 
-    <!-- 이 페이지 전용 간단 스타일 -->
     <style>
         .report-content-box {
             background: #f9fafb;
@@ -79,7 +77,6 @@
                         </c:when>
                         <c:otherwise>
                             <span class="badge badge-resolved">처리 완료</span>
-
                         </c:otherwise>
                     </c:choose>
                 </td>
@@ -97,10 +94,9 @@
             <c:out value="${report.reason}" />
         </div>
 
-        <!-- 여기서 바로 상태 변경 버튼 노출 -->
         <div class="report-action-row">
 
-            <!-- 상태가 RESOLVED일 때만 '대기' 버튼 -->
+            <!-- 상태가 RESOLVED일 때 '대기' 버튼 -->
             <c:if test="${report.status == 'RESOLVED'}">
                 <button class="log-btn"
                         style="background:#6c757d;"
@@ -109,7 +105,7 @@
                 </button>
             </c:if>
 
-            <!-- 상태가 PENDING일 때만 '처리 완료' 버튼 -->
+            <!-- 상태가 PENDING일 때 '처리 완료' 버튼 -->
             <c:if test="${report.status == 'PENDING'}">
                 <button class="log-btn"
                         style="background:#FF9800;"
@@ -117,6 +113,15 @@
                     처리 완료
                 </button>
             </c:if>
+
+           
+            <!-- 신고 대상 회원 차단(탈퇴 처리) -->
+				<button class="log-btn btn-danger"
+       			 onclick="if(confirm('정말 이 회원을 탈퇴(차단) 처리하시겠습니까?')) 
+        			location.href='${pageContext.request.contextPath}/admin/reports/deleteUser?id=${report.id}&userId=${report.targetUserId}'">
+    				신고 대상 회원 탈퇴
+				</button>
+
 
         </div>
     </div>

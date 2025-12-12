@@ -54,16 +54,17 @@ public class AdminService {
         }
     }
 
-    // 회원 차단(ROLE -> BLOCKED)
+ // 회원 차단(ROLE -> BLOCK)
     public int blockUser(long id) {
         try {
             AdminUserDAO dao = new AdminUserDAO();
-            return dao.updateRole(id, "BLOCKED");
+            return dao.updateRole(id, "BLOCK");   // ✅ 여기만 바꾸면 됨
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
         }
     }
+
 
     // 회원 차단 해제(ROLE -> USER)
     public int unblockUser(long id) {
@@ -239,15 +240,16 @@ public class AdminService {
     // =====================================================
     // 🔹 모임 관리
     // =====================================================
-    public List<AdminMeetingDTO> getMeetingList(String keyword, String status) {
+    public List<AdminMeetingDTO> getMeetingList(String keyword, String status, String reportFilter) {
         try {
             AdminMeetingDAO dao = new AdminMeetingDAO();
-            return dao.search(keyword, status);
+            return dao.search(keyword, status, reportFilter);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
+
 
     public List<AdminMeetingDTO> getMeetingList() {
         try {
@@ -288,5 +290,15 @@ public class AdminService {
             return 0;
         }
     }
+    public int deleteReport(long reportId) {
+        try {
+            AdminReportDAO dao = new AdminReportDAO();
+            return dao.deleteById(reportId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
 
 }

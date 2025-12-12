@@ -1,17 +1,11 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-=======
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
->>>>>>> admin-almost-end
 
 <!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-
     <title>모임 관리 - 관리자</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/admin.css">
 
@@ -128,7 +122,6 @@
 
     <section class="main-box">
 
-
         <!-- 상단 설명 + 필터 -->
         <div class="meeting-list-header">
             <div>
@@ -149,23 +142,35 @@
                        value="${keyword}"/>
 
                 <select name="status" class="filter-select">
-                    <option value="ALL" <c:if test="${status == null || status == 'ALL'}">selected</c:if>>
-                        전체 상태
-                    </option>
-                    <option value="OPEN" <c:if test="${status == 'OPEN'}">selected</c:if>>
-                        OPEN (모집중)
-                    </option>
-                    <option value="CLOSED" <c:if test="${status == 'CLOSED'}">selected</c:if>>
-                        CLOSED (마감)
-                    </option>
-                    <option value="COMPLETED" <c:if test="${status == 'COMPLETED'}">selected</c:if>>
-                        COMPLETED (종료)
-                    </option>
-                </select>
+  					  <option value="ALL" <c:if test="${status == null || status == 'ALL'}">selected</c:if>>
+    				    	전체 상태
+   					  </option>
+  					  <option value="OPEN" <c:if test="${status == 'OPEN'}">selected</c:if>>
+    					    OPEN (모집중)
+  					  </option>
+  					  <option value="CLOSED" <c:if test="${status == 'CLOSED'}">selected</c:if>>
+  					     	CLOSED (마감)
+   					  </option>
+  					   
+				   	  </select>
 
-                <button type="submit" class="log-btn">
-                    검색
-                </button>
+					<!-- ✅ 여기 추가 -->
+					 <select name="reportFilter" class="filter-select">
+   					 <option value="NONE"
+     		           <c:if test="${empty reportFilter || reportFilter == 'NONE'}">selected</c:if>>
+     					   신고 필터 없음
+  			         </option>
+ 
+    		         <option value="REPORTED_USER_IN_MEETING"
+           		       <c:if test="${reportFilter == 'REPORTED_USER_IN_MEETING'}">selected</c:if>>
+  	    			  신고된 유저가 포함된 모임
+  				    </option>
+				</select>
+
+			    <button type="submit" class="log-btn">
+    						검색
+				</button>
+
             </form>
         </div>
 
@@ -225,6 +230,7 @@
     </c:forEach>
     </tbody>
 </table>
+
 
     </section>
 

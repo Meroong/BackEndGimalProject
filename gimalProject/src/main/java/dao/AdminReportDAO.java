@@ -104,4 +104,25 @@ public class AdminReportDAO {
         dto.setCreatedAt(rs.getTimestamp("created_at"));
         return dto;
     }   
+ // 신고 삭제 (DB에서 완전 제거)
+    public int deleteById(long id) {
+        String sql = "DELETE FROM report WHERE id = ?";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, id);
+
+            int rows = pstmt.executeUpdate();
+            System.out.println("[AdminReportDAO] deleteById rows = " + rows);
+            return rows;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("[AdminReportDAO] deleteById() 오류");
+        }
+
+        return 0;
+    }
+
 }

@@ -118,6 +118,11 @@ public class AdminController extends HttpServlet {
             case "/reports/resolve":
                 toggleReportStatus(req, resp);
                 break;
+                
+            case "/report/deleteUser":
+            case "/reports/deleteUser":
+                deleteUserFromReport(req, resp);
+                break;
 
             // ================== 공지 관리 ==================
             case "/notice/list":
@@ -242,11 +247,14 @@ public class AdminController extends HttpServlet {
         long id = Long.parseLong(req.getParameter("id"));
         System.out.println("[AdminController] deleteUser id = " + id);
 
-        int result = adminService.deleteUser(id);
-        System.out.println("[AdminController] deleteUser result = " + result);
+        // 물리 삭제 ❌ → 차단 처리 ✅
+        int result = adminService.blockUser(id);
+        System.out.println("[AdminController] blockUser result = " + result);
 
         resp.sendRedirect(req.getContextPath() + "/admin/users");
     }
+
+
 
     // ================== 신고 관리 ==================
     private void showReportList(HttpServletRequest req, HttpServletResponse resp)
@@ -387,30 +395,54 @@ public class AdminController extends HttpServlet {
 
         String keyword = req.getParameter("keyword");
         String status  = req.getParameter("status");
+        String reportFilter = req.getParameter("reportFilter"); // ✅ 추가
 
-        List<AdminMeetingDTO> meetingList = adminService.getMeetingList(keyword, status);
+        List<AdminMeetingDTO> meetingList = adminService.getMeetingList(keyword, status, reportFilter);
 
         req.setAttribute("meetingList", meetingList);
         req.setAttribute("keyword", keyword);
         req.setAttribute("status", status);
+        req.setAttribute("reportFilter", reportFilter); // ✅ 추가
 
         RequestDispatcher rd =
                 req.getRequestDispatcher("/WEB-INF/views/admin/meetingList.jsp");
         rd.forward(req, resp);
     }
 
+
     private void showMeetingDetail(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
         long id = Long.parseLong(req.getParameter("id"));
-        AdminMeetingDTO meeting = adminService.getMeetingById(id);
 
+        // 1) 모임 기본 정보
+        AdminMeetingDTO meeting = adminService.getMeetingById(id);
         req.setAttribute("meeting", meeting);
+
+        // 2) ✅ 경고 플래그 계산 (DAO 직접 호출)
+        dao.AdminMeetingDAO meetingDAO = new dao.AdminMeetingDAO();
+
+        // (A) 신고 유저 포함 경고: DB 수정 없이 바로 가능
+        boolean warnReportedUserIncluded = meetingDAO.hasReportedUserInMeeting(id);
+
+        // (B) 신고된 모임 경고: report.target_id 컬럼이 있을 때만 의미 있음
+        boolean warnMeetingReported = meetingDAO.hasMeetingReport(id);
+
+        // (옵션) 건수까지 보여주고 싶으면
+        int meetingReportCount = meetingDAO.countPendingMeetingReports(id);
+        int reportedUserCount  = meetingDAO.countPendingReportedUsersInMeeting(id);
+
+        req.setAttribute("warnReportedUserIncluded", warnReportedUserIncluded);
+        req.setAttribute("warnMeetingReported", warnMeetingReported);
+
+        req.setAttribute("meetingReportCount", meetingReportCount);
+        req.setAttribute("reportedUserCount", reportedUserCount);
 
         RequestDispatcher rd =
                 req.getRequestDispatcher("/WEB-INF/views/admin/meetingDetail.jsp");
         rd.forward(req, resp);
     }
+
 
     private void updateMeetingStatus(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
@@ -445,4 +477,23 @@ public class AdminController extends HttpServlet {
 
         resp.sendRedirect(req.getContextPath() + "/admin/meeting/list");
     }
+ // 신고 상세에서 "신고 대상 회원 탈퇴" 눌렀을 때
+    private void deleteUserFromReport(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+
+        long userId   = Long.parseLong(req.getParameter("userId")); // 대상 유저 auto_id
+        long reportId = Long.parseLong(req.getParameter("id"));     // 신고 id
+
+        // 1) 유저 차단(탈퇴 처리)
+        int blockResult = adminService.blockUser(userId);
+        System.out.println("[AdminController] deleteUserFromReport blockResult = " + blockResult);
+
+        // 2) 신고 데이터 DB에서 삭제
+        int delResult = adminService.deleteReport(reportId);
+        System.out.println("[AdminController] deleteUserFromReport deleteReport result = " + delResult);
+
+        // 3) 신고 목록으로
+        resp.sendRedirect(req.getContextPath() + "/admin/reports");
+    }
+
 }

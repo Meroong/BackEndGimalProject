@@ -62,7 +62,6 @@
                 </div>
 
                 <ul class="admin-card-meta-list">
-                    <li>문제가 되는 회원 차단 (BLOCKED)</li>
                     <li>회원 상세 정보와 활동 내역 확인</li>
                 </ul>
             </a>

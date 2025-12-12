@@ -167,7 +167,7 @@
 
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-title">총 회원 수 (DTO)</div>
+                    <div class="stat-title">총 회원 수</div>
                     <div class="stat-value">
                         <c:out value="${basicStats.totalUsers}" default="0"/>
                     </div>
