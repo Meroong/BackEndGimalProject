@@ -195,6 +195,7 @@ CREATE TABLE meeting (
     cost INT DEFAULT 0,
     tag VARCHAR(100),
     status ENUM('OPEN','CLOSED','COMPLETED') DEFAULT 'OPEN',
+    view_count INT default 0,
     creator_id BIGINT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -352,6 +353,13 @@ CREATE TABLE report (
     FOREIGN KEY (reporter_id) REFERENCES user(auto_id),
     FOREIGN KEY (target_user_id) REFERENCES user(auto_id)
 );
+ALTER TABLE chat_room
+DROP FOREIGN KEY chat_room_ibfk_2;
+
+ALTER TABLE chat_room
+ADD CONSTRAINT chat_room_ibfk_2
+FOREIGN KEY (meeting_id) REFERENCES meeting(id)
+ON DELETE CASCADE;
 
 -- ================================
 -- 📌 샘플 데이터 INSERT
@@ -371,7 +379,7 @@ INSERT INTO meeting_location (road_address, jibun_address, addr_detail, latitude
 VALUES ('서울특별시 한강공원', '서울특별시 용산구 한강로', '1구역', 37.526, 126.927);
 
 INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, creator_id, weather)
-VALUES ('조깅 모임', '매주 토요일 조깅', '2025-11-22 09:00:00', 1, 10, 2, 0, '운동', 'OPEN', 2, '맑음');
+VALUES ('조깅 모임', '매주 토요일 조깅', '2025-12-11 09:00:00', 1, 10, 2, 0, '운동', 'OPEN', 2, '맑음');
 
 INSERT INTO meeting_participant (meeting_id, user_id, paid)
 VALUES (1, 1, TRUE), (1, 2, FALSE);
@@ -410,7 +418,6 @@ INSERT INTO mock_card (card_number, cvc, owner_name, valid_until, password, bala
 VALUES
 ('1111-2222-3333-4444', '123', '홍길동', '12/27', '12', 100000);
 
-
 select * from user_wallet;
 select * from mock_card;
 select * from wallet_history;
@@ -419,6 +426,8 @@ select * from meeting_participant;
 select * from meeting_location;
 select * from chat_room;
 select * from chat_room_user;
+select * from chat_message;
 select * from user;
 select * from user_address;
 select * from file_resource;
+select * from report;
