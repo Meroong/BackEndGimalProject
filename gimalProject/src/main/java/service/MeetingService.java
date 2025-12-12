@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.google.gson.JsonArray;
@@ -212,7 +213,7 @@ public class MeetingService {
         dto.setMaxMembers(maxMembers);
         dto.setCurrentMembers(currentMembers);
         dto.setCost(cost);
-        dto.setTag(tag);
+        dto.setTag(processTags(tag));
         dto.setStatus(status);
         dto.setCreatorId(creatorId); // 게시자 ID 세팅
         
@@ -258,7 +259,7 @@ public class MeetingService {
         dto.setMaxMembers(maxMembers);
         dto.setCurrentMembers(currentMembers);
         dto.setCost(cost);
-        dto.setTag(tag);
+        dto.setTag(processTags(tag));
         dto.setStatus(status);
         dto.setCreatorId(creatorId); // 게시자 ID 세팅
 
@@ -441,6 +442,22 @@ public class MeetingService {
         if (!result) {
             throw new RuntimeException("모임 상태 변경 실패");
         }
+    }
+    private String processTags(String rawTag) {
+        if (rawTag == null || rawTag.isBlank()) return null;
+
+        String[] arr = rawTag.split(",");
+        LinkedHashSet<String> set = new LinkedHashSet<>();
+
+        for (String t : arr) {
+            String tag = t.trim();
+            if (!tag.isEmpty()) {
+                set.add(tag);
+            }
+            if (set.size() >= 5) break; // 최대 5개 제한
+        }
+
+        return set.isEmpty() ? null : String.join(",", set);
     }
 
 }

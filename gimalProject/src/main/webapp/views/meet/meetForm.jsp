@@ -48,7 +48,79 @@
     let imageList = []; // 업로드한 이미지 파일들을 저장하는 배열(최대 5개)
     const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>";
     const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
+    
+    const recommendedTags = [
+        "운동", "육아", "산책", "조깅", "러닝",
+        "반려견", "반려묘", "카페", "스터디",
+        "독서", "취미", "여행", "사진", "게임"
+    ];
 
+    const MAX_TAGS = 5;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const container = document.getElementById("recommendedTagArea");
+
+        recommendedTags.forEach(tag => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.innerText = "#" + tag;
+
+            btn.style.padding = "6px 12px";
+            btn.style.borderRadius = "20px";
+            btn.style.border = "1px solid #FF7C40";
+            btn.style.background = "#fff";
+            btn.style.color = "#FF7C40";
+            btn.style.fontSize = "12px";
+            btn.style.cursor = "pointer";
+
+            btn.onclick = () => addTag(tag);
+
+            container.appendChild(btn);
+        });
+    });
+
+
+    function addTag(tag) {
+        const input = document.querySelector("input[name='tag']");
+        let tags = input.value
+            ? input.value.split(",").map(t => t.trim()).filter(t => t)
+            : [];
+
+        // 중복 방지
+        if (tags.includes(tag)) {
+            alert("이미 추가된 태그입니다.");
+            return;
+        }
+
+        // 개수 제한
+        if (tags.length >= MAX_TAGS) {
+            alert("태그는 최대 " + MAX_TAGS + "개까지 가능합니다.");
+            return;
+        }
+
+        tags.push(tag);
+        input.value = tags.join(",");
+    }
+
+    // 직접 입력 시에도 제한 적용
+    function validateTags(input) {
+        let tags = input.value
+            .split(",")
+            .map(t => t.trim())
+            .filter(t => t);
+
+        // 중복 제거
+        tags = [...new Set(tags)];
+
+        if (tags.length > MAX_TAGS) {
+            alert("태그는 최대 " + MAX_TAGS + "개까지 가능합니다.");
+            tags = tags.slice(0, MAX_TAGS);
+        }
+
+        input.value = tags.join(",");
+    }
+
+    
     // 주소 검색 팝업
     function openJusoPopup() {
         window.open(
@@ -196,8 +268,23 @@
         <label>참가비</label>
         <input type="number" name="cost" value="0">
 
-        <label>태그</label>
-        <input type="text" name="tag">
+		<label>태그 (쉼표로 구분, 최대 5개)</label>
+		<input type="text"
+		       name="tag"
+		       placeholder="예: 운동,산책,반려견"
+		       onblur="validateTags(this)">
+
+     	<label>추천 태그</label>
+		<div id="recommendedTagArea"
+		     style="
+		        display:flex;
+		        flex-wrap:wrap;
+		        gap:8px;
+		        margin-bottom:10px;
+		     ">
+		</div>
+
+        
 
         <label>상태</label>
         <select name="status">
