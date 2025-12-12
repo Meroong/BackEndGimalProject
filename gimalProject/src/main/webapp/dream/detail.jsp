@@ -214,6 +214,15 @@ ${fn:escapeXml(post.content)}
                 </form>
               </div>
             </c:if>
+            <button type="button"
+			        class="dream-detail-report-btn"
+			        onclick="handleReportClick(
+			            'DREAM',
+			            '${post.writerId}',
+			            '${post.dreamId}'
+			        )">
+			    신고하기
+			</button>
           </div>
         </div>
       </section>
@@ -287,7 +296,21 @@ ${fn:escapeXml(post.content)}
 
       update();
     })();
+    
+    const IS_LOGIN = <%= isLogin ? "true" : "false" %>;
+
+    function handleReportClick(usedType, targetUserId, usedId) {
+        if (!IS_LOGIN) {
+            if (confirm("신고하려면 로그인이 필요합니다.\n로그인 하시겠습니까?")) {
+                location.href = "<%= request.getContextPath() %>/views/user/login.jsp";
+            }
+            return;
+        }
+
+        openReportModal(usedType, targetUserId, usedId);
+    }
   </script>
 
 </body>
 </html>
+<jsp:include page="/include/reportModal.jsp" />

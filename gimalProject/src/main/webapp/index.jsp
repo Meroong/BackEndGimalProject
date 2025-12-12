@@ -97,60 +97,88 @@
                 const userLat = <%= lat %>;
                 const userLng = <%= lng %>;
 
-                const meetings = [
-                    <% if (meetings != null) {
-                        for (MeetingInfoDTO m : meetings) { %>
-                    {
-                        id: <%= m.getMeetingId() %>,
-                        title: "<%= m.getTitle() %>",
-                        lat: <%= m.getLatitude() %>,
-                        lng: <%= m.getLongitude() %>
-                    },
-                    <% }} %>
-                ];
+                const meetings = [];
+                <%
+                if (meetings != null) {
+                    for (MeetingInfoDTO m : meetings) {
+                        if (m.getLatitude() != null && m.getLongitude() != null) {
+                %>
+                meetings.push({
+                    id: <%= m.getMeetingId() %>,
+                    title: "<%= m.getTitle() %>",
+                    lat: <%= m.getLatitude() %>,
+                    lng: <%= m.getLongitude() %>
+                });
+                <%
+                        }
+                    }
+                }
+                %>
             </script>
 
             <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
 
-            <script>
-                window.onload = function () {
-                    if (!window.kakao) {
-                        alert("카카오 지도 SDK 로드 실패");
-                        return;
-                    }
-
-                    const container = document.getElementById('map');
-                    const map = new kakao.maps.Map(container, {
-                        center: new kakao.maps.LatLng(userLat, userLng),
-                        level: 4
-                    });
-
-                    // 내 위치
-                    new kakao.maps.Marker({
-                        position: new kakao.maps.LatLng(userLat, userLng),
-                        map: map
-                    });
-
-                    // 모임 마커
-                    meetings.forEach(m => {
-                        const marker = new kakao.maps.Marker({
-                            position: new kakao.maps.LatLng(m.lat, m.lng),
-                            map: map
-                        });
-
-                        const info = new kakao.maps.InfoWindow({
-                            content: `<div style="padding:6px;font-size:13px;">${m.title}</div>`
-                        });
-
-                        kakao.maps.event.addListener(marker, 'mouseover', () => info.open(map, marker));
-                        kakao.maps.event.addListener(marker, 'mouseout', () => info.close());
-                        kakao.maps.event.addListener(marker, 'click', () => {
-                            location.href =
-                                "<%= request.getContextPath() %>/meeting/detail?id=" + m.id;
-                        });
-                    });
-                };
-            </script>
+       <script>
+		window.onload = function () {
+		    if (!window.kakao || !kakao.maps) {
+		        console.error("카카오 지도 SDK 로드 실패");
+		        return;
+		    }
+		
+		    const container = document.getElementById('map');
+		
+		    const map = new kakao.maps.Map(container, {
+		        center: new kakao.maps.LatLng(userLat, userLng),
+		        level: 4
+		    });
+		
+		    // 내 위치 마커
+		    new kakao.maps.Marker({
+		        position: new kakao.maps.LatLng(userLat, userLng),
+		        map: map
+		    });
+		
+		    console.log("meetings:", meetings);
+		
+		    meetings.forEach(m => {
+		        if (!m.lat || !m.lng) return;
+		
+		        const position = new kakao.maps.LatLng(m.lat, m.lng);
+		
+		        const marker = new kakao.maps.Marker({
+		            position,
+		            map
+		        });
+		
+		        const infoWindow = new kakao.maps.InfoWindow({
+		            content: `
+		              <div style="
+		                padding:6px 10px;
+		                font-size:13px;
+		                border-radius:6px;
+		                background:white;
+		                box-shadow:0 2px 6px rgba(0,0,0,0.3);
+		              ">
+		                ${m.title}
+		              </div>
+		            `
+		        });
+		
+		        kakao.maps.event.addListener(marker, 'mouseover', () => {
+		            infoWindow.open(map, marker);
+		        });
+		
+		        kakao.maps.event.addListener(marker, 'mouseout', () => {
+		            infoWindow.close();
+		        });
+		
+		        kakao.maps.event.addListener(marker, 'click', () => {
+		            location.href =
+		              "<%= request.getContextPath() %>/meeting/info?meetingId=" + m.id;
+		        });
+		    });
+		};
+		</script>
 
             <%-- 가운데 카드 --%>
             <div class="center-card">

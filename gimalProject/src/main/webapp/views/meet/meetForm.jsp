@@ -282,7 +282,19 @@
         <%
             String today = java.time.LocalDate.now().toString();
         %>
-        <input type="datetime-local" name="date" value="<%= today %>" required>
+        <%
+		    java.time.LocalDateTime now = java.time.LocalDateTime.now();
+		    java.time.LocalDateTime max = now.plusDays(7);
+		
+		    String minDate = now.toString().substring(0,16);
+		    String maxDate = max.toString().substring(0,16);
+		%>
+		
+		<input type="datetime-local"
+		       name="date"
+		       min="<%= minDate %>"
+		       max="<%= maxDate %>"
+		       required>
 
         <label>최대 인원</label>
         <input type="number" name="maxMembers" value="10">
