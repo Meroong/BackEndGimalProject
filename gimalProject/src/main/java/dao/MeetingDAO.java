@@ -58,7 +58,8 @@ public class MeetingDAO {
                     m.view_count,
                     m.weather,
                     m.created_at,
-                    l.road_address
+                    l.road_address,
+                    l.jibun_address
                 FROM meeting m
                 JOIN meeting_location l ON m.location_id = l.id
                 WHERE 1 = 1
@@ -142,6 +143,7 @@ public class MeetingDAO {
                     dto.setWeather(rs.getString("weather"));
                     dto.setCreatedAt(rs.getTimestamp("created_at"));
                     dto.setRoadAddress(rs.getString("road_address"));
+                    dto.setJibunAddress(rs.getString("jibun_address"));
                     list.add(dto);
                 }
             }

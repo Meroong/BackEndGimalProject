@@ -112,13 +112,7 @@ public class MeetingService {
             if (dto.getDate() != null) {
                 dto.setDateStr(sdf.format(dto.getDate()));
             }
-            String roadAddr = dto.getRoadAddress(); // 예: "서울시 강남구 삼성동 123"
-            if (roadAddr != null) {
-                String[] parts = roadAddr.split(" ");
-                if (parts.length >= 3) {
-                    dto.setDong(parts[2]);   // 삼성동
-                }
-            }
+            dto.setDong(extractAreaUnit(dto.getJibunAddress()));
         
         // 작성자인지
         boolean isCreator = (loginUserId != -1 && loginUserId == dto.getCreatorId());
@@ -156,13 +150,7 @@ public class MeetingService {
             if (dto.getDate() != null) {
                 dto.setDateStr(sdf.format(dto.getDate()));
             }
-            String roadAddr = dto.getRoadAddress();
-            if (roadAddr != null) {
-                String[] parts = roadAddr.split(" ");
-                if (parts.length >= 3) {
-                    dto.setDong(parts[2]);
-                }
-            }
+            dto.setDong(extractAreaUnit(dto.getJibunAddress()));
         }
         return aList;
     }
@@ -513,5 +501,24 @@ public class MeetingService {
         }
 
         new MeetingDAO().updateStatus(meetingId, "OPEN");
+    }
+    private String extractAreaUnit(String jibunAddress) {
+        if (jibunAddress == null || jibunAddress.isBlank()) {
+            return "구로동"; // 기본값
+        }
+
+        String[] parts = jibunAddress.split(" ");
+        for (int i = parts.length - 1; i >= 0; i--) {
+            String p = parts[i];
+            if (
+                p.endsWith("동") ||
+                p.endsWith("읍") ||
+                p.endsWith("면") ||
+                p.endsWith("리")
+            ) {
+                return p;
+            }
+        }
+        return "구로동";
     }
 }
