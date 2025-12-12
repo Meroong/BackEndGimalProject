@@ -1,0 +1,917 @@
+/* =========================================================
+   common.css
+   - dream-list.css(드림 페이지) 디자인을 "전역 공통"으로 재구성한 스타일
+   - 다른 JSP에 순차 적용할 때: class만 맞춰주면 동일 톤/컴포넌트로 통일 가능
+   - 권장 로딩 순서: common.css -> page-specific.css
+   ========================================================= */
+
+/* =========================================================
+   0) Design Tokens (colors / radius / shadows)
+   ========================================================= */
+:root {
+  /* Base */
+  --bg: #fff7f0;
+  --surface: #ffffff;
+  --surface-2: #f9fafb;
+  --text: #111827;
+  --text-2: #374151;
+  --muted: #6b7280;
+  --muted-2: #9ca3af;
+  --border: #e5e7eb;
+
+  /* Brand accents (dream-list.css 기반) */
+  --accent: #f97316;     /* orange */
+  --primary: #4f46e5;    /* indigo */
+  --primary-700: #4338ca;
+  --success: #16a34a;
+
+  /* Radius */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  /* Shadows */
+  --shadow-1: 0 8px 22px rgba(15, 23, 42, 0.08);
+  --shadow-2: 0 12px 28px rgba(15, 23, 42, 0.08);
+  --shadow-3: 0 18px 45px rgba(15, 23, 42, 0.08);
+  --shadow-4: 0 24px 55px rgba(15, 23, 42, 0.12);
+
+  /* Layout */
+  --container: 1200px;
+  --container-narrow: 760px;
+}
+
+/* =========================================================
+   1) Base Reset
+   ========================================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: none;
+  background: transparent;
+}
+
+/* 접근성 숨김 텍스트 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =========================================================
+   2) Layout Helpers
+   ========================================================= */
+.page {
+  padding: 24px 0 48px;
+  min-height: calc(100vh - 80px);
+}
+
+.container {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+.container--narrow {
+  max-width: var(--container-narrow);
+}
+
+/* 2열 레이아웃 (사이드바 + 본문) */
+.layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 24px;
+  margin-top: 16px;
+}
+
+/* sticky 사이드바 */
+.sticky {
+  position: sticky;
+  top: 96px;
+}
+
+/* =========================================================
+   3) Typography
+   ========================================================= */
+.kicker {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  margin: 0 0 2px;
+}
+
+.h1 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.4;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.subtext {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* =========================================================
+   4) Surfaces (Card / Panel)
+   ========================================================= */
+.panel {
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: var(--shadow-3);
+}
+
+.panel--padded {
+  padding: 18px 16px 22px;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-3);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-4);
+}
+
+/* 카드 썸네일: 10:7 비율 */
+.card__thumb {
+  position: relative;
+  width: 100%;
+  padding-top: 70%;
+  background: #f3f4f6;
+}
+
+.card__thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card__body {
+  padding: 10px 12px 12px;
+}
+
+.card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card__meta {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card__meta-dot {
+  color: #d1d5db;
+}
+
+/* =========================================================
+   5) Buttons (pill style)
+   ========================================================= */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn--primary {
+  color: #ffffff;
+  background: linear-gradient(135deg, #6366f1, #22c55e);
+  box-shadow: 0 12px 26px rgba(79, 70, 229, 0.45);
+}
+
+.btn--primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 38px rgba(79, 70, 229, 0.55);
+  opacity: 0.98;
+}
+
+.btn--dark {
+  background: var(--text);
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.55);
+}
+
+.btn--dark:hover:not(:disabled) {
+  background: #020617;
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.7);
+}
+
+.btn--outline {
+  border: 1px solid #d1d5db;
+  background: var(--surface);
+  color: var(--text-2);
+}
+
+.btn--outline:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+/* 작은 pill (정렬/필터 chips 등) */
+.pill {
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 3px 10px;
+  font-size: 11px;
+  color: #4b5563;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.12s ease;
+}
+
+.pill:hover {
+  background: #f3f4ff;
+  border-color: var(--primary);
+  color: var(--primary-700);
+  transform: translateY(-0.5px);
+}
+
+.pill.is-active {
+  border-color: var(--primary);
+  background: #eef2ff;
+  color: var(--primary-700);
+}
+
+/* =========================================================
+   6) Form Controls (select / input / search)
+   ========================================================= */
+.input,
+.select,
+.textarea {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 8px 10px;
+  font-size: 14px;
+  outline: none;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--muted-2);
+}
+
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.08);
+}
+
+.select--pill {
+  width: auto;
+  min-width: 104px;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-1);
+}
+
+/* 검색 바(알약) */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search__box {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 520px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 4px 6px 4px 16px;
+  box-shadow: var(--shadow-2);
+}
+
+.search__input {
+  flex: 1;
+  border: none;
+  padding: 8px 0;
+  font-size: 14px;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+}
+
+.search__input::placeholder {
+  color: var(--muted-2);
+}
+
+.search__button {
+  height: 34px;
+  padding: 0 18px;
+}
+
+/* 체크박스 라인 */
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.check input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+}
+
+/* =========================================================
+   7) Lists / Grids
+   ========================================================= */
+.grid {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.empty {
+  margin-top: 60px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* =========================================================
+   8) Tags
+   ========================================================= */
+.tag {
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  padding: 3px 7px;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+}
+
+.tag--info {
+  border-color: rgba(59, 130, 246, 0.18);
+  background: rgba(59, 130, 246, 0.06);
+  color: #1d4ed8;
+}
+
+.tag--success {
+  border-color: rgba(22, 163, 74, 0.18);
+  background: rgba(22, 163, 74, 0.06);
+  color: #15803d;
+}
+
+.tag--neutral {
+  border-color: rgba(148, 163, 184, 0.25);
+  background: rgba(148, 163, 184, 0.08);
+  color: #4b5563;
+}
+
+/* =========================================================
+   9) Page Header (title + controls)
+   ========================================================= */
+.topbar {
+  margin-bottom: 12px;
+}
+
+.topbar__main {
+  max-width: var(--container-narrow);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.topbar__left {
+  text-align: center;
+}
+
+.topbar__right {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.topbar__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* 인기 검색어(칩 리스트) */
+.chips {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--muted-2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  justify-content: center;
+}
+
+.chips__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* =========================================================
+   10) Sidebar Filter (섹션 구분)
+   ========================================================= */
+.sidebar__title {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: var(--text);
+}
+
+.sidebar__section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.sidebar__section:first-of-type {
+  margin-top: 4px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.sidebar__section-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: #4b5563;
+}
+
+/* 카테고리 버튼 리스트 */
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.menu__item {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 13px;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.08s ease;
+}
+
+.menu__item:hover {
+  background: #f9fafb;
+  border-color: var(--border);
+  transform: translateY(-1px);
+}
+
+.menu__item.is-active {
+  background: #eef2ff;
+  border-color: var(--primary);
+  color: var(--primary-700);
+}
+
+/* =========================================================
+   11) Simple Forms (write/edit 공통에 재사용)
+   ========================================================= */
+.form {
+  max-width: 960px;
+  margin: 32px auto;
+  padding: 0 16px;
+}
+
+.form__panel {
+  background: var(--surface);
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.form__title {
+  font-size: 1.4rem;
+  margin: 0 0 20px;
+}
+
+.form__error {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 8px;
+}
+
+.form__row {
+  margin-bottom: 16px;
+}
+
+.form__row label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+  color: var(--text-2);
+}
+
+.form__cols {
+  display: flex;
+  gap: 16px;
+}
+
+.form__col {
+  flex: 1;
+}
+
+.form__actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* =========================================================
+   12) Responsive
+   ========================================================= */
+@media (max-width: 980px) {
+  .container {
+    padding: 0 18px;
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sticky {
+    position: static;
+    top: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .topbar__controls {
+    flex-direction: column;
+  }
+
+  .search__box {
+    max-width: 100%;
+  }
+}
+
+/* =========================================================
+   12) App Header (global include/header.jsp)
+   ========================================================= */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 247, 240, 0.82);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.85);
+}
+
+.app-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 0;
+}
+
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.app-brand__logo {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.75);
+  box-shadow: var(--shadow-1);
+  padding: 6px;
+}
+
+.app-brand__name {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.app-nav__link {
+  padding: 6px 10px;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 600;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.app-nav__link:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(229, 231, 235, 0.95);
+  box-shadow: var(--shadow-1);
+  transform: translateY(-1px);
+}
+
+.app-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 860px) {
+  .app-header__inner { flex-wrap: wrap; }
+  .app-nav { order: 3; width: 100%; justify-content: flex-start; margin-top: 6px; }
+}
+
+/* =========================================================
+   13) Footer (global include/footer.jsp)
+   ========================================================= */
+.app-footer {
+  margin-top: 44px;
+  padding: 24px 0 40px;
+  border-top: 1px solid rgba(229, 231, 235, 0.85);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.app-footer__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.app-footer__links {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.app-footer__links a { text-decoration: none; }
+
+/* =========================================================
+   14) Modal (global include/reportModal.jsp)
+   ========================================================= */
+.modal-overlay {
+  display: none; /* JS에서 flex로 변경 */
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 9999;
+}
+
+.modal {
+  width: min(520px, 100%);
+  background: var(--surface);
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  animation: modalIn 0.18s ease-out;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(180deg, rgba(99, 102, 241, 0.12), rgba(34, 197, 94, 0.06));
+  border-bottom: 1px solid rgba(229, 231, 235, 0.85);
+}
+
+.modal__title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(229, 231, 235, 0.95);
+  background: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+
+.icon-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-1);
+  background: #ffffff;
+}
+
+.modal__body { padding: 14px 16px; }
+
+.modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.field { margin-top: 12px; }
+
+.field label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+}
+
+.textarea--lg {
+  min-height: 110px;
+  resize: vertical;
+}
+
+/* (옵션) 위험 버튼 */
+.btn--danger {
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: #ffffff;
+  box-shadow: 0 14px 28px rgba(239, 68, 68, 0.34);
+}
+
+.btn--danger:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 36px rgba(239, 68, 68, 0.45);
+}
+
+/* =========================================================
+   15) Utilities
+   ========================================================= */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stack--lg { gap: 16px; }
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.center--page {
+  min-height: calc(100vh - 160px);
+}
+
+.notice {
+  padding: 18px 16px 20px;
+}
+
+.notice__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.notice__text {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.divider {
+  height: 1px;
+  background: rgba(229, 231, 235, 0.85);
+}

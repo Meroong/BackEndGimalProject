@@ -1,133 +1,70 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="util.AuthUtil"%>
 
-<!-- 헤더 CSS -->
-<style>
-    /* 헤더 전체 */
-    header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        padding-top: 10px;
-    }
+<!-- NOTE:
+  - common.css를 아직 모든 페이지 head에서 로드하지 않아서, include/header.jsp에서 한 번 더 로드합니다.
+  - 전체 JSP에 공통 적용이 끝나면(모든 페이지 head에 common.css 추가 후) 아래 link는 제거해도 됩니다.
+-->
+<link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/common.css">
 
-    .logo img {
-        width: 100px !important;
-        height: 100px !important;
-        object-fit: contain;
-    }
+<header class="app-header">
+  <div class="container app-header__inner">
 
-    .header-buttons {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
+    <!-- Brand -->
+    <a class="app-brand" href="<%= request.getContextPath() %>/index.jsp" aria-label="홈으로 이동">
+      <img class="app-brand__logo" src="<%= request.getContextPath() %>/resources/images/logo.png" alt="도란도란 로고">
+      <span class="app-brand__name">도란도란</span>
+    </a>
 
-    /* 메시지 버튼 */
-    .msg-btn {
-        background: #5271FF;
-        color: white;
-        padding: 8px 20px;
-        border-radius: 10px;
-        border: none;
-        cursor: pointer;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        transition: 0.2s;
-    }
+    <!-- Primary Nav (필요 시 항목 추가 가능) -->
+    <nav class="app-nav" aria-label="주요 메뉴">
+      <a class="app-nav__link" href="<%= request.getContextPath() %>/index.jsp">홈</a>
+      <a class="app-nav__link" href="<%= request.getContextPath() %>/meeting/list">모임</a>
+      <a class="app-nav__link" href="<%= request.getContextPath() %>/dream/list.do">드림</a>
+    </nav>
 
-    .msg-btn:hover {
-        background: #3A50D8;
-        transform: translateY(-2px);
-    }
+    <!-- Actions -->
+    <div class="app-actions">
+      <%
+        Object loginUser = session.getAttribute("Authorization");
+        if (loginUser != null) {
+          String role = AuthUtil.getRole(request);
+      %>
 
-    /* 마이페이지 버튼 */
-    .mypage-btn {
-        background: #FF6600;
-        color: white;
-        padding: 8px 20px;
-        border-radius: 10px;
-        border: none;
-        cursor: pointer;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        transition: 0.2s;
-    }
+        <button class="btn btn--primary msg-btn"
+                type="button"
+                onclick="location.href='<%= request.getContextPath() %>/chat/roomList'">
+          메시지
+        </button>
 
-    .mypage-btn:hover {
-        background: #e65c00;
-        transform: translateY(-2px);
-    }
-
-    /* 로그아웃/로그인 버튼 */
-    .log-btn {
-        background: #f0f0f0;
-        color: #333;
-        border: 1px solid #ccc;
-        padding: 8px 20px;
-        border-radius: 10px;
-        cursor: pointer;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        transition: 0.2s;
-    }
-
-    .log-btn:hover {
-        background: #e0e0e0;
-    }
-</style>
-
-<!-- 헤더 HTML -->
-<header>
-    <div class="logo">
-        <a href="<%= request.getContextPath() %>/index.jsp">
-            <img src="<%= request.getContextPath() %>/resources/images/logo.png" alt="logo">
-        </a>
-    </div>
-
-    <div class="header-buttons">
-        <%
-            Object loginUser = session.getAttribute("Authorization");
-
-            if (loginUser != null) {
-                String token = (String) loginUser;
-                String role = AuthUtil.getRole(request); // JWT에서 역할 추출
-        %>
-            <!-- 로그인 상태 공통: 메시지 버튼 -->
-            <button class="msg-btn"
-                    onclick="location.href='<%= request.getContextPath() %>/chat/roomList'">
-                메시지
-            </button>
-
-            <% if ("ADMIN".equals(role)) { %>
-                <button class="log-btn"
-                        onclick="location.href='<%= request.getContextPath() %>/admin'">
-                    관리자
-                </button>
-            <% } else { %>
-                <button class="mypage-btn"
-                        onclick="location.href='<%= request.getContextPath() %>/views/user/mypage.jsp'">
-                    마이페이지
-                </button>
-            <% } %>
-
-            <!-- 로그아웃 -->
-            <form action="<%= request.getContextPath() %>/user/logout" method="get" style="display:inline;">
-                <button type="submit" class="log-btn">Log out</button>
-            </form>
-
+        <% if ("ADMIN".equals(role)) { %>
+          <button class="btn btn--outline log-btn"
+                  type="button"
+                  onclick="location.href='<%= request.getContextPath() %>/admin'">
+            관리자
+          </button>
         <% } else { %>
-            <!-- 비로그인 상태 -->
-            <button class="log-btn"
-                    onclick="location.href='<%= request.getContextPath() %>/views/user/login.jsp'">
-                Log in
-            </button>
+          <button class="btn btn--dark mypage-btn"
+                  type="button"
+                  onclick="location.href='<%= request.getContextPath() %>/views/user/mypage.jsp'">
+            마이페이지
+          </button>
         <% } %>
+
+        <form action="<%= request.getContextPath() %>/user/logout" method="get" style="display:inline;">
+          <button type="submit" class="btn btn--outline log-btn">Log out</button>
+        </form>
+
+      <% } else { %>
+
+        <button class="btn btn--outline log-btn"
+                type="button"
+                onclick="location.href='<%= request.getContextPath() %>/views/user/login.jsp'">
+          Log in
+        </button>
+
+      <% } %>
     </div>
+
+  </div>
 </header>
