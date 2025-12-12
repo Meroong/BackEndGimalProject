@@ -27,7 +27,9 @@ DROP TABLE IF EXISTS user_wallet;
 DROP TABLE IF EXISTS mock_card;
 DROP TABLE IF EXISTS notice;
 DROP TABLE IF EXISTS review;
-DROP TABLE IF EXISTS dream_post;
+DROP TABLE IF EXISTS transaction;
+DROP TABLE IF EXISTS wishlist;
+DROP TABLE IF EXISTS rental_info;
 DROP TABLE IF EXISTS file_resource;
 DROP TABLE IF EXISTS user_tag;
 DROP TABLE IF EXISTS user_address;
@@ -230,6 +232,8 @@ CREATE TABLE weather_data (
     temp DOUBLE NOT NULL,
     weather VARCHAR(50) NOT NULL,
     pm10 INT NOT NULL,
+    latitude DOUBLE NOT NULL,
+    longitude DOUBLE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
