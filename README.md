@@ -6,6 +6,7 @@
 
 DB 세팅
 
+
 create database dorandoran;
 use dorandoran;
 
@@ -60,7 +61,7 @@ CREATE TABLE user (
     user_name VARCHAR(50) NOT NULL,
     nickname VARCHAR(50) UNIQUE NOT NULL,
     trust_score INT DEFAULT 0,
-    role ENUM('USER', 'ADMIN') DEFAULT 'USER',
+    role ENUM('USER', 'ADMIN', 'BLOCK') DEFAULT 'USER',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -354,16 +355,19 @@ CREATE TABLE poll_vote (
 -- ================================
 CREATE TABLE report (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    reporter_id BIGINT NOT NULL,
-    target_user_id BIGINT NOT NULL,
+    reporter_id BIGINT  NULL,
+    target_user_id BIGINT  NULL,
     target_type ENUM('USER','ITEM','MEETING'),
     reason TEXT,
     status ENUM('PENDING','RESOLVED') DEFAULT 'PENDING',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (reporter_id) REFERENCES user(auto_id),
-    FOREIGN KEY (target_user_id) REFERENCES user(auto_id)
+    FOREIGN KEY (reporter_id) REFERENCES user(auto_id) ON DELETE SET NULL,
+    FOREIGN KEY (target_user_id) REFERENCES user(auto_id) ON DELETE SET NULL
 );
+ALTER TABLE report
+ADD COLUMN target_id BIGINT NULL AFTER target_type;
 
+CREATE INDEX idx_report_meeting ON report(target_type, target_id, status);
 -- ================================
 -- 📌 샘플 데이터 INSERT
 -- ================================
@@ -423,3 +427,57 @@ select * from chat_room_user;
 select * from user;
 select * from user_address;
 select * from file_resource;
+
+
+
+-- 신고 테스트 데이터 5개 (report)
+-- 전제: user 테이블에 auto_id 1(관리자), 2(테스트유저)가 존재
+
+INSERT INTO report (reporter_id, target_user_id, target_type, reason, status, created_at)
+VALUES
+(2, 1, 'USER',    '채팅에서 비매너/욕설이 있었습니다.',                 'PENDING',  NOW()),
+(2, 1, 'MEETING', '모임 공지 내용이 실제와 다르고 허위 안내로 보입니다.', 'PENDING',  NOW()),
+(2, 1, 'ITEM',    '중고 상품 설명과 실제 상태가 다르다고 생각됩니다.',    'PENDING',  NOW()),
+(1, 2, 'USER',    '스팸성 메시지/도배 행위가 반복됩니다.',               'RESOLVED', NOW()),
+(1, 2, 'MEETING', '모임에서 규칙 위반 신고가 접수되었습니다.',           'PENDING',  NOW());
+
+-- 확인
+SELECT * FROM report ORDER BY id DESC;
+
+SELECT auto_id, user_id FROM user ORDER BY auto_id;
+DELETE FROM user WHERE user_id = 'test01';
+
+
+-- ================================
+-- 📍 meeting_location 추가 4개 (총 5개 장소)
+-- 기존에 id=1이 있다고 가정
+-- ================================
+INSERT INTO meeting_location (road_address, jibun_address, addr_detail, latitude, longitude) VALUES
+('서울특별시 올림픽공원', '서울특별시 송파구 방이동', '평화의문 앞', 37.5163, 127.1210),
+('서울특별시 서울숲',     '서울특별시 성동구 성수동1가', '중앙광장',   37.5445, 127.0374),
+('서울특별시 여의도공원', '서울특별시 영등포구 여의도동', '분수대 앞',  37.5260, 126.9237),
+('서울특별시 북서울꿈의숲','서울특별시 강북구 번동',      '정문 앞',    37.6249, 127.0417);
+
+-- ================================
+-- 🤝 meeting 5개 생성
+-- location_id: 1~5 사용
+-- creator_id: 1(관리자), 2(테스트유저) 섞어서 사용
+-- current_members는 max_members 이하로 설정
+-- ================================
+INSERT INTO meeting
+(title, content, date, location_id, max_members, current_members, cost, tag, status, creator_id, weather)
+VALUES
+('조깅 모임(주말 아침)', '가볍게 5km 조깅하고 스트레칭까지 합니다.', '2025-12-20 09:00:00', 1, 10, 2, 0, '운동', 'OPEN', 2, '맑음'),
+('플로깅(줍깅) 같이해요', '공원 한 바퀴 돌면서 쓰레기 줍는 모임입니다. 장갑/봉투 준비해요.', '2025-12-21 10:30:00', 2, 15, 3, 0, '봉사', 'OPEN', 1, '구름'),
+('강아지 산책 번개', '반려견 있으면 같이 산책하고 사진도 찍어요. (반려견 없어도 OK)', '2025-12-22 19:30:00', 3, 8, 1, 0, '산책', 'OPEN', 2, '맑음'),
+('중고 나눔 장터 모임', '아이 물건/장난감 위주로 서로 나눔/교환하는 자리입니다.', '2025-12-23 14:00:00', 4, 20, 5, 0, '나눔', 'OPEN', 1, '맑음'),
+('엄마아빠 육아 수다회', '육아템 추천/정보 공유하고, 아이들 교육 얘기도 편하게 나눠요.', '2025-12-24 11:00:00', 5, 12, 4, 1000, '육아', 'OPEN', 1, '눈');
+
+-- 확인
+SELECT id, title, date, location_id, max_members, current_members, tag, status, creator_id
+FROM meeting
+ORDER BY id DESC
+LIMIT 10;
+
+
+SELECT COUNT(*) AS user_count FROM `user`;
