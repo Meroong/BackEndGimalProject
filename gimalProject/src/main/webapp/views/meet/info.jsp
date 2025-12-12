@@ -47,60 +47,77 @@ function needLoginForJoin() {
 </script>
 
 <style>
-/* 검색창 */
-.search-section { text-align:center; margin:20px 0; }
-.search-row { display:flex; justify-content:center; gap:12px; }
-.search-row input { padding:10px 14px; border-radius:8px; border:1px solid #DDD; width:300px; }
-.search-row select { padding:10px 14px; border-radius:8px; border:1px solid #DDD; }
-.search-btn { padding:10px 20px; border:none; background:#FF7C40; color:#fff; border-radius:8px; cursor:pointer; }
-
-/* 카드 디자인 */
-.card { display:flex; gap:20px; background:#FCFBFE; padding:20px; border-radius:16px; box-shadow:0 4px 16px rgba(0,0,0,0.05); margin-bottom:30px; min-height:320px; }
-.card img { width:300px; height:300px; object-fit:cover; border-radius:12px; background:#f0f0f0; }
-.card-content { flex:1; display:flex; flex-direction:column; justify-content:space-between; }
-.card-content h2 { font-size:22px; font-weight:700; color:#FF7C40; margin:0; }
-.info { font-size:16px; color:#555; line-height:1.5; }
-.badge { display:inline-block; background:#FF7C40; color:#fff; padding:4px 8px; border-radius:8px; font-size:14px; margin-right:6px; }
-.hashtags { font-size:14px; color:#888; margin-top:6px; }
-
-/* 버튼 */
-.btn { padding:10px 18px; background:#FF7C40; color:#fff; border:none; border-radius:10px; cursor:pointer; font-size:16px; font-weight:600; transition:0.2s; text-align:center; }
-.btn:hover { background:#e66a2f; transform:translateY(-2px); }
-
-/* 썸네일 */
-.thumbnail-grid { display:flex; gap:10px; margin-top:10px; }
-.thumbnail-grid img { width:60px; height:60px; object-fit:cover; border-radius:6px; border:2px solid #ccc; cursor:pointer; }
-.thumbnail-grid img:hover { border-color:#FF7C40; }
-
-/* 모집인원 배지 */
-.recruit-badge { position:absolute; top:10px; left:10px; background:#FF7C40; color:#fff; padding:6px 10px; border-radius:12px; font-weight:600; font-size:14px; }
-
-/* 지도 */
-#map { width:100%; height:400px; border-radius:16px; margin-top:20px; }
-
-.report-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: #FF4E4E;
-    color: white;
-    padding: 8px 14px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.report-btn:hover {
-    background: #d93c3c;
-    transform: translateY(-2px);
-}
-
-.card-wrapper {
-    position: relative;
-}
+	/* 검색창 */
+	.search-section { text-align:center; margin:20px 0; }
+	.search-row { display:flex; justify-content:center; gap:12px; }
+	.search-row input { padding:10px 14px; border-radius:8px; border:1px solid #DDD; width:300px; }
+	.search-row select { padding:10px 14px; border-radius:8px; border:1px solid #DDD; }
+	.search-btn { padding:10px 20px; border:none; background:#FF7C40; color:#fff; border-radius:8px; cursor:pointer; }
+	
+	/* 카드 디자인 */
+	.card { display:flex; gap:20px; background:#FCFBFE; padding:20px; border-radius:16px; box-shadow:0 4px 16px rgba(0,0,0,0.05); margin-bottom:30px; min-height:320px; }
+	.card img { width:300px; height:300px; object-fit:cover; border-radius:12px; background:#f0f0f0; }
+	.card-content { flex:1; display:flex; flex-direction:column; justify-content:space-between; }
+	.card-content h2 { font-size:22px; font-weight:700; color:#FF7C40; margin:0; }
+	.info { font-size:16px; color:#555; line-height:1.5; }
+	.badge { display:inline-block; background:#FF7C40; color:#fff; padding:4px 8px; border-radius:8px; font-size:14px; margin-right:6px; }
+	.hashtags { font-size:14px; color:#888; margin-top:6px; }
+	
+	/* 버튼 */
+	.btn { padding:10px 18px; background:#FF7C40; color:#fff; border:none; border-radius:10px; cursor:pointer; font-size:16px; font-weight:600; transition:0.2s; text-align:center; }
+	.btn:hover { background:#e66a2f; transform:translateY(-2px); }
+	
+	/* 썸네일 */
+	.thumbnail-grid { display:flex; gap:10px; margin-top:10px; }
+	.thumbnail-grid img { width:60px; height:60px; object-fit:cover; border-radius:6px; border:2px solid #ccc; cursor:pointer; }
+	.thumbnail-grid img:hover { border-color:#FF7C40; }
+	
+	/* 모집인원 배지 */
+	.recruit-badge { position:absolute; top:10px; left:10px; background:#FF7C40; color:#fff; padding:6px 10px; border-radius:12px; font-weight:600; font-size:14px; }
+	
+	/* 지도 */
+	#map { width:100%; height:400px; border-radius:16px; margin-top:20px; }
+	
+	.report-btn {
+	    position: absolute;
+	    top: 20px;
+	    right: 20px;
+	    background: #FF4E4E;
+	    color: white;
+	    padding: 8px 14px;
+	    border-radius: 10px;
+	    font-size: 14px;
+	    font-weight: 600;
+	    border: none;
+	    cursor: pointer;
+	    transition: 0.2s;
+	}
+	
+	.report-btn:hover {
+	    background: #d93c3c;
+	    transform: translateY(-2px);
+	}
+	
+	.card-wrapper {
+	    position: relative;
+	}
+	/* 태그 표시용 (상세페이지) */
+	.tag-view-area {
+	    display: flex;
+	    flex-wrap: wrap;
+	    gap: 8px;
+	    margin-top: 6px;
+	}
+	
+	.tag-view {
+	    padding: 6px 12px;
+	    border-radius: 20px;
+	    border: 1px solid #FF7C40;
+	    background: #FFF4EE;
+	    color: #FF7C40;
+	    font-size: 13px;
+	    font-weight: 500;
+	}
 
 </style>
 </head>
@@ -208,13 +225,20 @@ function needLoginForJoin() {
                 </p>
                 <p class="info"><strong>주소:</strong> <%= m.getRoadAddress() %> / <%= m.getAddrDetail() %></p>
 
-                <p class="hashtags">
-                <% if(m.getTag()!=null){ 
-                       for(String tag : m.getTag().split("#")){ 
-                           if(!tag.trim().isEmpty()){ %>
-                    #<%= tag %>
-                <% }}} %>
-                </p>
+			<div class="tag-view-area">
+			<%
+			    if (m.getTag() != null && !m.getTag().isBlank()) {
+			        for (String tag : m.getTag().split(",")) {
+			            String t = tag.trim();
+			            if (!t.isEmpty()) {
+			%>
+			    <span class="tag-view">#<%= t %></span>
+			<%
+			            }
+			        }
+			    }
+			%>
+			</div>
             </div>
 
             <div style="margin-top:10px;">

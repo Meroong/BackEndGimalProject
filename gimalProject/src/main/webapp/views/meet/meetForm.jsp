@@ -42,6 +42,29 @@
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         object-fit: cover; cursor: pointer;
     }
+    /* 태그 */
+    .tag-btn {
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1px solid #FF7C40;
+        background: #fff;
+        color: #FF7C40;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .tag-btn.active {
+        background: #FF7C40;
+        color: #fff;
+    }
+
+    .selected-tag {
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: #FF7C40;
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
 </style>
 
 <script>
@@ -49,77 +72,79 @@
     const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>";
     const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
     
-    const recommendedTags = [
-        "운동", "육아", "산책", "조깅", "러닝",
-        "반려견", "반려묘", "카페", "스터디",
-        "독서", "취미", "여행", "사진", "게임"
-    ];
-
-    const MAX_TAGS = 5;
-
-    document.addEventListener("DOMContentLoaded", function () {
-        const container = document.getElementById("recommendedTagArea");
-
-        recommendedTags.forEach(tag => {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.innerText = "#" + tag;
-
-            btn.style.padding = "6px 12px";
-            btn.style.borderRadius = "20px";
-            btn.style.border = "1px solid #FF7C40";
-            btn.style.background = "#fff";
-            btn.style.color = "#FF7C40";
-            btn.style.fontSize = "12px";
-            btn.style.cursor = "pointer";
-
-            btn.onclick = () => addTag(tag);
-
-            container.appendChild(btn);
-        });
-    });
-
-
-    function addTag(tag) {
-        const input = document.querySelector("input[name='tag']");
-        let tags = input.value
-            ? input.value.split(",").map(t => t.trim()).filter(t => t)
-            : [];
-
-        // 중복 방지
-        if (tags.includes(tag)) {
-            alert("이미 추가된 태그입니다.");
-            return;
-        }
-
-        // 개수 제한
-        if (tags.length >= MAX_TAGS) {
-            alert("태그는 최대 " + MAX_TAGS + "개까지 가능합니다.");
-            return;
-        }
-
-        tags.push(tag);
-        input.value = tags.join(",");
-    }
-
-    // 직접 입력 시에도 제한 적용
-    function validateTags(input) {
-        let tags = input.value
-            .split(",")
-            .map(t => t.trim())
-            .filter(t => t);
-
-        // 중복 제거
-        tags = [...new Set(tags)];
-
-        if (tags.length > MAX_TAGS) {
-            alert("태그는 최대 " + MAX_TAGS + "개까지 가능합니다.");
-            tags = tags.slice(0, MAX_TAGS);
-        }
-
-        input.value = tags.join(",");
-    }
-
+    /* =========================
+    태그 선택 로직
+	 ========================= */
+	 const recommendedTags = [
+	     "운동","육아","산책","조깅","러닝",
+	     "반려견","반려묘","카페","스터디",
+	     "독서","취미","여행","사진","게임"
+	 ];
+	
+	 const MAX_TAGS = 5;
+	 let selectedTags = [];
+	
+	 document.addEventListener("DOMContentLoaded", () => {
+	     const area = document.getElementById("recommendedTagArea");
+	
+	     recommendedTags.forEach(tag => {
+	         const btn = document.createElement("button");
+	         btn.type = "button";
+	         btn.className = "tag-btn";
+	         btn.dataset.tag = tag;
+	         btn.innerText = "#" + tag;
+	
+	         btn.onclick = () => toggleTag(tag, btn);
+	         area.appendChild(btn);
+	     });
+	 });
+	
+	 function toggleTag(tag, btn) {
+	     const idx = selectedTags.indexOf(tag);
+	
+	     if (idx !== -1) {
+	         selectedTags.splice(idx, 1);
+	         btn.classList.remove("active");
+	     } else {
+	         if (selectedTags.length >= MAX_TAGS) {
+	             alert("태그는 최대 5개까지 가능합니다.");
+	             return;
+	         }
+	         selectedTags.push(tag);
+	         btn.classList.add("active");
+	     }
+	
+	     renderSelectedTags();
+	     syncTagInput();
+	 }
+	
+	 function renderSelectedTags() {
+	     const area = document.getElementById("selectedTagArea");
+	     area.innerHTML = "";
+	
+	     selectedTags.forEach(tag => {
+	         const chip = document.createElement("span");
+	         chip.className = "selected-tag";
+	         chip.innerText = "#" + tag + " ✕";
+	
+	         chip.onclick = () => {
+	             selectedTags = selectedTags.filter(t => t !== tag);
+	
+	             document.querySelectorAll(".tag-btn").forEach(b => {
+	                 if (b.dataset.tag === tag) b.classList.remove("active");
+	             });
+	
+	             renderSelectedTags();
+	             syncTagInput();
+	         };
+	
+	         area.appendChild(chip);
+	     });
+	 }
+	
+	 function syncTagInput() {
+	     document.getElementById("tagInput").value = selectedTags.join(",");
+	 }
     
     // 주소 검색 팝업
     function openJusoPopup() {
@@ -268,21 +293,16 @@
         <label>참가비</label>
         <input type="number" name="cost" value="0">
 
-		<label>태그 (쉼표로 구분, 최대 5개)</label>
-		<input type="text"
-		       name="tag"
-		       placeholder="예: 운동,산책,반려견"
-		       onblur="validateTags(this)">
+		<label>태그 선택 (최대 5개)</label>
+		
+        <label>선택된 태그</label>
+        <div id="selectedTagArea" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
 
-     	<label>추천 태그</label>
-		<div id="recommendedTagArea"
-		     style="
-		        display:flex;
-		        flex-wrap:wrap;
-		        gap:8px;
-		        margin-bottom:10px;
-		     ">
-		</div>
+        <input type="hidden" name="tag" id="tagInput">
+
+        <label>추천 태그 (클릭해서 선택)</label>
+        <div id="recommendedTagArea" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+
 
         
 

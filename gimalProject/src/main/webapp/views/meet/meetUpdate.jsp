@@ -66,6 +66,30 @@
         background: rgba(0,0,0,0.6); color: white;
         padding: 3px 5px; font-size: 10px; border-radius: 4px; cursor: pointer;
     }
+    
+	.tag-btn {
+	    padding: 6px 12px;
+	    border-radius: 20px;
+	    border: 1px solid #FF7C40;
+	    background: #fff;
+	    color: #FF7C40;
+	    font-size: 12px;
+	    cursor: pointer;
+	}
+	
+	.tag-btn.active {
+	    background: #FF7C40;
+	    color: #fff;
+	}
+	
+	.selected-tag {
+	    padding: 6px 12px;
+	    border-radius: 20px;
+	    background: #FF7C40;
+	    color: #fff;
+	    font-size: 12px;
+	    cursor: pointer;
+	}
 </style>
 
 <script>
@@ -195,6 +219,98 @@
             "width=570,height=420,scrollbars=yes,resizable=yes"
         );
     }
+    
+    /* =========================
+    태그 선택 로직 (수정)
+	 ========================= */
+	 const recommendedTags = [
+	     "운동","육아","산책","조깅","러닝",
+	     "반려견","반려묘","카페","스터디",
+	     "독서","취미","여행","사진","게임"
+	 ];
+	
+	 const MAX_TAGS = 5;
+	
+	 // 🔥 기존 태그를 JS 배열로 변환
+	 let selectedTags = [];
+	 <%
+	     if (m.getTag() != null && !m.getTag().isBlank()) {
+	         for (String t : m.getTag().split(",")) {
+	 %>
+	 selectedTags.push("<%= t.trim() %>");
+	 <%
+	         }
+	     }
+	 %>
+	
+	 document.addEventListener("DOMContentLoaded", () => {
+	     const area = document.getElementById("recommendedTagArea");
+	
+	     recommendedTags.forEach(tag => {
+	         const btn = document.createElement("button");
+	         btn.type = "button";
+	         btn.className = "tag-btn";
+	         btn.dataset.tag = tag;
+	         btn.innerText = "#" + tag;
+	
+	         if (selectedTags.includes(tag)) {
+	             btn.classList.add("active");
+	         }
+	
+	         btn.onclick = () => toggleTag(tag, btn);
+	         area.appendChild(btn);
+	     });
+	
+	     renderSelectedTags();
+	     syncTagInput();
+	 });
+	
+	 function toggleTag(tag, btn) {
+	     const idx = selectedTags.indexOf(tag);
+	
+	     if (idx !== -1) {
+	         selectedTags.splice(idx, 1);
+	         btn.classList.remove("active");
+	     } else {
+	         if (selectedTags.length >= MAX_TAGS) {
+	             alert("태그는 최대 5개까지 가능합니다.");
+	             return;
+	         }
+	         selectedTags.push(tag);
+	         btn.classList.add("active");
+	     }
+	
+	     renderSelectedTags();
+	     syncTagInput();
+	 }
+	
+	 function renderSelectedTags() {
+	     const area = document.getElementById("selectedTagArea");
+	     area.innerHTML = "";
+	
+	     selectedTags.forEach(tag => {
+	         const chip = document.createElement("span");
+	         chip.className = "selected-tag";
+	         chip.innerText = "#" + tag + " ✕";
+	
+	         chip.onclick = () => {
+	             selectedTags = selectedTags.filter(t => t !== tag);
+	
+	             document.querySelectorAll(".tag-btn").forEach(b => {
+	                 if (b.dataset.tag === tag) b.classList.remove("active");
+	             });
+	
+	             renderSelectedTags();
+	             syncTagInput();
+	         };
+	
+	         area.appendChild(chip);
+	     });
+	 }
+	
+	 function syncTagInput() {
+	     document.getElementById("tagInput").value = selectedTags.join(",");
+	 }
 </script>
 
 <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
@@ -255,8 +371,15 @@
         <label>참가비</label>
         <input type="number" name="cost" value="<%= m.getCost() %>">
 
-        <label>태그</label>
-        <input type="text" name="tag" value="<%= m.getTag() %>">
+		<label>태그 선택 (최대 5개)</label>
+		
+		<label>선택된 태그</label>
+		<div id="selectedTagArea" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+		
+		<input type="hidden" name="tag" id="tagInput">
+		
+		<label>추천 태그 (클릭해서 선택)</label>
+		<div id="recommendedTagArea" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
 
         <label>상태</label>
         <select name="status">

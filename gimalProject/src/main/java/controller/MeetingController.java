@@ -203,236 +203,350 @@ public class MeetingController extends HttpServlet {
 			}
 		}
 
-	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		String path = req.getPathInfo(); // /insert, /update, /join, /quit 등
+        String path = req.getPathInfo(); // /roomMake
+        
+        // ---------- 로그인 검증 ----------
+        Long autoId = AuthUtil.getAutoId(req);
 
-		// ---------- 로그인 검증 ----------
-		Long autoId = AuthUtil.getAutoId(req);
+        if (autoId == -1) {
+            HttpSession session = req.getSession();
 
-		if (autoId == -1) {
-			HttpSession session = req.getSession();
+            // 현재 요청 URL + 쿼리스트링 조회
+            String currentUrl = req.getRequestURI();
+            String queryString = req.getQueryString();
+            if (queryString != null && !queryString.isEmpty()) {
+                currentUrl += "?" + queryString;
+            }
 
-			// 현재 요청 URL + 쿼리스트링 조회
-			String currentUrl = req.getRequestURI();
-			String queryString = req.getQueryString();
-			if (queryString != null && !queryString.isEmpty()) {
-				currentUrl += "?" + queryString;
-			}
+            // 세션에 저장
+            session.setAttribute("redirectAfterLogin", currentUrl);
 
-			// 세션에 저장
-			session.setAttribute("redirectAfterLogin", currentUrl);
+            // 로그인 페이지로 이동
+            resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+            return;
+        }
+        
+        ImageService imageService = new ImageService();
+	    String latitudeStr = req.getParameter("latitude");
+	    String longitudeStr = req.getParameter("longitude");
 
-			// 로그인 페이지로 이동
-			resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
-			return;
-		}
+	    double latitude = (latitudeStr != null && !latitudeStr.isEmpty()) ? Double.parseDouble(latitudeStr) : 37.1;
+	    double longitude = (longitudeStr != null && !longitudeStr.isEmpty()) ? Double.parseDouble(longitudeStr) : 107.1;
+	    String uploadPath = "C:/upload/meeting";
+	    String usedType = "MEETING";
+	    
+	    try {
+	    	System.out.println(path);
+	        switch (path) {
+	        
+	        
+	        
+	        //INSERT create로 변경할까 
+            case "/insert":
+                // location insert
+                long newLocationId = meetingService.insertLocation(
+                        req.getParameter("roadAddress"),
+                        req.getParameter("jibunAddress"),
+                        req.getParameter("addrDetail"),
+                        latitude,
+                        longitude
+                );
 
-		ImageService imageService = new ImageService();
-		String latitudeStr = req.getParameter("latitude");
-		String longitudeStr = req.getParameter("longitude");
+                // meeting insert
+                // 2️⃣ meeting date 처리 (date / datetime-local 모두 대응)
+                String dateStrInsert = req.getParameter("date");
 
-		double latitude = (latitudeStr != null && !latitudeStr.isEmpty()) ? Double.parseDouble(latitudeStr) : 37.1;
-		double longitude = (longitudeStr != null && !longitudeStr.isEmpty()) ? Double.parseDouble(longitudeStr) : 107.1;
-		String uploadPath = "C:/upload/meeting";
-		String usedType = "MEETING";
+                if (dateStrInsert == null || dateStrInsert.isBlank()) {
+                    throw new Exception("날짜 값이 전달되지 않았습니다.");
+                }
 
-		try {
-			System.out.println(path);
+                // datetime-local 대응: T → 공백
+                dateStrInsert = dateStrInsert.replace("T", " ");
 
-			switch (path) {
+                // 초(:ss) 보정
+                if (dateStrInsert.length() == 16) { // yyyy-MM-dd HH:mm
+                    dateStrInsert += ":00";
+                }
 
-			/* ========================
-			 *  INSERT
-			 * ======================== */
-			case "/insert": {
-				// location insert
-				long newLocationId = meetingService.insertLocation(
-						req.getParameter("roadAddress"),
-						req.getParameter("jibunAddress"),
-						req.getParameter("addrDetail"),
-						latitude,
-						longitude);
+                // date만 온 경우 보정
+                if (dateStrInsert.length() == 10) { // yyyy-MM-dd
+                    dateStrInsert += " 00:00:00";
+                }
 
-				// meeting insert
-				String dateStrInsert = req.getParameter("date");
+                Timestamp meetingDate = Timestamp.valueOf(dateStrInsert);
+                
+                long meetingId = meetingService.insertMeetingInfo(
+                        req.getParameter("title"),
+                        req.getParameter("content"),
+                        meetingDate,
+                        newLocationId,
+                        Integer.parseInt(req.getParameter("maxMembers")),
+                        Integer.parseInt(req.getParameter("currentMembers"))-1,
+                        Integer.parseInt(req.getParameter("cost")),
+                        req.getParameter("tag"),
+                        req.getParameter("status"),
+                        latitude,
+                        longitude,
+                        autoId //로그인 추가시 동작
+                );
 
-				if (dateStrInsert == null || dateStrInsert.isEmpty()) {
-					throw new Exception("날짜 값이 전달되지 않았습니다.");
-				}
+                /* ================================
+                 *   다중 이미지 업로드 처리
+                 * ================================ */
+                for (Part part : req.getParts()) {
+                    if ("images".equals(part.getName()) && part.getSize() > 0) {
+                        imageService.uploadFile(
+                                meetingId,
+                                part,
+                                uploadPath,
+                                usedType);
+                    }
+                }
+                //호스트 모임참가자에 넣기 
+                meetingService.joinMeet(meetingId, autoId);
+                new ChattingService().makeGroupRoom(meetingId, "Group", autoId); // meetingId, hostId(creator)
+                
+                resp.sendRedirect(req.getContextPath() + "/meeting/list");
+                return;
 
-				dateStrInsert = (dateStrInsert.length() == 10)
-						? dateStrInsert + " 00:00:00"
-						: dateStrInsert;
 
-				long meetingId = meetingService.insertMeetingInfo(
-						req.getParameter("title"),
-						req.getParameter("content"),
-						Timestamp.valueOf(dateStrInsert),
-						newLocationId,
-						Integer.parseInt(req.getParameter("maxMembers")),
-						Integer.parseInt(req.getParameter("currentMembers")),
-						Integer.parseInt(req.getParameter("cost")),
-						req.getParameter("tag"),
-						req.getParameter("status"),
-						latitude,
-						longitude,
-						autoId // 로그인 사용자 ID
-				);
+	            /* ========================
+	             * UPDATE
+	             * ======================== */
+	            case "/update":
+	                long locationId = Long.parseLong(req.getParameter("locationId"));
+	                long meetingUpId = Long.parseLong(req.getParameter("meetingId"));
 
-				// 다중 이미지 업로드
-				for (Part part : req.getParts()) {
-					if ("images".equals(part.getName()) && part.getSize() > 0) {
-						imageService.uploadFile(
-								meetingId,
-								part,
-								uploadPath,
-								usedType);
-					}
-				}
+	                // location 업데이트
+	                meetingService.updateLocation(
+	                        locationId,
+	                        req.getParameter("roadAddress"),
+	                        req.getParameter("jibunAddress"),
+	                        req.getParameter("addrDetail"),
+	                        latitude,
+	                        longitude
+	                );
 
-				// 호스트를 모임 참가자로 등록
-				meetingService.joinMeet(meetingId, autoId);
-				new ChattingService().makeGroupRoom(meetingId, "Group", autoId);
+	                // meeting 업데이트
+	                String dateStr = req.getParameter("date");
+	                dateStr = dateStr.length() == 10 ? dateStr + " 00:00:00" : dateStr;
+	                Timestamp date = Timestamp.valueOf(dateStr);
 
-				resp.sendRedirect(req.getContextPath() + "/meeting/list");
-				return;
-			}
+	                meetingService.updateMeetingInfo(
+	                        meetingUpId,
+	                        req.getParameter("title"),
+	                        req.getParameter("content"),
+	                        date,
+	                        locationId,
+	                        Integer.parseInt(req.getParameter("maxMembers")),
+	                        Integer.parseInt(req.getParameter("currentMembers")),
+	                        Integer.parseInt(req.getParameter("cost")),
+	                        req.getParameter("tag"),
+	                        req.getParameter("status"),
+	                        latitude,
+	                        longitude,
+	                        autoId  //로그인 추가 시 해결
+	                );
+	        
+	                //이미지 삭제 처리
+	                String[] deleteIds = req.getParameterValues("deleteImageIds");
 
-			/* ========================
-			 *  UPDATE
-			 * ======================== */
-			case "/update": {
-				long locationId = Long.parseLong(req.getParameter("locationId"));
-				long meetingUpId = Long.parseLong(req.getParameter("meetingId"));
+	                if (deleteIds != null) {
+	                    FileResourceDAO fileDao = new FileResourceDAO();
 
-				// location 업데이트
-				meetingService.updateLocation(
-						locationId,
-						req.getParameter("roadAddress"),
-						req.getParameter("jibunAddress"),
-						req.getParameter("addrDetail"),
-						latitude,
-						longitude);
+	                    for (String idStr : deleteIds) {
 
-				// meeting 업데이트
-				String dateStr = req.getParameter("date");
-				dateStr = (dateStr.length() == 10) ? dateStr + " 00:00:00" : dateStr;
-				Timestamp date = Timestamp.valueOf(dateStr);
+	                        if (idStr == null || idStr.isBlank() || idStr.equals("null")) {
+	                            continue; // ← 건너뛰기
+	                        }
 
-				meetingService.updateMeetingInfo(
-						meetingUpId,
-						req.getParameter("title"),
-						req.getParameter("content"),
-						date,
-						locationId,
-						Integer.parseInt(req.getParameter("maxMembers")),
-						Integer.parseInt(req.getParameter("currentMembers")),
-						Integer.parseInt(req.getParameter("cost")),
-						req.getParameter("tag"),
-						req.getParameter("status"),
-						latitude,
-						longitude,
-						autoId);
+	                        long fileId = Long.parseLong(idStr);
+	                        imageService.deleteFile(fileId, meetingUpId, usedType);
+	                    }
+	                }
+	                //새 이미지 업로드 처리
+	                for (Part part : req.getParts()) {
+	                    if ("images".equals(part.getName()) && part.getSize() > 0) {
+	                        imageService.uploadFile(
+	                                meetingUpId,
+	                                part,
+	                                uploadPath,
+	                                "MEETING"
+	                        );
+	                    }
+	                }
 
-				// 이미지 삭제 처리
-				String[] deleteIds = req.getParameterValues("deleteImageIds");
+	                // 성공 시
+	                resp.sendRedirect(req.getContextPath() + "/meeting/list");
+	                return;
+	                
+	            case "/status": {
 
-				if (deleteIds != null) {
-					FileResourceDAO fileDao = new FileResourceDAO(); // 필요 시 내부에서 사용
+	                Long loginUserId = AuthUtil.getAutoId(req);
+	                if (loginUserId == -1) {
+	                    resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+	                    return;
+	                }
 
-					for (String idStr : deleteIds) {
-						if (idStr == null || idStr.isBlank() || "null".equals(idStr)) {
-							continue;
-						}
-						long fileId = Long.parseLong(idStr);
-						imageService.deleteFile(fileId, meetingUpId, usedType);
-					}
-				}
+	                long statusMeetId = Long.parseLong(req.getParameter("meetingId"));
+	                String status = req.getParameter("status"); // OPEN / CLOSED
 
-				// 새 이미지 업로드 처리
-				for (Part part : req.getParts()) {
-					if ("images".equals(part.getName()) && part.getSize() > 0) {
-						imageService.uploadFile(
-								meetingUpId,
-								part,
-								uploadPath,
-								"MEETING");
-					}
-				}
+	                // 모임 조회
+	                MeetingInfoDTO meetingInfo = meetingService.getMeetingInfo(statusMeetId);
+	                if (meetingInfo == null) {
+	                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+	                    return;
+	                }
 
-				resp.sendRedirect(req.getContextPath() + "/meeting/list");
-				return;
-			}
+	                // 작성자 검증
+	                if (!loginUserId.equals(meetingInfo.getCreatorId())) {
+	                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+	                    return;
+	                }
+	                //모임 재개 시 날짜 검증
+	                if ("OPEN".equals(status)) {
+	                    Timestamp now = new Timestamp(System.currentTimeMillis());
 
-			/* ========================
-			 *  JOIN
-			 * ======================== */
-			case "/join": {
-				long meetId = Long.parseLong(req.getParameter("meetingId"));
+	                    if (meetingInfo.getDate() != null && meetingInfo.getDate().before(now)) {
+	                        resp.setContentType("text/html; charset=UTF-8");
+	                        resp.getWriter().println(
+	                            "<script>alert('이미 지난 모임은 모집을 재개할 수 없습니다.'); history.back();</script>"
+	                        );
+	                        return;
+	                    }
+	                }
 
-				try {
-					boolean result = meetingService.joinMeet(meetId, autoId);
-					if (result) {
-						resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + meetId);
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-					req.setAttribute("errorMsg", e.getMessage());
-					req.getRequestDispatcher("/meeting/info?meetingId=" + meetId)
-							.forward(req, resp);
-				}
-				return;
-			}
+	                // 상태 변경
+	                meetingService.updateMeetingStatus(statusMeetId, status);
 
-			/* ========================
-			 *  QUIT
-			 * ======================== */
-			case "/quit": {
-				long quitMeetId = Long.parseLong(req.getParameter("meetingId"));
+	                resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + statusMeetId);
+	                return;
+	            }
+	                
+	            case "/join":
 
-				try {
-					boolean quitResult = meetingService.quitMeet(quitMeetId, autoId);
+				    // meetingId 파라미터
+				    long meetId = Long.parseLong(req.getParameter("meetingId"));
 
-					if (quitResult) {
-						resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + quitMeetId);
-					}
+				    try {
+				 
+				        boolean result	=	meetingService.joinMeet(meetId, autoId);
+				        if (result) {
+				            resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + meetId);
+				        }
+				    } catch (Exception e) {
+				        e.printStackTrace();
+				        req.setAttribute("errorMsg", e.getMessage());
 
-				} catch (Exception e) {
-					e.printStackTrace();
-					req.setAttribute("errorMsg", e.getMessage());
-					req.getRequestDispatcher("/meeting/info?meetingId=" + quitMeetId)
-							.forward(req, resp);
-				}
-				return;
-			}
+				        // 에러 메시지와 함께 상세 페이지로 되돌리기
+				        req.getRequestDispatcher("/meeting/info?meetingId=" + meetId)
+				           .forward(req, resp);
+				    }
+				    return;
+				    
+				    /* ========================================
+	                   QUIT
+	                 ======================================== */
+	                case "/quit":
 
-			default:
-				resp.sendError(HttpServletResponse.SC_NOT_FOUND, "잘못된 요청 경로입니다.");
-				return;
-			}
+	                    long quitMeetId = Long.parseLong(req.getParameter("meetingId"));
 
-		} catch (Exception e) {
-			e.printStackTrace();
+	                    try {
+	                        boolean quitResult = meetingService.quitMeet(quitMeetId, autoId);
 
-			// 에러 메시지를 request에 담아서 폼으로 포워딩
-			req.setAttribute("errorMsg", e.getMessage());
+	                        if (quitResult) {
+	                            resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + quitMeetId);
+	                        }
 
-			// 기존 입력값 유지
-			req.setAttribute("roadAddress", req.getParameter("roadAddress"));
-			req.setAttribute("jibunAddress", req.getParameter("jibunAddress"));
-			req.setAttribute("addrDetail", req.getParameter("addrDetail"));
-			req.setAttribute("title", req.getParameter("title"));
-			req.setAttribute("content", req.getParameter("content"));
-			req.setAttribute("date", req.getParameter("date"));
-			req.setAttribute("maxMembers", req.getParameter("maxMembers"));
-			req.setAttribute("currentMembers", req.getParameter("currentMembers"));
-			req.setAttribute("cost", req.getParameter("cost"));
-			req.setAttribute("tag", req.getParameter("tag"));
-			req.setAttribute("status", req.getParameter("status"));
+	                    } catch (Exception e) {
+	                        e.printStackTrace();
+	                        req.setAttribute("errorMsg", e.getMessage());
+	                        req.getRequestDispatcher("/meeting/info?meetingId=" + quitMeetId).forward(req, resp);
+	                    }
+	                    return;
+	                    
+	                case "/delete": {
 
-			// 폼 JSP 경로는 프로젝트 구조에 맞게 조정
-			req.getRequestDispatcher("/views/meet/meetForm.jsp").forward(req, resp);
-		}
+	                    // 로그인 확인
+	                    Long loginUserId = AuthUtil.getAutoId(req);
+	                    if (loginUserId == -1) {
+	                        resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+	                        return;
+	                    }
+
+	                    // 파라미터 검증
+	                    String meetingIdParam = req.getParameter("meetingId");
+	                    if (meetingIdParam == null) {
+	                        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 요청입니다.");
+	                        return;
+	                    }
+
+	                    long deleteMeetId;
+	                    try {
+	                    	deleteMeetId = Long.parseLong(meetingIdParam);
+	                    } catch (NumberFormatException e) {
+	                        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "유효하지 않은 모임 ID입니다.");
+	                        return;
+	                    }
+
+	                    // 모임 존재 여부 + 작성자 조회
+	                    MeetingInfoDTO meetingInfo = meetingService.getMeetingInfo(deleteMeetId);
+	                    if (meetingInfo == null) {
+	                        resp.sendError(HttpServletResponse.SC_NOT_FOUND, "삭제할 모임이 존재하지 않습니다.");
+	                        return;
+	                    }
+
+	                    // 작성자 검증 (🔥 Controller 책임)
+	                    if (!loginUserId.equals(meetingInfo.getCreatorId())) {
+	                        resp.sendError(HttpServletResponse.SC_FORBIDDEN, "모임 작성자만 삭제할 수 있습니다.");
+	                        return;
+	                    }
+
+	                    // 서비스 호출
+	                    boolean result = meetingService.deleteMeeting(deleteMeetId, loginUserId);
+
+	                    // 결과 처리
+	                    if (result) {
+	                        resp.sendRedirect(req.getContextPath() + "/meeting/list");
+	                    } else {
+	                        resp.setContentType("text/html; charset=UTF-8");
+	                        resp.getWriter().println(
+	                            "<script>alert('삭제 중 오류가 발생했습니다.'); history.back();</script>"
+	                        );
+	                    }
+
+	                    return;
+	                }
+
+
+	            default:
+	                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "잘못된 요청 경로입니다.");
+	        }
+
+	    	} catch (Exception e) {
+	        e.printStackTrace();
+
+	        // 에러 메시지를 request에 담아서 회원가입/모임 페이지로 포워딩
+	        req.setAttribute("errorMsg", e.getMessage());
+
+	        // 기존 입력값도 유지
+	        req.setAttribute("roadAddress", req.getParameter("roadAddress"));
+	        req.setAttribute("jibunAddress", req.getParameter("jibunAddress"));
+	        req.setAttribute("addrDetail", req.getParameter("addrDetail"));
+	        req.setAttribute("title", req.getParameter("title"));
+	        req.setAttribute("content", req.getParameter("content"));
+	        req.setAttribute("date", req.getParameter("date"));
+	        req.setAttribute("maxMembers", req.getParameter("maxMembers"));
+	        req.setAttribute("currentMembers", req.getParameter("currentMembers"));
+	        req.setAttribute("cost", req.getParameter("cost"));
+	        req.setAttribute("tag", req.getParameter("tag"));
+	        req.setAttribute("status", req.getParameter("status"));
+
+	        // 포워딩
+	        req.getRequestDispatcher("/meetingForm.jsp").forward(req, resp);
+	    }
 	}
+
 }
+

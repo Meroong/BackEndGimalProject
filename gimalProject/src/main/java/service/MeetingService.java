@@ -494,5 +494,24 @@ public class MeetingService {
 
         return set.isEmpty() ? null : String.join(",", set);
     }
+    public void reopenMeeting(long meetingId, Long loginUserId) {
+        MeetingDTO meeting = new MeetingDAO().getPostDetail(meetingId);
 
+        if (meeting == null) {
+            throw new IllegalArgumentException("존재하지 않는 모임입니다.");
+        }
+
+        // 작성자 검증
+        if (!loginUserId.equals(meeting.getCreatorId())) {
+            throw new SecurityException("권한이 없습니다.");
+        }
+
+        // 🔥 날짜 검증
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        if (meeting.getDate().before(now)) {
+            throw new IllegalStateException("이미 지난 모임은 모집을 재개할 수 없습니다.");
+        }
+
+        new MeetingDAO().updateStatus(meetingId, "OPEN");
+    }
 }
