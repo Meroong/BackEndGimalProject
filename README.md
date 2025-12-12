@@ -27,10 +27,7 @@ DROP TABLE IF EXISTS user_wallet;
 DROP TABLE IF EXISTS mock_card;
 DROP TABLE IF EXISTS notice;
 DROP TABLE IF EXISTS review;
-DROP TABLE IF EXISTS transaction;
-DROP TABLE IF EXISTS wishlist;
-DROP TABLE IF EXISTS rental_info;
-DROP TABLE IF EXISTS item;
+DROP TABLE IF EXISTS dream_post;
 DROP TABLE IF EXISTS file_resource;
 DROP TABLE IF EXISTS user_tag;
 DROP TABLE IF EXISTS user_address;
@@ -96,63 +93,31 @@ CREATE TABLE file_resource (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- ================================
--- 🛒 ITEM (드림/교환/중고)
--- ================================
-CREATE TABLE item (
-    item_id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    seller_id BIGINT NOT NULL,
-    category_id BIGINT,
-    title VARCHAR(255) NOT NULL,
-    content TEXT,
-    price INT NOT NULL,
-    trade_type ENUM('SALE', 'RENTAL', 'DREAM') DEFAULT 'SALE',
-    status ENUM('AVAILABLE', 'RESERVED', 'COMPLETED') DEFAULT 'AVAILABLE',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (seller_id) REFERENCES user(auto_id)
+
+-- 🌙 DREAM POST (드림 게시글)
+CREATE TABLE dream_post (
+  dream_id BIGINT NOT NULL AUTO_INCREMENT,
+  writer_id BIGINT NOT NULL,
+  writer_type VARCHAR(20) NOT NULL,        -- USER / ADMIN 등
+  title VARCHAR(200) NOT NULL,
+  content TEXT NOT NULL,
+  category_code VARCHAR(30) NOT NULL,      -- 예: BABY, PET, ETC
+  condition_code VARCHAR(20) NOT NULL,     -- 예: NEW, USED
+  price INT NOT NULL DEFAULT 0,
+  dong VARCHAR(50) NOT NULL,               -- 동 단위 필터
+  thumbnail_url TEXT,
+  status VARCHAR(20) NOT NULL DEFAULT 'OPEN',
+  view_count INT NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      ON UPDATE CURRENT_TIMESTAMP,
+  is_deleted TINYINT(1) NOT NULL DEFAULT 0,
+
+  PRIMARY KEY (dream_id),
+  KEY idx_dream_status_dong (status, dong),
+  FOREIGN KEY (writer_id) REFERENCES user(auto_id) ON DELETE CASCADE
 );
 
--- ================================
--- 🔁 RENTAL INFO
--- ================================
-CREATE TABLE rental_info (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    item_id BIGINT NOT NULL,
-    deposit INT DEFAULT 0,
-    daily_rate INT,
-    rental_period INT,
-    return_date DATE,
-    FOREIGN KEY (item_id) REFERENCES item(item_id) ON DELETE CASCADE
-);
-
--- ================================
--- ❤️ WISHLIST
--- ================================
-CREATE TABLE wishlist (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    user_id BIGINT NOT NULL,
-    item_id BIGINT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user(auto_id) ON DELETE CASCADE,
-    FOREIGN KEY (item_id) REFERENCES item(item_id) ON DELETE CASCADE
-);
-
--- ================================
--- 💳 TRANSACTION
--- ================================
-CREATE TABLE transaction (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    item_id BIGINT NOT NULL,
-    buyer_id BIGINT NOT NULL,
-    seller_id BIGINT NOT NULL,
-    status ENUM('IN_PROGRESS','COMPLETED','CANCELLED') DEFAULT 'IN_PROGRESS',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    completed_at TIMESTAMP NULL,
-    FOREIGN KEY (item_id) REFERENCES item(item_id),
-    FOREIGN KEY (buyer_id) REFERENCES user(auto_id),
-    FOREIGN KEY (seller_id) REFERENCES user(auto_id)
-);
 
 -- ================================
 -- ⭐ REVIEW
@@ -404,6 +369,35 @@ VALUES
 (2, 2, '일주일 대여 가능합니다.'),
 (3, 1, '이번주 토요일 모임은 몇 시인가요?'),
 (3, 2, '오전 9시 한강공원입니다.');
+-- ================================
+-- 📌 DREAM POST 샘플 데이터
+-- ================================
+INSERT INTO dream_post
+(writer_id, writer_type, title, content, category_code, condition_code, price, dong, thumbnail_url, status)
+VALUES
+(2, 'USER',
+ '유모차 나눔합니다',
+ '아이 다 커서 유모차 필요하신 분께 드려요.',
+ 'BABY', 'USED', 0,
+ '삼성동',
+ 'https://example.com/images/stroller.jpg',
+ 'OPEN'),
+
+(2, 'USER',
+ '강아지 장난감 드림',
+ '소형견 장난감 무료 나눔합니다.',
+ 'PET', 'USED', 0,
+ '삼성동',
+ 'https://example.com/images/dogtoy.jpg',
+ 'OPEN'),
+
+(1, 'ADMIN',
+ '아기 침대 드림',
+ '관리자 검수 완료된 아기 침대입니다.',
+ 'BABY', 'USED', 0,
+ '역촌동',
+ NULL,
+ 'OPEN');
 
 INSERT INTO user_wallet (user_id, balance)
 VALUES
@@ -424,6 +418,13 @@ select * from wallet_history;
 select * from meeting;
 select * from meeting_participant;
 select * from meeting_location;
+select * from chat_room;
+select * from chat_room_user;
+select * from chat_message;
+select * from user;
+select * from user_address;
+select * from file_resource;
+select * from report;
 select * from chat_room;
 select * from chat_room_user;
 select * from chat_message;
