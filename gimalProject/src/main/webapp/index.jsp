@@ -25,10 +25,9 @@
 <body>
 <div class="container">
 
-    <%-- 헤더 --%>
     <jsp:include page="/include/header.jsp" />
 
-    <%-- 검색 영역 --%>
+    <!-- 검색 영역 -->
     <section class="search-section">
         <div class="search-row">
             <select>
@@ -51,13 +50,13 @@
         <div class="title-sub">오늘의 추천활동은 실내 모임이에요 😊</div>
     </section>
 
-    <%-- 메인 영역 --%>
+    <!-- 메인 영역 -->
     <section class="main-box">
         <div class="box-title">우리 동네 기반 맞춤 추천</div>
 
         <div class="grid-3">
 
-            <%-- 지도 영역 --%>
+            <!-- 지도 -->
             <div class="map-card" id="map" style="width:100%; height:400px;"></div>
 
             <%
@@ -92,95 +91,119 @@
                 }
             %>
 
-            <%-- 지도 데이터 JS 전달 --%>
+            <!-- JS 데이터 -->
             <script>
                 const userLat = <%= lat %>;
                 const userLng = <%= lng %>;
 
                 const meetings = [];
-                <%
-                if (meetings != null) {
-                    for (MeetingInfoDTO m : meetings) {
-                        if (m.getLatitude() != null && m.getLongitude() != null) {
-                %>
+                <% if (meetings != null) {
+                       for (MeetingInfoDTO m : meetings) {
+                           if (m.getLatitude() != null && m.getLongitude() != null) { %>
                 meetings.push({
                     id: <%= m.getMeetingId() %>,
                     title: "<%= m.getTitle() %>",
                     lat: <%= m.getLatitude() %>,
                     lng: <%= m.getLongitude() %>
                 });
-                <%
-                        }
-                    }
-                }
-                %>
+                <% } } } %>
             </script>
 
             <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
 
-       <script>
-		window.onload = function () {
-		    if (!window.kakao || !kakao.maps) {
-		        console.error("카카오 지도 SDK 로드 실패");
-		        return;
-		    }
-		
-		    const container = document.getElementById('map');
-		
-		    const map = new kakao.maps.Map(container, {
-		        center: new kakao.maps.LatLng(userLat, userLng),
-		        level: 4
-		    });
-		
-		    // 내 위치 마커
-		    new kakao.maps.Marker({
-		        position: new kakao.maps.LatLng(userLat, userLng),
-		        map: map
-		    });
-		
-		    console.log("meetings:", meetings);
-		
-		    meetings.forEach(m => {
-		        if (!m.lat || !m.lng) return;
-		
-		        const position = new kakao.maps.LatLng(m.lat, m.lng);
-		
-		        const marker = new kakao.maps.Marker({
-		            position,
-		            map
-		        });
-		
-		        const infoWindow = new kakao.maps.InfoWindow({
-		            content: `
-		              <div style="
-		                padding:6px 10px;
-		                font-size:13px;
-		                border-radius:6px;
-		                background:white;
-		                box-shadow:0 2px 6px rgba(0,0,0,0.3);
-		              ">
-		                ${m.title}
-		              </div>
-		            `
-		        });
-		
-		        kakao.maps.event.addListener(marker, 'mouseover', () => {
-		            infoWindow.open(map, marker);
-		        });
-		
-		        kakao.maps.event.addListener(marker, 'mouseout', () => {
-		            infoWindow.close();
-		        });
-		
-		        kakao.maps.event.addListener(marker, 'click', () => {
-		            location.href =
-		              "<%= request.getContextPath() %>/meeting/info?meetingId=" + m.id;
-		        });
-		    });
-		};
-		</script>
+			<script>
+			window.onload = function () {
+			    if (!window.kakao || !kakao.maps) return;
+			
+			    const map = new kakao.maps.Map(
+			        document.getElementById('map'),
+			        {
+			            center: new kakao.maps.LatLng(userLat, userLng),
+			            level: 4
+			        }
+			    );
+			
+			    /* ======================
+			       내 위치 (항상 표시)
+			    ====================== */
+			    const myPos = new kakao.maps.LatLng(userLat, userLng);
+			
+			    new kakao.maps.Marker({
+			        position: myPos,
+			        map: map
+			    });
+			
+			    new kakao.maps.CustomOverlay({
+			        position: myPos,
+			        yAnchor: 1.4,
+			        content:
+			          '<div style="padding:6px 10px;background:#4f46e5;color:white;font-size:13px;font-weight:600;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.3);">' +
+			          '📍 내 위치' +
+			          '</div>'
+			    }).setMap(map);
+			
+			    /* ======================
+			       모임 마커 이미지 (한 번만)
+			    ====================== */
+			    const meetingMarkerImage = new kakao.maps.MarkerImage(
+			        "<%= request.getContextPath() %>/resources/images/marker_meeting.png",
+			        new kakao.maps.Size(48, 48),
+			        { offset: new kakao.maps.Point(24, 48) }
+			    );
+			
+			    /* ======================
+			       모임 마커 렌더링
+			    ====================== */
+			    const coordCountMap = {};
+			    meetings.forEach(function (m) {
+			        if (!m.lat || !m.lng) return;
 
-            <%-- 가운데 카드 --%>
+			        // 🔑 같은 좌표 그룹 카운트
+			        const key = m.lat + "," + m.lng;
+			        if (!coordCountMap[key]) coordCountMap[key] = 0;
+
+			        const index = coordCountMap[key]++;
+			        
+			        // 🔧 offset (약 2~3m)
+			        const offset = 0.00004 * index;
+
+			        const pos = new kakao.maps.LatLng(
+			            m.lat + offset,
+			            m.lng + offset
+			        );
+
+			        const marker = new kakao.maps.Marker({
+			            position: pos,
+			            image: meetingMarkerImage,
+			            map: map
+			        });
+
+			        const overlay = new kakao.maps.CustomOverlay({
+			            position: pos,
+			            yAnchor: 1.3,
+			            content:
+			              '<div style="padding:6px 10px;background:white;color:#222;font-size:13px;font-weight:600;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.3);white-space:nowrap;">' +
+			              m.title +
+			              '</div>'
+			        });
+
+			        kakao.maps.event.addListener(marker, 'mouseover', function () {
+			            overlay.setMap(map);
+			        });
+
+			        kakao.maps.event.addListener(marker, 'mouseout', function () {
+			            overlay.setMap(null);
+			        });
+
+			        kakao.maps.event.addListener(marker, 'click', function () {
+			            location.href =
+			                "<%= request.getContextPath() %>/meeting/info?meetingId=" + m.id;
+			        });
+			    });
+			};
+			</script>
+
+            <!-- 가운데 카드 -->
             <div class="center-card">
                 <div class="center-title">오늘의 인기 모임 🔥</div>
                 <div class="center-desc">
@@ -188,7 +211,7 @@
                 </div>
             </div>
 
-            <%-- 오른쪽 카드 --%>
+            <!-- 오른쪽 카드 -->
             <div>
                 <div class="weather-card" style="background-image:url('<%= bgImage %>');">
                     <div class="weather-title">현재 <%= dongName %> 날씨</div>
@@ -198,14 +221,14 @@
 
                 <div class="activities">
                     <a href="<%= request.getContextPath() %>/meeting/list"
-                       class="activity-card" style="text-decoration:none;color:inherit;">
-                        <img src="resources/images/meeting.jpg" alt="meet">
+                       class="activity-card">
+                        <img src="resources/images/meeting.jpg">
                         <span>모임</span>
                     </a>
 
                     <a href="<%= request.getContextPath() %>/dream/list.do"
-                       class="activity-card" style="text-decoration:none;color:inherit;">
-                        <img src="resources/images/giving.jpg" alt="dream">
+                       class="activity-card">
+                        <img src="resources/images/giving.jpg">
                         <span>드림</span>
                     </a>
                 </div>

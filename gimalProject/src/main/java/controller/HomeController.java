@@ -55,7 +55,7 @@ public class HomeController extends HttpServlet {
 
         List<MeetingInfoDTO> meetings = new MeetingService().getActiveMeetingsForMap();
         for( MeetingInfoDTO dto : meetings) {
-        	System.out.println(dto.getLatitude());
+        	System.out.println(dto.getTitle());
         }
         
         //JSP 전달
