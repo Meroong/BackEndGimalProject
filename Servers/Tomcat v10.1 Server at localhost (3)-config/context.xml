@@ -26,12 +26,11 @@
     <!--
     <Manager pathname="SESSIONS.ser" />
     -->
-    <!-- 이미지 경로 접근하기 위해 설정 -->
+    
     <Resources className="org.apache.catalina.webresources.StandardRoot">
-        <PreResources 
-            className="org.apache.catalina.webresources.DirResourceSet"
-            base="C:/upload"
-            webAppMount="/upload" />
+    	<PreResources
+    		className="org.apache.catalina.webresources.DirResourceSet"
+    		base="C:/upload"
+    		webAppMount="/upload" />
     </Resources>
 </Context>
-

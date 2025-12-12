@@ -427,7 +427,7 @@ public class MeetingController extends HttpServlet {
 	                    // 서비스 호출
 	                    boolean result = meetingService.deleteMeeting(deleteMeetId, loginUserId);
 
-	                    // 6️⃣ 결과 처리
+	                    // 결과 처리
 	                    if (result) {
 	                        resp.sendRedirect(req.getContextPath() + "/meeting/list");
 	                    } else {

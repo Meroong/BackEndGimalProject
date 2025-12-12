@@ -416,8 +416,11 @@ public class MeetingService {
         MeetingDAO meetingDao = new MeetingDAO();
         ImageService imageService = new ImageService();
 
-        // 모임 이미지 전체 삭제
-        imageService.deleteAllByUsed("MEETING", meetingId);
+        //업로드 실제 경로
+        String uploadPath = "C:/upload/meeting";
+
+        // 모임 이미지 (DB + 실제 파일) 전체 삭제
+        imageService.deleteAllByUsed("MEETING", meetingId, uploadPath);
 
         // location 삭제
         Long locationId = meetingDao.getLocationIdByMeetingId(meetingId);
@@ -425,7 +428,7 @@ public class MeetingService {
             new MeetingLocationDAO().deleteLocation(locationId);
         }
 
-        // meeting 삭제 (CASCADE)
+        //meeting 삭제 (participant, chat_room 등은 CASCADE)
         return meetingDao.delete(meetingId, creatorId);
     }
     

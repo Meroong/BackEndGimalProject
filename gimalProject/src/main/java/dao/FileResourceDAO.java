@@ -64,6 +64,30 @@ public class FileResourceDAO {
        }
 	}
 	
+	public List<String> getPostUrls(long autoId, long dreamId, String usedType) {
+		System.out.println("work DBquery: getFileUrl");
+		List<String> alist = new ArrayList<>();
+		String sql = "select id, file_url from file_resource where used_id = ? and used_type = ? and file_url like '/upload/POST/"+ dreamId+"%';";
+		
+        try (Connection con = JDBCUtil.jdbcCon();
+                PreparedStatement pstmt = con.prepareStatement(sql)) {
+		
+        	pstmt.setLong(1, autoId);
+        	pstmt.setString(2, usedType);
+        	
+        	ResultSet rs = pstmt.executeQuery();
+        	
+        	while(rs.next()) {
+        		alist.add(rs.getString("file_url"));
+        	}
+        	return alist;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("DB 연결 또는 쿼리 오류");
+            return alist;
+       }
+	}
+	
 	
 	public boolean insertFile(FileResourceDTO dto) {
 		System.out.println("work DBquery: insertFile");
@@ -155,6 +179,32 @@ public class FileResourceDAO {
 	        e.printStackTrace();
 	    }
 	    return false;
+	}
+	
+	public boolean deletePostFileByUrl(long usedId, String usedType, String fileUrl) {
+	    System.out.println("work DBquery: deletePostFileByUrl");
+	    String sql = "DELETE FROM file_resource WHERE used_type = ? AND used_id = ? AND file_url = ?";
+
+	    try (Connection con = JDBCUtil.jdbcCon();
+	         PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+	        pstmt.setString(1, usedType);
+	        pstmt.setLong(2, usedId);
+	        pstmt.setString(3, fileUrl);
+
+	        int rs = pstmt.executeUpdate();
+	        if (rs > 0) {
+	            System.out.println("삭제 성공");
+	            return true;
+	        }
+	        System.out.println("삭제 실패");
+	        return false;
+
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        System.out.println("DB 연결 또는 쿼리 오류");
+	        return false;
+	    }
 	}
 	
 	public boolean isExist(long autoId, String usedType) {

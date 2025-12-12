@@ -1,0 +1,1407 @@
+/* =========================================================
+   0. 공통 레이아웃 / 베이스
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background: #fff7f0; /* 드림 페이지 전체 톤 */
+}
+
+.dream-page {
+  padding: 24px 0 48px;
+  min-height: calc(100vh - 80px);
+}
+
+/* 폼은 그냥 래퍼 역할만: 그리드 X */
+.dream-form {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px 40px;
+}
+
+/* 접근성 숨김 텍스트 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =========================================================
+   1. 상단 타이틀 + 검색 영역 + 글쓰기 버튼
+   ========================================================= */
+
+/* 상단 전체 영역 */
+.dream-topbar {
+  margin-bottom: 12px;
+}
+
+/* 스크린샷처럼 중앙에 모아 두는 래퍼 */
+.dream-topbar-main {
+  max-width: 760px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* 타이틀 영역: 가운데 정렬 */
+.dream-topbar-left {
+  text-align: center;
+}
+
+.dream-topbar-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #f97316;
+  letter-spacing: 0.08em;
+  margin-bottom: 2px;
+}
+
+.dream-topbar-title {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.4;
+  font-weight: 800;
+  color: #111827;
+}
+
+.dream-topbar-subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #6b7280;
+}
+
+/* 오른쪽(실제로는 아래) 검색 영역 */
+.dream-topbar-right {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 동 선택 + 검색박스 한 줄 */
+.dream-topbar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+/* 동 선택 */
+.dream-location-wrap {
+  flex-shrink: 0;
+}
+
+.dream-location-select {
+  min-width: 104px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  font-size: 13px;
+  color: #374151;
+  outline: none;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+}
+
+.dream-location-select:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.08);
+}
+
+/* 검색 박스 */
+.dream-search-wrap {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 520px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  padding: 4px 6px 4px 16px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.dream-search-input {
+  flex: 1;
+  border: none;
+  padding: 8px 0;
+  font-size: 14px;
+  outline: none;
+  background: transparent;
+  color: #111827;
+}
+
+.dream-search-input::placeholder {
+  color: #9ca3af;
+}
+
+.dream-search-button {
+  padding: 0 18px;
+  height: 34px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #6366f1, #22c55e);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 26px rgba(79, 70, 229, 0.45);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.dream-search-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 38px rgba(79, 70, 229, 0.55);
+  opacity: 0.98;
+}
+
+/* 인기 검색어 */
+.dream-popular-keywords {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  justify-content: center;
+}
+
+.dream-popular-label {
+  flex-shrink: 0;
+}
+
+.dream-popular-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dream-popular-item {
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: #4b5563;
+  cursor: pointer;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease,
+    transform 0.12s ease;
+}
+
+.dream-popular-item:hover {
+  background-color: #f3f4ff;
+  border-color: #4f46e5;
+  color: #4338ca;
+  transform: translateY(-0.5px);
+}
+
+.dream-write-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  background-color: #111827;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.55);
+  transition:
+    background-color 0.12s ease,
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+.dream-write-btn:hover {
+  background-color: #020617;
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.7);
+}
+
+/* =========================================================
+   2. 메인 레이아웃 (필터 + 리스트)
+   ========================================================= */
+
+.dream-layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 24px;
+  margin-top: 16px;
+}
+
+/* 필터 사이드바: 살짝 줄이고 위로 붙이기 */
+.dream-filter {
+  grid-column: 1 / 2;
+  background-color: #ffffff;
+  border-radius: 20px;
+  padding: 18px 16px 22px;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  position: sticky;
+  top: 96px;
+}
+
+.dream-filter-title {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #111827;
+}
+
+/* 각 섹션 (나눔 설정 / 상태) */
+.dream-filter-section {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.dream-filter-section:first-of-type {
+  margin-top: 4px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.dream-filter-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #4b5563;
+}
+
+/* 체크박스 */
+.dream-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #374151;
+}
+
+.dream-checkbox input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+}
+
+/* 카테고리 리스트 */
+.dream-filter-category {
+  /* 기본 섹션 스타일 그대로 사용 + 약간의 여유 */
+}
+
+.dream-category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.dream-category-item {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background-color: transparent;
+  font-size: 13px;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease,
+    color 0.12s ease,
+    transform 0.08s ease;
+}
+
+.dream-category-item:hover {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+.dream-category-item.is-active {
+  background-color: #eef2ff;
+  border-color: #4f46e5;
+  color: #4338ca;
+}
+
+/* 오른쪽 리스트 영역 */
+.dream-main {
+  grid-column: 2 / 3;
+  min-height: 360px;
+}
+
+/* 리스트 상단: 개수, 정렬 */
+.dream-main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 10px;
+  flex-wrap: wrap; /* 화면 좁을 때 줄바꿈 */
+}
+
+.dream-main-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap; /* 모바일에서 정렬 버튼 위/아래로 글쓰기 버튼 자연스럽게 배치 */
+}
+
+.dream-main-count {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.dream-main-count strong {
+  color: #111827;
+  font-weight: 700;
+}
+
+.dream-main-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.dream-sort-label {
+  font-size: 11px;
+}
+
+.dream-sort-button {
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  padding: 3px 9px;
+  font-size: 11px;
+  cursor: default;
+  color: #6b7280;
+}
+
+.dream-sort-button.is-active {
+  border-color: #4f46e5;
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+/* 검색 결과가 없을 때 */
+.dream-empty {
+  margin-top: 60px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* =========================================================
+   3. 카드 그리드 (드림 목록)
+   ========================================================= */
+
+.dream-grid {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.dream-card {
+  list-style: none;
+}
+
+.dream-card-link {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 18px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+
+.dream-card-link:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 24px 55px rgba(15, 23, 42, 0.12);
+}
+
+/* 썸네일 영역 (10:7 비율) */
+.dream-card-thumb-wrap {
+  position: relative;
+  width: 100%;
+  padding-top: 70%;
+  background-color: #f3f4f6;
+}
+
+.dream-card-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 카드 본문 */
+.dream-card-body {
+  padding: 10px 12px 12px;
+}
+
+.dream-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.dream-card-meta {
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dream-card-meta-location {
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dream-card-meta-dot {
+  color: #d1d5db;
+}
+
+.dream-card-meta-time {
+  white-space: nowrap;
+}
+
+/* 상태/컨디션 태그 */
+.dream-card-tags {
+  margin-top: 7px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dream-tag {
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 3px 7px;
+  border: 1px solid transparent;
+}
+
+.dream-tag-condition {
+  border-color: rgba(59, 130, 246, 0.18);
+  background: rgba(59, 130, 246, 0.06);
+  color: #1d4ed8;
+}
+
+.dream-tag-status-open {
+  border-color: rgba(22, 163, 74, 0.18);
+  background: rgba(22, 163, 74, 0.06);
+  color: #15803d;
+}
+
+.dream-tag-status-close {
+  border-color: rgba(148, 163, 184, 0.25);
+  background: rgba(148, 163, 184, 0.08);
+  color: #4b5563;
+}
+
+/* =========================================================
+   4. 글쓰기 / 수정 폼 (공통)
+   ========================================================= */
+
+.dream-write-container {
+  max-width: 960px;
+  margin: 32px auto;
+  padding: 0 16px;
+}
+
+.dream-write-inner {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.dream-write-title {
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+}
+
+.dream-write-error {
+  margin-bottom: 16px;
+  padding: 10px 12px;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  border-radius: 8px;
+}
+
+.dream-write-form .form-row {
+  margin-bottom: 16px;
+}
+
+.dream-write-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.dream-write-form input[type="text"],
+.dream-write-form input[type="number"],
+.dream-write-form select,
+.dream-write-form textarea {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.form-row-2col {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row-2col .form-col {
+  flex: 1;
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.btn-primary {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  background-color: #ff7f50;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background-color: #fff;
+  color: #374151;
+  text-decoration: none;
+}
+
+/* =========================================================
+   5. 이미지 업로드 (글쓰기/수정 공통)
+   ========================================================= */
+
+.dream-upload {
+  border-radius: 12px;
+  border: 1px dashed #d1d5db;
+  background-color: #f9fafb;
+  padding: 12px 14px;
+}
+
+.dream-upload-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.dream-upload-title {
+  font-weight: 600;
+  color: #111827;
+  font-size: 0.9rem;
+}
+
+.dream-upload-hint {
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+/* 드롭존 */
+.dream-upload-dropzone {
+  position: relative;
+  border-radius: 10px;
+  border: 1px dashed #e5e7eb;
+  background-color: #f9fafb;
+  padding: 12px;
+  min-height: 120px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.dream-upload-dropzone.is-dragover {
+  border-color: #f97316;
+  background-color: #fff7ed;
+}
+
+.dream-upload-input {
+  display: none;
+}
+
+/* 비어 있을 때 */
+.dream-upload-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 4px;
+  padding: 18px 8px;
+  font-size: 0.85rem;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.dream-upload-main {
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.dream-upload-sub {
+  font-size: 0.8rem;
+}
+
+/* 캐러셀 */
+.dream-upload-carousel {
+  display: none; /* JS에서 토글 */
+  align-items: center;
+  gap: 8px;
+}
+
+.dream-upload-viewport {
+  flex: 1;
+  overflow: hidden;
+}
+
+.dream-upload-track {
+  display: flex;
+  gap: 8px;
+}
+
+/* 썸네일 + 삭제버튼 (수정에서도 같이 사용) */
+.dream-upload-thumb {
+  position: relative;
+  flex: 0 0 220px;
+  max-width: 220px;
+  height: 140px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #f3f4f6;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.dream-upload-thumb img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* 썸네일 삭제 버튼 */
+.dream-upload-remove {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(0, 0, 0, 0.55);
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.dream-upload-remove:hover {
+  background: rgba(0, 0, 0, 0.75);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+}
+
+/* 캐러셀 화살표 */
+.dream-upload-arrow {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: #4b5563;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.dream-upload-arrow:hover:not(.is-disabled) {
+  background-color: #ff7f50;
+  border-color: #ff7f50;
+  color: #ffffff;
+}
+
+.dream-upload-arrow.is-disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* =========================================================
+   6. 상세 페이지
+   ========================================================= */
+
+/* 상세 페이지 - 상태 토글 */
+
+/* 영역 안에서 쓰는 폼 래퍼 */
+.dream-detail-status-inline {
+  margin-top: 4px;
+}
+
+/* 회색 배경 바 (토글 전체) */
+.dream-detail-status-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 999px;
+  background-color: #e5e7eb;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  min-width: 220px;
+  max-width: 260px;    /* 영역 안에 쏙 들어가도록 */
+}
+
+/* 개별 버튼 */
+.dream-detail-status-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  border-radius: 999px;
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: transparent;
+  color: #4b5563;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.08s ease;
+}
+
+.dream-detail-status-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* 나눔중(OPEN)일 때 – 상단 배지와 어울리는 초록 계열 */
+.dream-detail-status-btn.is-active {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #f9fafb;
+  box-shadow: 0 8px 18px rgba(22, 163, 74, 0.35);
+}
+
+/* 나눔완료(CLOSE)일 때 – 핑크/레드 계열 */
+.dream-detail-status-btn.is-closed {
+  background: linear-gradient(135deg, #fb7185, #f97373);
+  color: #fef2f2;
+  box-shadow: 0 8px 18px rgba(248, 113, 113, 0.35);
+}
+
+.dream-detail-page {
+  background: #fff7f0;
+  padding: 40px 0 56px;
+}
+
+.dream-detail-shell {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 24px 28px 32px;
+  background-color: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+/* 상단 바 */
+.dream-detail-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.dream-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.85rem;
+  color: #4b5563;
+  background-color: #f3f4f6;
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.1s ease;
+}
+
+.dream-detail-back:hover {
+  background-color: #e5e7eb;
+  color: #111827;
+  transform: translateX(-1px);
+}
+
+.dream-detail-back-icon {
+  font-size: 1rem;
+}
+
+.dream-detail-back-text {
+  font-weight: 500;
+}
+
+/* 상태 배지 */
+.dream-detail-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background-color: #e5e7eb;
+  color: #4b5563;
+}
+
+.dream-detail-pill.is-open {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.dream-detail-pill.is-closed {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+/* 메인 레이아웃 */
+.dream-detail-main {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 520px) minmax(0, 1fr);
+  gap: 32px;
+  align-items: flex-start;
+}
+
+/* 왼쪽: 이미지 */
+.dream-detail-left {
+  width: 100%;
+}
+
+.dream-detail-image-slider {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #e5e7eb, #f9fafb);
+}
+
+.dream-detail-image-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.dream-detail-image-track {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  transition: transform 0.35s ease;
+}
+
+.dream-detail-image-slide {
+  flex: 0 0 100%;
+  height: 100%;
+}
+
+.dream-detail-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 이미지 좌/우 버튼 */
+.dream-detail-image-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: none;
+  background-color: rgba(15, 23, 42, 0.6);
+  color: #f9f9fb;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  backdrop-filter: blur(4px);
+  transition: background-color 0.18s ease, transform 0.08s ease, opacity 0.18s ease;
+}
+
+.dream-detail-image-arrow.is-left {
+  left: 10px;
+}
+
+.dream-detail-image-arrow.is-right {
+  right: 10px;
+}
+
+.dream-detail-image-arrow:hover {
+  background-color: rgba(15, 23, 42, 0.8);
+  transform: translateY(-50%) scale(1.03);
+}
+
+.dream-detail-image-arrow.is-disabled {
+  opacity: 0.3;
+  cursor: default;
+  transform: translateY(-50%);
+}
+
+/* 썸네일 리스트 */
+.dream-detail-thumbs {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.dream-detail-thumb-btn {
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  background: #f3f4f6;
+  cursor: pointer;
+  transition: border-color 0.18s ease, transform 0.08s ease, box-shadow 0.18s ease;
+}
+
+.dream-detail-thumb-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 14px rgba(15, 23, 42, 0.16);
+}
+
+.dream-detail-thumb-btn.is-active {
+  border-color: #4f46e5;
+  box-shadow: 0 8px 18px rgba(79, 70, 229, 0.35);
+}
+
+.dream-detail-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 오른쪽: 정보 영역 */
+.dream-detail-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dream-detail-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.3;
+}
+
+.dream-detail-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.86rem;
+  color: #6b7280;
+}
+
+.dream-detail-location {
+  font-weight: 500;
+}
+
+.dream-detail-dot {
+  color: #9ca3af;
+}
+
+.dream-detail-views {
+  font-size: 0.82rem;
+}
+
+/* 태그 */
+.dream-detail-chips {
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dream-detail-chip {
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 500;
+}
+
+/* 가격 */
+.dream-detail-price-row {
+  margin-top: 8px;
+}
+
+.dream-detail-price {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.dream-detail-price.is-free {
+  color: #16a34a;
+}
+
+/* 구분선 */
+.dream-detail-divider {
+  margin: 16px 0 12px;
+  height: 1px;
+  background: linear-gradient(to right, rgba(209, 213, 219, 0.2), rgba(148, 163, 184, 0.7), rgba(209, 213, 219, 0.2));
+}
+
+/* 섹션 */
+.dream-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dream-detail-section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.dream-detail-content {
+  margin: 0;
+  border-radius: 12px;
+  background-color: #f9fafb;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #374151;
+  white-space: pre-wrap;
+}
+
+/* 거래 정보 리스트 */
+.dream-detail-info-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dream-detail-info-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.85rem;
+}
+
+.dream-detail-info-label {
+  color: #6b7280;
+}
+
+.dream-detail-info-value {
+  color: #111827;
+  font-weight: 500;
+}
+
+/* CTA 영역 */
+.dream-detail-cta {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dream-detail-chat-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  color: #f9fafb;
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(79, 70, 229, 0.45);
+  transition: transform 0.08s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+}
+
+.dream-detail-chat-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 40px rgba(79, 70, 229, 0.6);
+}
+
+.dream-detail-chat-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.45);
+  opacity: 0.95;
+}
+
+/* 소유자용 버튼 */
+.dream-detail-owner-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.dream-detail-owner-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background-color: #ffffff;
+  font-size: 0.82rem;
+  color: #4b5563;
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.dream-detail-owner-link:hover {
+  background-color: #f3f4f6;
+  border-color: #d1d5db;
+  color: #111827;
+  box-shadow: 0 6px 14px rgba(148, 163, 184, 0.35);
+}
+
+.dream-detail-owner-link.is-danger {
+  border-color: #fecaca;
+  background-color: #fef2f2;
+  color: #b91c1c;
+}
+
+.dream-detail-owner-link.is-danger:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #7f1d1d;
+  box-shadow: 0 6px 14px rgba(248, 113, 113, 0.35);
+}
+
+/* =========================================================
+   7. 반응형
+   ========================================================= */
+
+@media (max-width: 960px) {
+  .dream-form {
+    padding: 0 16px 32px;
+  }
+
+  .dream-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dream-filter {
+    position: static;
+    margin-top: 16px;
+    order: 2;
+  }
+
+  .dream-main {
+    order: 1;
+  }
+
+  .dream-detail-shell {
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    padding: 20px 16px 28px;
+  }
+
+  .dream-detail-main {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .dream-topbar-main {
+    padding: 0 4px;
+  }
+
+  .dream-topbar-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dream-location-select {
+    width: 100%;
+  }
+
+  .dream-search-wrap {
+    max-width: 100%;
+  }
+
+  .dream-card-title {
+    -webkit-line-clamp: 1;
+  }
+
+  .dream-detail-title {
+    font-size: 1.25rem;
+  }
+
+  .dream-detail-chat-btn {
+    font-size: 0.95rem;
+  }
+}
+
+/* =========================================================
+   수정 페이지 - 기존 이미지 썸네일
+   ========================================================= */
+
+.dream-edit-current-images {
+  margin-bottom: 20px;
+}
+
+.dream-edit-current-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 8px;
+}
+
+.dream-edit-current-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dream-edit-current-thumb {
+  width: 110px;           /* 썸네일 한 칸 크기 */
+  height: 110px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #f3f4f6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.dream-edit-current-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;      /* 비율 유지하면서 잘라서 맞추기 */
+  display: block;
+}
+
+/* 기존 이미지 리스트 레이아웃 */
+.dream-edit-current-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* 삭제 예정 표시용 상태 */
+.dream-edit-current-thumb.is-marked-for-delete {
+  opacity: 0.55;
+}
+
+.dream-edit-current-thumb.is-marked-for-delete::after {
+  content: "삭제 예정";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2px 6px;
+  font-size: 12px;
+  text-align: center;
+  background: rgba(220, 38, 38, 0.85);
+  color: #fff;
+}
+
