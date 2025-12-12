@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.*, dto.MeetingInfoDTO" %>
 
+
 <%
     Object loginUser = session.getAttribute("userInfo");
     boolean isLogin = (loginUser != null);
@@ -18,6 +19,13 @@
     if (keyword == null) keyword = "";
     if (selectedStatus == null || selectedStatus.isBlank()) selectedStatus = "ALL";
     if (selectedWeather == null || selectedWeather.isBlank()) selectedWeather = "ALL";
+
+    // ✅ 태그 카테고리 목록
+    String[] tagCategories = {
+        "운동","육아","산책","조깅","러닝",
+        "반려견","반려묘","카페","스터디",
+        "독서","취미","여행","사진","게임"
+    };
 %>
 
 <!DOCTYPE html>
@@ -310,46 +318,31 @@
 
             <!-- 좌측 필터 사이드바 -->
             <div class="sidebar">
-
-                <!-- 카테고리 -->
-                <div class="filter-group">
-                    <div class="side-title">카테고리</div>
-                    <ul>
-                        <li>
-                            <label class="filter-label">
-                                <input type="radio" name="category" value="전체"
-      								 onchange="autoSubmitFilter()"
-      								  <%= "전체".equals(selectedCategory) ? "checked" : "" %>>
-
-                                전체
-                            </label>
-                        </li>
-                        <li>
-                            <label class="filter-label">
-                                <input type="radio" name="category" value="산책"
-      								 onchange="autoSubmitFilter()"
-       								<%= "산책".equals(selectedCategory) ? "checked" : "" %>>
-                                산책
-                            </label>
-                        </li>
-                        <li>
-                            <label class="filter-label">
-                                <input type="radio" name="category" value="헬스"
-                                 onchange="autoSubmitFilter()"
-                                       <%= "헬스".equals(selectedCategory) ? "checked" : "" %>>
-                                헬스
-                            </label>
-                        </li>
-                        <li>
-                            <label class="filter-label">
-                                <input type="radio" name="category" value="애견"
-                                 onchange="autoSubmitFilter()"
-                                       <%= "애견".equals(selectedCategory) ? "checked" : "" %>>
-                                애견
-                            </label>
-                        </li>
-                    </ul>
-                </div>
+				<!-- 카테고리 (태그 기반) -->
+				<div class="filter-group">
+				<div class="side-title">카테고리</div>
+				<ul>
+				<li>
+				<label class="filter-label">
+				<input type="radio" name="category" value="전체"
+				       onchange="autoSubmitFilter()"
+				       <%= "전체".equals(selectedCategory)?"checked":"" %>>
+				전체
+				</label>
+				</li>
+				
+				<% for(String tag : tagCategories) { %>
+				<li>
+				<label class="filter-label">
+				<input type="radio" name="category" value="<%= tag %>"
+				       onchange="autoSubmitFilter()"
+				       <%= tag.equals(selectedCategory)?"checked":"" %>>
+				<%= tag %>
+				</label>
+				</li>
+				<% } %>
+				</ul>
+				</div>
 
                 <!-- 모집 상태 필터 (모집중/마감/종료) -->
                 <div class="filter-group">
