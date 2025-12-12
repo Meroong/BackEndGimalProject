@@ -185,7 +185,7 @@
         <%
             String today = java.time.LocalDate.now().toString();
         %>
-        <input type="date" name="date" value="<%= today %>" required>
+        <input type="datetime-local" name="date" value="<%= today %>" required>
 
         <label>최대 인원</label>
         <input type="number" name="maxMembers" value="10">

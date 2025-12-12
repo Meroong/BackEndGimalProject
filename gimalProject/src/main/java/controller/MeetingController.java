@@ -42,7 +42,8 @@ public class MeetingController extends HttpServlet {
 		
 		switch(path) {
 			case "/list":
-			    ArrayList<MeetingInfoDTO> aList = meetingService.getMeetingList();
+				Long listUserId = AuthUtil.getAutoId(req);
+			    ArrayList<MeetingInfoDTO> aList = meetingService.getMeetingList(listUserId);
 			    req.setAttribute("meetingList", aList);
 			    System.out.println(new Timestamp(System.currentTimeMillis()));
 			    // 리스트가 비어 있어도 그대로 JSP로 보냄
@@ -186,21 +187,35 @@ public class MeetingController extends HttpServlet {
                 );
 
                 // meeting insert
+                // 2️⃣ meeting date 처리 (date / datetime-local 모두 대응)
                 String dateStrInsert = req.getParameter("date");
 
-                if (dateStrInsert == null || dateStrInsert.isEmpty()) {
+                if (dateStrInsert == null || dateStrInsert.isBlank()) {
                     throw new Exception("날짜 값이 전달되지 않았습니다.");
                 }
 
-                dateStrInsert = dateStrInsert.length() == 10 ? dateStrInsert + " 00:00:00" : dateStrInsert;
+                // datetime-local 대응: T → 공백
+                dateStrInsert = dateStrInsert.replace("T", " ");
 
+                // 초(:ss) 보정
+                if (dateStrInsert.length() == 16) { // yyyy-MM-dd HH:mm
+                    dateStrInsert += ":00";
+                }
+
+                // date만 온 경우 보정
+                if (dateStrInsert.length() == 10) { // yyyy-MM-dd
+                    dateStrInsert += " 00:00:00";
+                }
+
+                Timestamp meetingDate = Timestamp.valueOf(dateStrInsert);
+                
                 long meetingId = meetingService.insertMeetingInfo(
                         req.getParameter("title"),
                         req.getParameter("content"),
-                        Timestamp.valueOf(dateStrInsert),
+                        meetingDate,
                         newLocationId,
                         Integer.parseInt(req.getParameter("maxMembers")),
-                        Integer.parseInt(req.getParameter("currentMembers")),
+                        Integer.parseInt(req.getParameter("currentMembers"))-1,
                         Integer.parseInt(req.getParameter("cost")),
                         req.getParameter("tag"),
                         req.getParameter("status"),
@@ -294,12 +309,41 @@ public class MeetingController extends HttpServlet {
 	                        );
 	                    }
 	                }
-	                
-	                
 
 	                // 성공 시
 	                resp.sendRedirect(req.getContextPath() + "/meeting/list");
 	                return;
+	                
+	            case "/status": {
+
+	                Long loginUserId = AuthUtil.getAutoId(req);
+	                if (loginUserId == -1) {
+	                    resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+	                    return;
+	                }
+
+	                long statusMeetId = Long.parseLong(req.getParameter("meetingId"));
+	                String status = req.getParameter("status"); // OPEN / CLOSED
+
+	                // 모임 조회
+	                MeetingInfoDTO meetingInfo = meetingService.getMeetingInfo(statusMeetId);
+	                if (meetingInfo == null) {
+	                    resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+	                    return;
+	                }
+
+	                // 작성자 검증
+	                if (!loginUserId.equals(meetingInfo.getCreatorId())) {
+	                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+	                    return;
+	                }
+
+	                // 상태 변경
+	                meetingService.updateMeetingStatus(statusMeetId, status);
+
+	                resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + statusMeetId);
+	                return;
+	            }
 	                
 	            case "/join":
 

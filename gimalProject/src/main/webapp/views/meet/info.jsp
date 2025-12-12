@@ -233,7 +233,7 @@ function needLoginForJoin() {
                         </form>
                     <% } %>
 
-                    <% if(Boolean.TRUE.equals(isParticipant) && !Boolean.TRUE.equals(isCreator)) { %>
+                    <% if(Boolean.TRUE.equals(isParticipant) && !Boolean.TRUE.equals(isCreator)) { System.out.println(m.getStatus()); %>
                         <form action="<%= request.getContextPath() %>/meeting/quit" method="post" style="display:inline; margin-left:10px;">
                             <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
                             <button class="btn" style="background:#555;">모임 나가기</button>
@@ -245,6 +245,27 @@ function needLoginForJoin() {
                            href="<%= request.getContextPath() %>/meeting/edit?meetingId=<%= m.getMeetingId() %>">
                            모임 수정
                         </a>
+                        
+					    <% if ("OPEN".equals(m.getStatus())) { %>
+					        <!-- 모집 마감 -->
+					        <form action="<%= request.getContextPath() %>/meeting/status" method="post" style="display:inline;">
+					            <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
+					            <input type="hidden" name="status" value="CLOSED">
+					            <button type="submit" class="btn" style="background:#555;">
+					                모집 마감
+					            </button>
+					        </form>
+					
+					    <% } else if ("CLOSED".equals(m.getStatus())) { %>
+					        <!-- 모집 재개 -->
+					        <form action="<%= request.getContextPath() %>/meeting/status" method="post" style="display:inline;">
+					            <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
+					            <input type="hidden" name="status" value="OPEN">
+					            <button type="submit" class="btn" style="background:#2ecc71;">
+					                모집 재개
+					            </button>
+					        </form>
+					    <% } %>
                     <% } %>
 
                 <% } %>

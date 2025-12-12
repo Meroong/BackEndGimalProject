@@ -91,11 +91,16 @@ public class MeetingService {
     }
 
     // 게시판 리스트 조회
-    public ArrayList<MeetingInfoDTO> getMeetingList() {
+    public ArrayList<MeetingInfoDTO> getMeetingList(long loginUserId) {
         System.out.println("Service: getMeetingList");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         ArrayList<MeetingInfoDTO> aList =  new MeetingDAO().getPostList();
         
+        //상태 보정 (자동 마감)
+        int closedCount = new MeetingDAO().closeExpiredMeetings();
+        System.out.println("자동 마감 처리된 모임 수: " + closedCount);
+        
+        Timestamp now = new Timestamp(System.currentTimeMillis());
         for (MeetingInfoDTO dto : aList) {
         	//timeAgo 세팅 몇분전
             if (dto.getCreatedAt() != null) {
@@ -113,7 +118,19 @@ public class MeetingService {
                     dto.setDong(parts[2]);   // 삼성동
                 }
             }
+        
+        // 작성자인지
+        boolean isCreator = (loginUserId != -1 && loginUserId == dto.getCreatorId());
+        dto.setCreator(isCreator);
+
+        // 참여자인지
+        boolean isParticipant = false;
+        if (loginUserId != -1) {
+            isParticipant = new MeetingParticipantDAO()
+                    .isParticipant(dto.getMeetingId(), loginUserId);
         }
+        dto.setParticipant(isParticipant);
+    }
         return aList;
     }
 
@@ -411,4 +428,16 @@ public class MeetingService {
         // meeting 삭제 (CASCADE)
         return meetingDao.delete(meetingId, creatorId);
     }
+    
+    public void updateMeetingStatus(long meetingId, String status) {
+        if (!"OPEN".equals(status) && !"CLOSED".equals(status)) {
+            throw new IllegalArgumentException("잘못된 상태값");
+        }
+
+        boolean result = new MeetingDAO().updateStatus(meetingId, status);
+        if (!result) {
+            throw new RuntimeException("모임 상태 변경 실패");
+        }
+    }
+
 }

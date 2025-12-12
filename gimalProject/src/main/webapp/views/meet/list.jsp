@@ -95,91 +95,128 @@
         }
 
         /* ---------- 모임 리스트 카드 ---------- */
-        /* ============================
-   meeting-card 스타일만 수정
-============================ */
 
-/* 카드 */
-.meeting-card {
-    background: white;
-    padding: 22px 25px;
-    margin-bottom: 18px;
-    border-radius: 20px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-    cursor: pointer;
-    transition: 0.2s;
-}
-.meeting-card:hover {
-    transform: translateY(-4px);
-}
-
-/* 제목 */
-.meeting-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 6px;
-    color: #222;
-}
-
-/* 내용 요약 */
-.meeting-content {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 10px;
-}
-
-/* ========= 날짜 + 동네 (1줄) ========= */
-.meeting-meta-top {
-    font-size: 13px;
-    color: #555;
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* ========= 조회수 + 몇분전 + 모집인원 버튼 (2줄) ========= */
-.meeting-meta-bottom {
-    font-size: 12px;
-    color: #777;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* 조회수 */
-.view-wrapper {
-    display: flex;
-    align-items: center;
-}
-
-.view-icon {
-    width: 16px;
-    height: 16px;
-    opacity: 0.7;
-    margin-right: 4px;
-}
-
-.view-count {
-    color: #666;
-    font-size: 12px;
-}
-
-/* 몇분전 */
-.time-ago {
-    color: #777;
-}
-
-/* 오른쪽 배치되는 버튼 */
-.status-btn {
-    margin-left: auto;
-    font-size: 13px;
-    padding: 5px 12px;
-    border-radius: 8px;
-    color: white;
-    background: #FF7C40;
-    font-weight: 600;
-}
+		/* 카드 */
+		.meeting-card {
+		    background: white;
+		    padding: 22px 25px;
+		    margin-bottom: 18px;
+		    border-radius: 20px;
+		    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+		    cursor: pointer;
+		    transition: 0.2s;
+		}
+		.meeting-card:hover {
+		    transform: translateY(-4px);
+		}
+		
+		/* 제목 */
+		.meeting-title {
+		    font-size: 18px;
+		    font-weight: 700;
+		    margin-bottom: 6px;
+		    color: #222;
+		}
+		
+		/* 내용 요약 */
+		.meeting-content {
+		    font-size: 14px;
+		    color: #666;
+		    margin-bottom: 10px;
+		}
+		
+		/* ========= 날짜 + 동네 (1줄) ========= */
+		.meeting-meta-top {
+		    font-size: 13px;
+		    color: #555;
+		    margin-bottom: 6px;
+		    display: flex;
+		    align-items: center;
+		    gap: 6px;
+		}
+		
+		/* ========= 조회수 + 몇분전 + 모집인원 버튼 (2줄) ========= */
+		.meeting-meta-bottom {
+		    font-size: 12px;
+		    color: #777;
+		    display: flex;
+		    align-items: center;
+		    gap: 6px;
+		}
+		
+		/* 조회수 */
+		.view-wrapper {
+		    display: flex;
+		    align-items: center;
+		}
+		
+		.view-icon {
+		    width: 16px;
+		    height: 16px;
+		    opacity: 0.7;
+		    margin-right: 4px;
+		}
+		
+		.view-count {
+		    color: #666;
+		    font-size: 12px;
+		}
+		
+		/* 몇분전 */
+		.time-ago {
+		    color: #777;
+		}
+		
+		/* 오른쪽 배치되는 버튼 */
+		.status-btn {
+		    margin-left: auto;
+		    font-size: 13px;
+		    padding: 5px 12px;
+		    border-radius: 8px;
+		    color: white;
+		    background: #FF7C40;
+		    font-weight: 600;
+		}
+				/* 모집 상태 뱃지 */
+		.status-badge {
+		    padding: 4px 10px;
+		    border-radius: 8px;
+		    font-size: 12px;
+		    font-weight: 700;
+		    color: #fff;
+		}
+		
+		.status-badge.open {
+		    background: #FF7C40;
+		}
+		
+		.status-badge.closed {
+		    background: #999;
+		}
+		
+		/* 참여 버튼 */
+		.join-btn {
+		    background: #FF7C40;
+		    border: none;
+		    color: #fff;
+		    padding: 6px 14px;
+		    border-radius: 8px;
+		    font-size: 13px;
+		    font-weight: 700;
+		    cursor: pointer;
+		}
+		
+		.join-btn:hover {
+		    background: #e46d33;
+		}
+		
+		/* 인원 표시 */
+		.member-count {
+		    font-size: 12px;
+		    color: #555;
+		    font-weight: 600;
+		}
+		
 
         
     </style>
@@ -273,14 +310,47 @@
 				</div>
 				
 				<div class="meeting-meta-bottom">
+
+				    <!-- 조회수 -->
 				    <span class="view-wrapper">
 				        <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" class="view-icon">
 				        <span class="view-count"><%= m.getViewCount() %></span>
 				    </span>
+				
+				    <!-- 몇분전 -->
 				    <span class="time-ago"><%= m.getTimeAgo() %></span>
 				
-				    <span class="status-btn">모집인원</span>
+				    <!-- 모집 인원 -->
+				    <span class="member-count">
+				        <%= m.getCurrentMembers() %> / <%= m.getMaxMembers() %>명
+				    </span>
+				
+				    <!-- 상태 뱃지 -->
+				    <% if ("OPEN".equals(m.getStatus())) { %>
+				        <span class="status-badge open">모집중</span>
+				    <% } else { %>
+				        <span class="status-badge closed">마감</span>
+				    <% } %>
+				
+				    <!-- 참여 버튼 (🔥 조건 엄격) -->
+				    <% if (
+				            isLogin
+				            && "OPEN".equals(m.getStatus())
+				            && !m.isCreator()      /* 👉 DTO에 creator 여부 boolean 있으면 최고 */
+				            && !m.isParticipant()  /* 👉 참여 여부 */
+				        ) { %>
+				
+				        <form action="<%= request.getContextPath() %>/meeting/join"
+				              method="post"
+				              style="margin-left:auto;">
+				            <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
+				            <button type="submit" class="join-btn">참여하기</button>
+				        </form>
+				
+				    <% } %>
+				
 				</div>
+
 
 			
 			</div>

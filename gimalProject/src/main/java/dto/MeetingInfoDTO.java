@@ -28,9 +28,27 @@ public class MeetingInfoDTO {
     
 	private Timestamp createdAt;     // 생성일
     private Timestamp updatedAt;     // 수정일
+    private boolean creator;
+    private boolean	participant;
     
+	public boolean isCreator() {
+		return creator;
+	}
+
+	public void setCreator(boolean creator) {
+		this.creator = creator;
+	}
+
 	public int getViewCount() {
 		return viewCount;
+	}
+
+	public boolean isParticipant() {
+		return participant;
+	}
+
+	public void setParticipant(boolean participant) {
+		this.participant = participant;
 	}
 
 	public void setViewCount(int viewCount) {

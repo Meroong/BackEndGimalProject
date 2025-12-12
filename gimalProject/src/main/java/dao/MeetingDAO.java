@@ -316,4 +316,39 @@ public class MeetingDAO {
 
         return null; // 조회 실패 또는 존재하지 않는 meeting
     }
+    // 모임 상태 변경
+    public boolean updateStatus(long meetingId, String status) {
+        String sql = "UPDATE meeting SET status = ? WHERE id = ?";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setString(1, status);
+            pstmt.setLong(2, meetingId);
+
+            return pstmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    // 날짜 지난 모임 자동 마감
+    public int closeExpiredMeetings() {
+        String sql = """
+            UPDATE meeting
+            SET status = 'CLOSED'
+            WHERE status = 'OPEN'
+              AND date < NOW()
+        """;
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            return pstmt.executeUpdate(); // 몇 건 바뀌었는지
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
 }
