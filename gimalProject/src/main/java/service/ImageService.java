@@ -2,6 +2,7 @@ package service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -152,6 +153,41 @@ public class ImageService {
 	    }
 
 	    return fileDao.insertFile(dto);
+	}
+	public boolean updateMeetingImages(long meetingId, String[] deleteIds, Collection<Part> parts, String uploadPath) {
+	    System.out.println("Service: updateMeetingImages");
+		boolean success = true;
+
+	    try {
+	        if (deleteIds != null) {
+	            for (String idStr : deleteIds) {
+	                if (idStr == null || idStr.isBlank() || "null".equals(idStr)) continue;
+
+	                long fileId = Long.parseLong(idStr);
+	                boolean deleted = deleteFile(fileId, meetingId, "MEETING");
+	                if (!deleted) success = false;
+	            }
+	        }
+
+	        for (Part part : parts) {
+	            if ("images".equals(part.getName()) && part.getSize() > 0) {
+	                boolean uploaded = uploadFile(meetingId, part, uploadPath, "MEETING");
+	                if (!uploaded) success = false;
+	            }
+	        }
+	    } catch (Exception e) {
+	        throw new RuntimeException("모임 이미지 처리 중 오류", e);
+	    }
+
+	    return success;
+	}
+
+
+	public boolean deleteFile(long fileId, long autoId, String usedType) {
+		System.out.println("Service: deleteFile");
+		boolean result = new FileResourceDAO().deleteFileById(fileId, autoId, usedType);
+		
+		return result;
 	}
 	//  다중 파일 삭제용 사용타입 + 사용ID 기준 전체 이미지 삭제
 	public boolean deleteAllByUsed(String usedType, long usedId, String uploadRoot) {

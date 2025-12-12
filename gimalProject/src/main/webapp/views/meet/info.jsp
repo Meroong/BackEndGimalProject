@@ -17,6 +17,7 @@
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b"></script>
 
 <script>
+const IS_LOGIN = <%= isLogin ? "true" : "false" %>;
 function setMainImage(src) {
     var mainImg = document.getElementById("mainImage");
     if(mainImg) mainImg.src = src;
@@ -43,6 +44,21 @@ function needLoginForJoin() {
 	    %>
     	location.href = "<%= request.getContextPath() %>/views/user/login.jsp";
     }
+}
+// 신고버튼 클릭 시 로그인 여부 확인
+function handleReportClick(usedType, targetUserId, usedId) {
+    if (!IS_LOGIN) {
+        // 로그인 안 된 경우
+        if (confirm("신고하려면 로그인이 필요합니다.\n로그인 하시겠습니까?")) {
+            // 현재 페이지를 로그인 후 복귀용으로 저장
+            const currentUrl = encodeURIComponent(window.location.href);
+            location.href = "<%= request.getContextPath() %>/views/user/login.jsp";
+        }
+        return;
+    }
+
+    // 로그인 된 경우 → 기존 모달 호출
+    openReportModal(usedType, targetUserId, usedId);
 }
 </script>
 
@@ -179,10 +195,15 @@ function needLoginForJoin() {
 	<!-- 3. 신고 가능 -->
 	<% } else { %>
 	
-	    <button type="button" class="report-btn"
-	            onclick="openReportModal('MEETING', '<%= m.getCreatorId() %>', '<%= m.getMeetingId() %>')">
-	        신고하기
-	    </button>
+		<button type="button" class="report-btn"
+		        onclick="handleReportClick(
+		            'MEETING',
+		            '<%= m.getCreatorId() %>',
+		            '<%= m.getMeetingId() %>'
+		        )">
+		    신고하기
+		</button>
+
 	
 	<% } %>
 	

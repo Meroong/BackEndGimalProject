@@ -7,6 +7,11 @@
 <c:set var="post" value="${requestScope.post}" />
 <c:set var="isOwner" value="${requestScope.isOwner}" />
 
+<%
+	Object loginUser = session.getAttribute("userInfo");
+    boolean isLogin = (loginUser != null);
+%>
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -176,9 +181,20 @@ ${fn:escapeXml(post.content)}
           <!-- CTA 영역 -->
           <div class="dream-detail-cta">
             <!-- 채팅하기 버튼 (기능 X, UI만) -->
-            <button type="button" class="dream-detail-chat-btn">
-              채팅하기
-            </button>
+			<form id="chatForm" method="post" action="${ctx}/chat/private" target="chatPopup">
+			  <input type="hidden" name="itemId" value="${post.dreamId}">
+			  <input type="hidden" name="hostId" value="${post.writerId}">
+			</form>
+			
+			<a href="javascript:void(0)"
+			   class="dream-detail-chat-btn"
+			   onclick="
+			     window.open('', 'chatPopup',
+			       'width=430,height=640,top=100,left=100,scrollbars=yes');
+			     document.getElementById('chatForm').submit();
+			   ">
+			   채팅하기
+			</a>
 
             <c:if test="${isOwner}">      	
               <div class="dream-detail-owner-actions">

@@ -179,16 +179,32 @@ public class ChattingController extends HttpServlet {
         }
         
         // !! 개인 거래채팅방 개설
-        if ("/pRoomMake".equals(path)) {
-        	System.out.println("/pRoomMake 요청");
+     // !! 개인 거래 채팅방 개설
+        if ("/private".equals(path)) {
+            System.out.println("/private 요청");
+
+            HttpSession session = req.getSession();
+            UserDTO loginUser = (UserDTO) session.getAttribute("userInfo");
+
+            if (loginUser == null) {
+                resp.sendRedirect(req.getContextPath() + "/login");
+                return;
+            }
+
             long itemId = Long.parseLong(req.getParameter("itemId"));
             long hostId = Long.parseLong(req.getParameter("hostId"));
-            long receiverId = Long.parseLong(req.getParameter("receiverId"));
 
-            // 개인용 채팅방 생성
-            boolean result = service.makePrivateRoom(itemId, "PRIVATE", hostId, receiverId);
+            ChattingService chatService = new ChattingService();
 
-            req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
+            // 기존 PRIVATE 채팅방 조회 or 생성
+            long roomId = chatService.getOrCreatePrivateRoom(
+                itemId, "PRIVATE", hostId, autoId
+            );
+
+            //  팝업으로 채팅방 이동
+            resp.sendRedirect(
+                req.getContextPath() + "/chat/room/" + roomId
+            );
             return;
         }
         
@@ -221,19 +237,48 @@ public class ChattingController extends HttpServlet {
         
         // !! 채팅방 나오기
         if (path.startsWith("/roomQuit/")) {
-        	System.out.println("roomQuit 요청");
-        	String[] parts = path.split("/");
-        	if(parts.length != 3) {
+            System.out.println("roomQuit 요청");
+
+            String[] parts = path.split("/");
+            if (parts.length != 3) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Room ID Missing");
                 return;
-        	}
-        	Long roomId = Long.valueOf(parts[2]);
-        	boolean result =service.quitRoomById(autoId, roomId);
-        	
-        	// 추후 수정 result 활용해야함
-        	resp.sendRedirect(req.getContextPath() + "/chat/roomList");
-        	return;
+            }
+
+            Long roomId = Long.valueOf(parts[2]);
+
+            // ✅ 방 정보 조회(재활용)
+            ChatRoomDTO roomDto = service.getRoomInfo(roomId);
+            if (roomDto == null) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Room not found");
+                return;
+            }
+
+            // ✅ 1) 우선 채팅방에서 나가기(공통)
+            boolean chatQuit = service.quitRoomById(autoId, roomId);
+
+            // ✅ 2) GROUP이면 모임에서도 나가기 (호스트는 삭제 유도 or 못 나가게 처리)
+            if ("GROUP".equalsIgnoreCase(roomDto.getRoomType()) && roomDto.getMeetingId() != null) {
+
+                // 호스트면 나가기 대신 “삭제” 유도하거나 막는 게 깔끔함
+                if (autoId == roomDto.getHostId()) {
+                    resp.setContentType("text/html; charset=UTF-8");
+                    resp.getWriter().println("<script>alert('호스트는 방 나가기 대신 모임을 삭제하세요.');history.back();</script>");
+                    return;
+                }
+
+                try {
+                    new MeetingService().quitMeet(roomDto.getMeetingId(), autoId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // 모임 나가기는 실패했어도 채팅 나가기는 됐을 수 있으니 목록으로 보냄
+                }
+            }
+
+            resp.sendRedirect(req.getContextPath() + "/chat/roomList");
+            return;
         }
+
         if ("/invite".equals(path)) {
             System.out.println("/invite 요청");
 

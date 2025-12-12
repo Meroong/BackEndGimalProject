@@ -1213,6 +1213,10 @@ body {
   cursor: pointer;
   box-shadow: 0 12px 30px rgba(79, 70, 229, 0.45);
   transition: transform 0.08s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+  display: inline-flex;          
+  align-items: center;           
+  justify-content: center;       
+  text-decoration: none;         
 }
 
 .dream-detail-chat-btn:hover {

@@ -16,6 +16,10 @@ public class TimeUtil {
 
         long diffSec = (now - past) / 1000;        // 초 차이
 
+        if (diffSec < 0) {
+            return "방금 전";
+        }
+        
         if (diffSec < 60) {
             return diffSec + "초 전";
         }

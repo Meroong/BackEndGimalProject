@@ -314,72 +314,89 @@ public class MeetingController extends HttpServlet {
 	            /* ========================
 	             * UPDATE
 	             * ======================== */
-	            case "/update":
-	                long locationId = Long.parseLong(req.getParameter("locationId"));
-	                long meetingUpId = Long.parseLong(req.getParameter("meetingId"));
+            case "/update": {
 
-	                // location 업데이트
-	                meetingService.updateLocation(
-	                        locationId,
-	                        req.getParameter("roadAddress"),
-	                        req.getParameter("jibunAddress"),
-	                        req.getParameter("addrDetail"),
-	                        latitude,
-	                        longitude
-	                );
+                try {
+                    // ---------- 파라미터 파싱 ----------
+                    long locationId = Long.parseLong(req.getParameter("locationId"));
+                    long meetingUpId = Long.parseLong(req.getParameter("meetingId"));
 
-	                // meeting 업데이트
-	                String dateStr = req.getParameter("date");
-	                dateStr = dateStr.length() == 10 ? dateStr + " 00:00:00" : dateStr;
-	                Timestamp date = Timestamp.valueOf(dateStr);
+                    String roadAddress = req.getParameter("roadAddress");
+                    String jibunAddress = req.getParameter("jibunAddress");
+                    String addrDetail = req.getParameter("addrDetail");
 
-	                meetingService.updateMeetingInfo(
-	                        meetingUpId,
-	                        req.getParameter("title"),
-	                        req.getParameter("content"),
-	                        date,
-	                        locationId,
-	                        Integer.parseInt(req.getParameter("maxMembers")),
-	                        Integer.parseInt(req.getParameter("currentMembers")),
-	                        Integer.parseInt(req.getParameter("cost")),
-	                        req.getParameter("tag"),
-	                        req.getParameter("status"),
-	                        latitude,
-	                        longitude,
-	                        autoId  //로그인 추가 시 해결
-	                );
-	        
-	                //이미지 삭제 처리
-	                String[] deleteIds = req.getParameterValues("deleteImageIds");
+                    int maxMembers = Integer.parseInt(req.getParameter("maxMembers"));
+                    int currentMembers = Integer.parseInt(req.getParameter("currentMembers"));
+                    int cost = Integer.parseInt(req.getParameter("cost"));
 
-	                if (deleteIds != null) {
-	                    FileResourceDAO fileDao = new FileResourceDAO();
+                    String title = req.getParameter("title");
+                    String content = req.getParameter("content");
+                    String tag = req.getParameter("tag");
+                    String status = req.getParameter("status");
 
-	                    for (String idStr : deleteIds) {
+                    // ---------- 날짜 처리 ----------
+                    String dateStr = req.getParameter("date");
+                    if (dateStr.length() == 10) {
+                        dateStr += " 00:00:00";
+                    }
+                    Timestamp date = Timestamp.valueOf(dateStr);
 
-	                        if (idStr == null || idStr.isBlank() || idStr.equals("null")) {
-	                            continue; // ← 건너뛰기
-	                        }
+                    // ---------- 위치 업데이트 ----------
+                    meetingService.updateLocation(
+                            locationId,
+                            roadAddress,
+                            jibunAddress,
+                            addrDetail,
+                            latitude,
+                            longitude
+                    );
 
-	                        long fileId = Long.parseLong(idStr);
-	                        imageService.deleteFile(fileId, meetingUpId, usedType);
-	                    }
-	                }
-	                //새 이미지 업로드 처리
-	                for (Part part : req.getParts()) {
-	                    if ("images".equals(part.getName()) && part.getSize() > 0) {
-	                        imageService.uploadFile(
-	                                meetingUpId,
-	                                part,
-	                                uploadPath,
-	                                "MEETING"
-	                        );
-	                    }
-	                }
+                    // ---------- 모임 정보 업데이트 ----------
+                    meetingService.updateMeetingInfo(
+                            meetingUpId,
+                            title,
+                            content,
+                            date,
+                            locationId,
+                            maxMembers,
+                            currentMembers,
+                            cost,
+                            tag,
+                            status,
+                            latitude,
+                            longitude,
+                            autoId   // 작성자 검증용
+                    );
 
-	                // 성공 시
-	                resp.sendRedirect(req.getContextPath() + "/meeting/list");
-	                return;
+                    // ---------- 이미지 처리  ----------
+                    String[] deleteIds = req.getParameterValues("deleteImageIds");
+
+                    boolean imageResult = imageService.updateMeetingImages(
+                            meetingUpId,
+                            deleteIds,
+                            req.getParts(),
+                            uploadPath
+                    );
+
+                    if (!imageResult) {
+                        System.out.println("⚠ 이미지 처리 중 일부 실패");
+                    }
+
+                    // ---------- 성공 ----------
+                    resp.sendRedirect(req.getContextPath() + "/meeting/list");
+                    return;
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+
+                    resp.setContentType("text/html; charset=UTF-8");
+                    resp.getWriter().println(
+                        "<script>alert('모임 수정 중 오류가 발생했습니다.'); history.back();</script>"
+                    );
+                    return;
+                }
+            }
+
 	                
 	            case "/status": {
 

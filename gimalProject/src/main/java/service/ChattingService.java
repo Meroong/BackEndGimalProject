@@ -18,36 +18,44 @@ public class ChattingService {
     private ChatRoomUserDAO roomUserDao = new ChatRoomUserDAO();
     private ChatRoomDAO roomDao = new ChatRoomDAO();
     private ChatMessageDAO messageDao = new ChatMessageDAO();
-    
-    // private채팅방 개설
-    public boolean makePrivateRoom(long itemId, String RoomType, long hostId, long receiverId ) {
-    	System.out.println("work service: makePrivateRoom");
-    	ChatRoomDTO dto = new ChatRoomDTO();
-    	boolean isExists = roomDao.isPrivateRoomExists(itemId, hostId, receiverId);
-    	
-    	if(!isExists) {
-    		dto.setItemId(itemId);
-        	dto.setRoomType(RoomType);
-        	dto.setHostId(hostId);
-        	
-        	
-        	int affectedRow = roomDao.createChatRoom(dto);
-        	
-        	if(affectedRow >0) {
-                // 참여자 등록
-                roomUserDao.addUserToRoom(hostId, roomId);
-                roomUserDao.addUserToRoom(receiverId, roomId);
-        		System.out.println("개설 성공");
-        		return true;
-        	}
-        	else {
-        		System.out.println("이미 존재하는 개인채팅방 혹은 오류");
-        		return false;
-        		//jsp에서 1과 0 값으로 메시지와 페이지 세팅 >0은 성공 아니면 실패 
-        	}
-    	}
-    	System.out.println("존재하는 채팅방");
-    	return false;
+
+    // PRIVATE 채팅방 개설 or 기존 방 반환
+    public long getOrCreatePrivateRoom(
+            long itemId,
+            String roomType,
+            long hostId,
+            long receiverId
+    ) {
+        System.out.println("work service: makePrivateRoom");
+
+        // 이미 존재하는 PRIVATE 채팅방 확인
+        Integer existRoomId =
+            roomDao.findPrivateRoom(itemId, hostId, receiverId);
+
+        if (existRoomId != null) {
+            System.out.println("기존 PRIVATE 채팅방 존재: roomId=" + existRoomId);
+            return existRoomId;
+        }
+
+        // 없으면 새로 생성
+        ChatRoomDTO dto = new ChatRoomDTO();
+        dto.setItemId(itemId);
+        dto.setRoomType(roomType);
+        dto.setHostId(hostId);
+
+        int roomId = roomDao.createChatRoom(dto);
+
+        if (roomId <= 0) {
+            System.out.println("PRIVATE 채팅방 생성 실패");
+            return 0;
+        }
+
+        // 참여자 등록
+        roomUserDao.addUserToRoom(hostId, roomId);
+        roomUserDao.addUserToRoom(receiverId, roomId);
+
+        System.out.println("PRIVATE 채팅방 생성 성공: roomId=" + roomId);
+        return roomId;
     }
     // group 채팅방 개설
     public boolean makeGroupRoom(long meetingId, String roomType, long hostId ) {

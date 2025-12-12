@@ -67,34 +67,39 @@
     <a href="${pageContext.request.contextPath}/chat/roomList" class="back-btn">←</a>
     채팅방 #${selectedRoomId}
 
-    <!-- ✅ 회비 버튼 유지 -->
+    <!-- 회비 버튼 유지 -->
     <c:if test="${meetingCost != null && meetingCost > 0 && !hasPaid}">
         <button class="pay-toggle-btn" onclick="togglePayBox()">회비</button>
     </c:if>
 
-    <!-- ✅ 플러스 버튼 (호스트 전용 메뉴 호출) -->
-    <c:if test="${isHost}">
-        <button class="member-btn" onclick="toggleHostMenu()">＋</button>
-    </c:if>
-</h2>
+	<!-- 플러스 버튼: 항상 노출 (나가기 메뉴 때문에) -->
+	<button class="member-btn" onclick="toggleHostMenu()">＋</button>
+	</h2>
 
-<!-- ✅ 호스트 전용 메뉴 -->
+<!-- 호스트 전용 메뉴 -->
 <div id="hostMenu" class="host-menu">
-    <button onclick="openMemberModal()">👥 모임원 관리</button>
-    <button onclick="openVoteModal()">📊 투표 만들기</button>
-</div>
 
-<!-- ✅ 회비 박스 -->
-<c:if test="${meetingCost != null && meetingCost > 0 && !hasPaid}">
-    <div class="pay-box" id="payBox">
-        <form method="post" action="${pageContext.request.contextPath}/wallet/pay">
-            <input type="hidden" name="meetingId" value="${roomInfo.meetingId}">
-            <input type="hidden" name="roomId" value="${selectedRoomId}">
-            <input type="hidden" name="amount" value="${meetingCost}">
-            <button type="submit">회비 ${meetingCost}원 결제</button>
-        </form>
-    </div>
-</c:if>
+  <!-- 방 나가기: 항상 -->
+  <form method="post"
+        action="${pageContext.request.contextPath}/chat/roomQuit/${selectedRoomId}"
+        onsubmit="return confirmExitChat();">
+    <button type="submit">🚪 방 나가기</button>
+  </form>
+
+  <!-- 모임 채팅방 + 호스트일 때만 -->
+  <c:if test="${roomInfo.roomType eq 'GROUP' && isHost}">
+    <button type="button" onclick="openMemberModal()">👥 모임원 관리</button>
+    <button type="button" onclick="openVoteModal()">📊 투표 만들기</button>
+
+    <!-- 모임 삭제까지 원하면 -->
+    <form method="post"
+          action="${pageContext.request.contextPath}/meeting/delete"
+          onsubmit="return confirm('모임이 삭제되면 채팅방도 사라집니다. 정말 삭제할까요?');">
+      <input type="hidden" name="meetingId" value="${roomInfo.meetingId}">
+      <button type="submit">🗑 모임 삭제</button>
+    </form>
+  </c:if>
+</div>
 
 <!-- 채팅 영역 -->
 <div class="chat-box">
@@ -123,7 +128,7 @@
             </div>
         </c:forEach>
 
-        <!-- ✅ 기존 메시지 -->
+        <!-- 기존 메시지 -->
         <c:url var="defaultProfile" value="/resources/images/default.jpg"/>
         <c:forEach var="msg" items="${messages}">
             <c:choose>
@@ -143,7 +148,7 @@
         </c:forEach>
     </div>
 
-    <!-- ✅ 메시지 입력 -->
+    <!-- 메시지 입력 -->
     <form class="chat-form" method="post" action="${pageContext.request.contextPath}/chat/sendChat">
         <input type="hidden" name="roomId" value="${selectedRoomId}"/>
         <input type="text" name="content" placeholder="메시지 입력"/>
@@ -153,7 +158,7 @@
 
 </div>
 
-<!-- ✅ 모임원 관리 모달 -->
+<!-- 모임원 관리 모달 -->
 <div class="modal" id="memberModal">
     <h3>모임원 관리</h3>
     <ul>
@@ -164,7 +169,7 @@
     <button onclick="closeMemberModal()">닫기</button>
 </div>
 
-<!-- ✅ 투표 생성 모달 -->
+<!-- 투표 생성 모달 -->
 <div class="modal" id="voteModal">
     <h3>투표 만들기</h3>
 
@@ -208,6 +213,13 @@ function openMemberModal() {
 
 function closeMemberModal() {
     document.getElementById("memberModal").style.display = "none";
+}
+function confirmExitChat() {
+  var isGroup = "${roomInfo.roomType}" === "GROUP";
+  if (isGroup) {
+    return confirm("채팅방을 나가면 모임에서도 나가게 됩니다. 계속할까요?");
+  }
+  return confirm("채팅방을 나갈까요?");
 }
 </script>
 
