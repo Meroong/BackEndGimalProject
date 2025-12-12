@@ -26,10 +26,7 @@ DROP TABLE IF EXISTS wallet_history;
 DROP TABLE IF EXISTS user_wallet;
 DROP TABLE IF EXISTS mock_card;
 DROP TABLE IF EXISTS notice;
-DROP TABLE IF EXISTS review;
-DROP TABLE IF EXISTS transaction;
-DROP TABLE IF EXISTS wishlist;
-DROP TABLE IF EXISTS rental_info;
+DROP TABLE IF EXISTS dream_post;
 DROP TABLE IF EXISTS file_resource;
 DROP TABLE IF EXISTS user_tag;
 DROP TABLE IF EXISTS user_address;
@@ -347,8 +344,8 @@ VALUES
 INSERT INTO meeting_location (road_address, jibun_address, addr_detail, latitude, longitude)
 VALUES ('서울특별시 한강공원', '서울특별시 용산구 한강로', '1구역', 37.526, 126.927);
 
-INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, creator_id, weather)
-VALUES ('조깅 모임', '매주 토요일 조깅', '2025-12-11 09:00:00', 1, 10, 2, 0, '운동', 'OPEN', 2, '맑음');
+INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, status, creator_id, weather, created_at)
+VALUES ('조깅 모임', '매주 토요일 조깅', '2025-12-11 09:00:00', 1, 10, 2, 0, '운동', 'OPEN', 2, '맑음', '2025-12-10 08:00:00');
 
 INSERT INTO meeting_participant (meeting_id, user_id, paid)
 VALUES (1, 1, TRUE), (1, 2, FALSE);
@@ -436,3 +433,5 @@ select * from user;
 select * from user_address;
 select * from file_resource;
 select * from report;
+select * from weather_data;
+
