@@ -1,3 +1,4 @@
+<%@page import="util.DongUtil"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.List"%>
 <%@ page import="dto.UserAddressDTO"%>
@@ -54,9 +55,8 @@
 
                 String dongName = "우리 동네";
                 UserAddressDTO addressInfo = (UserAddressDTO) session.getAttribute("addressInfo");
-                if (addressInfo != null && addressInfo.getRoadAddress() != null) {
-                    String[] parts = addressInfo.getRoadAddress().split(" ");
-                    dongName = parts[parts.length - 1];
+                if (addressInfo != null && addressInfo.getDongName() != null) {
+                    dongName = addressInfo.getDongName();
                 }
 
                 String temp = "정보 없음";
@@ -256,11 +256,15 @@
 
             <!-- 오른쪽 카드 -->
             <div>
-                <div class="weather-card" style="background-image:url('<%= bgImage %>');">
-                    <div class="weather-title">현재 <%= dongName %> 날씨</div>
-                    <div class="weather-temp"><%= temp %></div>
-                    <div class="weather-status"><%= status %></div>
-                </div>
+				<div class="weather-card">
+				    <div class="weather-header">
+				        <span class="weather-title">현재 <%= dongName %> 날씨</span>
+				        <img src="<%= bgImage %>" class="weather-icon" alt="날씨 아이콘">
+				    </div>
+				
+				    <div class="weather-temp"><%= temp %></div>
+				    <div class="weather-status"><%= status %></div>
+				</div>
 
                 <div class="activities">
                     <a href="<%= request.getContextPath() %>/meeting/list"

@@ -292,14 +292,16 @@
         }
     </style>
 
-	<script>
-	function needLogin() {
-	    if(confirm('로그인이 필요합니다.')) {
-	        <% session.setAttribute("redirectAfterLogin", request.getContextPath().toString()+"/meeting/list"); %>
-	        location.href = "<%= request.getContextPath() %>/views/user/login.jsp";
-	    }
-	}
-	</script>
+<script>
+function needLogin() {
+    if (confirm('로그인이 필요합니다.')) {
+        const redirectUrl = encodeURIComponent(location.pathname + location.search);
+        location.href =
+            "<%= request.getContextPath() %>/views/user/login.jsp?redirect=" + redirectUrl;
+    }
+}
+</script>
+
 <script>
     function autoSubmitFilter() {
         document.getElementById('filterForm').submit();

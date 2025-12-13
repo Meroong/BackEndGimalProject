@@ -1,5 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
+<%
+    String redirect = request.getParameter("redirect");
+    if (redirect != null) {
+        session.setAttribute("redirectAfterLogin", redirect);
+    }
+%>
+
 <html>
 <head>
 <meta charset="UTF-8">

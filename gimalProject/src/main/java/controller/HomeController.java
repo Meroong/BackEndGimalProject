@@ -67,6 +67,7 @@ public class HomeController extends HttpServlet {
         req.setAttribute("lat", lat);
         req.setAttribute("lng", lon);
         req.setAttribute("popularMeetings", popularMeetings);
+        
 
         // 포워드
         req.getRequestDispatcher("/index.jsp").forward(req, resp);

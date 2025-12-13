@@ -12,6 +12,7 @@ import service.ImageService;
 import service.UserService;
 import service.WalletService;
 import util.AuthUtil;
+import util.DongUtil;
 import dto.UserAddressDTO;
 import dto.UserDTO;
 import auth.JwtAuth;
@@ -201,18 +202,37 @@ public class UserController extends HttpServlet {
             }
         //유저 주소만 업데이트 검색바 용    
         case "/updateAddress": {
-
-            Long autoId = AuthUtil.getAutoId(req);
-            if (autoId == -1) {
-                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
-
+        	System.out.println("UserController: updateAddress");
+        	
             String upRoadAddress = req.getParameter("roadAddress");
             String upJibunAddress = req.getParameter("jibunAddress");
             String upAddrDetail  = req.getParameter("addrDetail");
             String upLatitude    = req.getParameter("latitude");
             String upLongitude   = req.getParameter("longitude");
+            String dongName = null;
+            System.out.println(upLatitude);
+            if (upLatitude != null && upLatitude.isBlank()) upLatitude = null;
+            if (upLongitude != null && upLongitude.isBlank()) upLongitude = null;
+            
+            Long autoId = AuthUtil.getAutoId(req);
+            if (autoId == -1) {
+                UserAddressDTO temp = new UserAddressDTO();
+                temp.setRoadAddress(upRoadAddress);
+                temp.setJibunAddress(upJibunAddress);
+
+                // ⭐⭐⭐ 이게 핵심
+                if (upLatitude != null && upLongitude != null) {
+                    temp.setLatitude(Double.parseDouble(upLatitude));
+                    temp.setLongitude(Double.parseDouble(upLongitude));
+                }
+                temp.setDongName(new DongUtil().extractAreaUnit(upJibunAddress));
+
+                req.getSession().setAttribute("addressInfo", temp);
+
+                resp.sendRedirect(req.getContextPath() + "/home");
+                return;
+            }
+
 
             try {
                 // 기존 서비스 로직 재사용

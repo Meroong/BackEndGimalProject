@@ -260,6 +260,8 @@ select:focus, input:focus {
     border-radius: 20px;
     padding: 25px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        position: relative;
+    overflow: hidden;   /* 🔥 아이콘이 커도 삐져나오지 않게 */
 }
 
 .weather-title {
@@ -280,6 +282,23 @@ select:focus, input:focus {
     font-size: 17px;
     color: #555;
     font-weight: 500;
+}
+
+
+/* 상단: 제목 + 아이콘 */
+.weather-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* 🔥 문제의 핵심 */
+.weather-icon {
+    width: 64px;        /* ← 여기서 크기 제어 */
+    height: 64px;
+    object-fit: contain;
+    flex-shrink: 0;
+    opacity: 0.95;      /* 선택 */
 }
 
 /* 활동 카드 */
