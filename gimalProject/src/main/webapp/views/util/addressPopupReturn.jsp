@@ -27,7 +27,11 @@ if (window.opener) {
     // 상세주소
     window.opener.document.getElementById("addrDetail").value = "<%= addrDetail != null ? addrDetail.replace("\"", "\\\"") : "" %>";
     window.opener.document.getElementById("addrDetailValue").value = "<%= addrDetail != null ? addrDetail.replace("\"", "\\\"") : "" %>";
-
+    //공통 검색바에서 열렸을 때
+	 if (opener.setSelectedAddress) {
+	     opener.setSelectedAddress(dongName);
+	 }
+    
     window.close();
 }
 </script>

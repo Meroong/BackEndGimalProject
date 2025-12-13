@@ -5,7 +5,7 @@
 <head>
     <title>채팅방 #${selectedRoomId}</title>
 
-    <!-- ✅ 기존 CSS 그대로 유지 -->
+    <!-- 기존 CSS 그대로 유지 -->
     <style>
         body { margin: 0; padding: 0; background: #F5F6FA; font-family: 'Pretendard', sans-serif; }
         .container { position: fixed; bottom: 20px; right: 20px; width: 400px; height: 600px; background: #fff; border-radius: 16px; box-shadow: 0 5px 18px rgba(0,0,0,0.15); display: flex; flex-direction: column; overflow: hidden; z-index: 1000; }
@@ -56,6 +56,16 @@
         .host-menu button:hover {
             background: #e96a2f;
         }
+        .bubble.image-bubble {
+		    max-width: 90%;
+		    padding: 6px;
+		}
+		.chat-image {
+		    max-width: 320px;      /* 🔥 핵심: 고정 상한 */
+		    max-height: 220px;
+		    border-radius: 12px;
+		    display: block;
+		}
     </style>
 </head>
 
@@ -130,30 +140,80 @@
 
         <!-- 기존 메시지 -->
         <c:url var="defaultProfile" value="/resources/images/default.jpg"/>
-        <c:forEach var="msg" items="${messages}">
-            <c:choose>
-                <c:when test="${msg.senderId == loginUserId}">
-                    <div class="msg right-msg">
-                        <div class="bubble right-bubble">${msg.content}</div>
-                        <img src="${msg.senderProfile != null ? msg.senderProfile : defaultProfile}">
-                    </div>
-                </c:when>
-                <c:otherwise>
-                    <div class="msg left-msg">
-                        <img src="${msg.senderProfile != null ? msg.senderProfile : defaultProfile}">
-                        <div class="bubble left-bubble">${msg.content}</div>
-                    </div>
-                </c:otherwise>
-            </c:choose>
-        </c:forEach>
+		<c:forEach var="msg" items="${messages}">
+		    <c:choose>
+				<c:when test="${msg.senderId == loginUserId}">
+				    <div class="msg right-msg">
+				
+				        <c:choose>
+				            <c:when test="${msg.messageType eq 'IMAGE'}">
+				                <div class="bubble right-bubble image-bubble">
+				                    <img src="${pageContext.request.contextPath}${msg.imageUrl}"
+				                         class="chat-image"/>
+				                </div>
+				            </c:when>
+				
+				            <c:otherwise>
+				                <div class="bubble right-bubble">
+				                    ${msg.content}
+				                </div>
+				            </c:otherwise>
+				        </c:choose>
+				
+				        <img src="${msg.senderProfile != null ? msg.senderProfile : defaultProfile}">
+				    </div>
+				</c:when>
+				<c:otherwise>
+				    <div class="msg left-msg">
+				        <img src="${msg.senderProfile != null ? msg.senderProfile : defaultProfile}">
+				
+				        <c:choose>
+				            <c:when test="${msg.messageType eq 'IMAGE'}">
+				                <div class="bubble left-bubble image-bubble">
+				                    <img src="${pageContext.request.contextPath}${msg.imageUrl}"
+				                         class="chat-image"/>
+				                </div>
+				            </c:when>
+				
+				            <c:otherwise>
+				                <div class="bubble left-bubble">
+				                    ${msg.content}
+				                </div>
+				            </c:otherwise>
+				        </c:choose>
+				    </div>
+				</c:otherwise>
+		    </c:choose>
+		</c:forEach>
     </div>
 
     <!-- 메시지 입력 -->
-    <form class="chat-form" method="post" action="${pageContext.request.contextPath}/chat/sendChat">
-        <input type="hidden" name="roomId" value="${selectedRoomId}"/>
-        <input type="text" name="content" placeholder="메시지 입력"/>
-        <button type="submit">전송</button>
-    </form>
+<form class="chat-form"
+      method="post"
+      action="${pageContext.request.contextPath}/chat/sendChat"
+      enctype="multipart/form-data">
+
+    <input type="hidden" name="roomId" value="${selectedRoomId}"/>
+
+    <!-- 📷 이미지 버튼 -->
+    <label for="imageInput"
+           style="cursor:pointer;font-size:18px;line-height:36px;">📷</label>
+
+    <!-- 실제 파일 input (숨김) -->
+    <input type="file"
+           id="imageInput"
+           name="image"
+           accept="image/*"
+           style="display:none"/>
+
+    <!-- 텍스트 입력 -->
+    <input type="text"
+           name="content"
+           placeholder="메시지 입력"/>
+
+    <!-- 전송 -->
+    <button type="submit">전송</button>
+</form>
 </div>
 
 </div>

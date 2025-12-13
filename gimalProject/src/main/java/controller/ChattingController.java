@@ -11,11 +11,13 @@ import dto.UserDTO;
 import dto.chatParticipantsUserDTO;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import service.ChattingService;
 import service.ImageService;
 import service.MeetingService;
@@ -23,6 +25,11 @@ import service.PollService;
 import service.UserService;
 import util.AuthUtil;
 
+@MultipartConfig(
+	    fileSizeThreshold = 1024 * 1024,  // 1MB
+	    maxFileSize = 5 * 1024 * 1024,     // 5MB
+	    maxRequestSize = 20 * 1024 * 1024  // 20MB
+	)
 @WebServlet("/chat/*")
 public class ChattingController extends HttpServlet {
     ChattingService service;
@@ -209,16 +216,41 @@ public class ChattingController extends HttpServlet {
         }
         
         // !! 채팅 보내기 기능
-        if("/sendChat".equals(path)) {
-        	System.out.println("sendChat 요청");
-            long roomId = Long.parseLong(req.getParameter("roomId"));
+        if ("/sendChat".equals(path)) {
+            System.out.println("sendChat 요청");
+
+            // multipart 환경에서도 roomId는 getParameter 가능
+            String roomIdStr = req.getParameter("roomId");
+            if (roomIdStr == null || roomIdStr.isBlank()) {
+                throw new RuntimeException("roomId 파라미터 누락");
+            }
+            long roomId = Long.parseLong(roomIdStr);
+
+            //  텍스트
             String content = req.getParameter("content");
-            
-            service.chattingWithUserAndRoomId(autoId, roomId,content);
-            
+
+            //  이미지 Part
+            Part imagePart = null;
+            try {
+                imagePart = req.getPart("image"); // 없으면 null
+            } catch (Exception ignore) {}
+
+            //  업로드 경로 (※ chat 폴더 기준)
+            String uploadPath = "C:/upload";
+
+            // 서비스 단일 진입점 호출
+            boolean result = service.sendChat(
+                autoId,
+                roomId,
+                content,
+                imagePart,
+                uploadPath
+            );
+
             resp.sendRedirect(req.getContextPath() + "/chat/room/" + roomId);
             return;
         }
+
         // !! 채팅방 삭제  //일단 냅두기로 관리자용도 있어도 되니까
         if (path.startsWith("/roomDelete/")) {
         	System.out.println("roomDelte 요청");

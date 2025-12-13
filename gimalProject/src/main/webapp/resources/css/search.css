@@ -1,0 +1,27 @@
+@charset "UTF-8";
+
+.common-search-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.location-btn {
+    background: #f1f3f5;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.location-btn:hover {
+    background: #e9ecef;
+}
+
+.common-search-bar input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid #ccc;
+}

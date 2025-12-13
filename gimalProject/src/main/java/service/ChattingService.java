@@ -1,5 +1,6 @@
 package service;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import dao.ChatMessageDAO;
@@ -12,6 +13,7 @@ import dto.ChatRoomDTO;
 import dto.MeetingParticipantDTO;
 import dto.UserDTO;
 import dto.chatParticipantsUserDTO;
+import jakarta.servlet.http.Part;
 
 public class ChattingService {
 
@@ -209,29 +211,59 @@ public class ChattingService {
     		//jsp에서 1과 0 값으로 메시지와 페이지 세팅 >0은 성공 아니면 실패 
     	}
     }
-    
-    //채팅 보내기 
-    public boolean chattingWithUserAndRoomId(long autoId, long roomId, String content) {
-    	System.out.println("work service: chattingWithUserAndRoomId");
-    	ChatMessageDTO dto = new ChatMessageDTO();
-    	ChatMessageDAO dao = new ChatMessageDAO();
-    	
-    	//메시지 아이디와 보낸시점은 디비에서 세팅 
-        dto.setSenderId(autoId);
+    //채팅 보내는 보내는 메서드 하나
+    public boolean sendChat(
+            long senderId,
+            long roomId,
+            String content,
+            Part imagePart,
+            String uploadPath
+    ) {
+        if (imagePart != null && imagePart.getSize() > 0) {
+            return sendImageMessage(senderId, roomId, imagePart, uploadPath);
+        }
+
+        if (content != null && !content.trim().isEmpty()) {
+            return sendTextMessage(senderId, roomId, content);
+        }
+
+        return false;
+    }
+    private boolean sendTextMessage(long senderId, long roomId, String content) {
+        ChatMessageDTO dto = new ChatMessageDTO();
+        dto.setSenderId(senderId);
         dto.setRoomId(roomId);
+        dto.setMessageType("TEXT");
         dto.setContent(content);
-        
-        //디비 인서트 결과를 어펙티드로우로 저장 
-    	int affectedRow = dao.sendMessage(dto);
-    	
-    	if(affectedRow > 0) {
-    		System.out.println("채팅 insert 성공");
-    		return true;
-    	}
-    	else {
-    		System.out.println("채팅 insert 실패");
-    		return false;
-    	}
+
+        Long messageId = messageDao.sendMessage(dto);
+        return messageId != null && messageId > 0;
+    }
+    private boolean sendImageMessage(
+            long senderId,
+            long roomId,
+            Part imagePart,
+            String uploadPath
+    ) {
+        // 메시지 먼저 생성 (IMAGE 타입)
+        ChatMessageDTO msg = new ChatMessageDTO();
+        msg.setSenderId(senderId);
+        msg.setRoomId(roomId);
+        msg.setMessageType("IMAGE");
+
+        Long messageId = messageDao.sendMessage(msg);
+        if (messageId == null || messageId <= 0) return false;
+
+        // 이미지 업로드
+        ImageService imageService = new ImageService();
+        boolean uploaded = imageService.uploadFile(
+            messageId,               // usedId = messageId
+            imagePart,
+            uploadPath + File.separator + "chat",
+            "CHAT"
+        );
+
+        return uploaded;
     }
     //url 통해 방에 접근하는 거 방지용 로직
     public boolean checkUserInRoom(long userId, long roomId) {
