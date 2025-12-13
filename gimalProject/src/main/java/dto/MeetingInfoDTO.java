@@ -42,7 +42,7 @@ public class MeetingInfoDTO {
     // Image URLs (여러 장 가능) 파일을 보여주기 위해 url이 필요하고 관리하기 위해 id가 필요 
     private List<FileResourceDTO> images;   // 이미지 리스트
     
-    private String dong;
+    private String dongName;
     
 	public boolean isCreator() {
 		return creator;
@@ -79,16 +79,15 @@ public class MeetingInfoDTO {
         this.thumbnailUrl = thumbnailUrl;
     }
 
-    public String getDong() {
-        return dong;
-    }
+    public String getDongName() {
+		return dongName;
+	}
 
-    public void setDong(String dong) {
-        this.dong = dong;
-    }
+	public void setDongName(String dongName) {
+		this.dongName = dongName;
+	}
 
-    
-    public String getTimeAgo() {
+	public String getTimeAgo() {
 		return timeAgo;
 	}
 

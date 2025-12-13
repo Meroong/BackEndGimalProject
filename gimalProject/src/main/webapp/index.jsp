@@ -10,6 +10,7 @@
     <meta charset="UTF-8">
     <title>도란도란 - 우리 동네 유아·애견 커넥트</title>
     <link rel="stylesheet" href="home.css">
+    <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/searchBar.css">
 
     <style>
         .weather-card {
@@ -28,27 +29,9 @@
     <jsp:include page="/include/header.jsp" />
 
     <!-- 검색 영역 -->
-    <section class="search-section">
-        <div class="search-row">
-            <select>
-                <option>구로동</option>
-                <option>가리봉동</option>
-                <option>고척동</option>
-            </select>
-
-            <select>
-                <option>모임</option>
-                <option>교환</option>
-                <option>드림</option>
-            </select>
-
-            <input type="text" placeholder="검색어를 입력해주세요">
-            <button class="search-btn">검색</button>
-        </div>
-
-        <div class="title-main">날씨가 쌀쌀하니 겉옷 꼭 챙기세요!</div>
-        <div class="title-sub">오늘의 추천활동은 실내 모임이에요 😊</div>
-    </section>
+	<jsp:include page="/include/searchBar.jsp">
+	    <jsp:param name="page" value="home"/>
+	</jsp:include>
 
     <!-- 메인 영역 -->
     <section class="main-box">
@@ -239,7 +222,7 @@
 		        </div>
 		
 		        <div class="pmi-meta">
-		            <span>📍 <%= m.getDong() != null ? m.getDong() : "우리 동네" %></span>
+		            <span>📍 <%= m.getDongName() != null ? m.getDongName() : "우리 동네" %></span>
 		            <span>⏰ <%= m.getTimeAgo() != null ? m.getTimeAgo() : "방금 전" %></span>
 		        </div>
 		

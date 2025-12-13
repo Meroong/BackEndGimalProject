@@ -155,7 +155,7 @@ public class MeetingController extends HttpServlet {
 			        System.out.println("이미지 없음");
 			    }
 	
-			    // 신고 여부 체크
+		    // 신고 여부 체크
 			    boolean hasReported = false;
 			    if (userId != -1) {
 			        hasReported = new ReportService().hasAlreadyReported(

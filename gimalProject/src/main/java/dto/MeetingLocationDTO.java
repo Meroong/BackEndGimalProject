@@ -6,6 +6,7 @@ public class MeetingLocationDTO {
     private String roadAddress;    // 도로명 주소
     private String jibunAddress;   // 지번 주소
     private String addrDetail;     // 상세 주소
+    private String dongName;
     private Double latitude;       // 위도
     private Double longitude;      // 경도
 
@@ -21,7 +22,15 @@ public class MeetingLocationDTO {
         this.longitude = longitude;
     }
 
-    // Getter & Setter
+    public String getDongName() {
+		return dongName;
+	}
+
+	public void setDongName(String dongName) {
+		this.dongName = dongName;
+	}
+
+	// Getter & Setter
     public Long getId() {
         return id;
     }

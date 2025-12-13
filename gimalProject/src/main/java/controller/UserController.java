@@ -199,6 +199,49 @@ public class UserController extends HttpServlet {
                 req.getRequestDispatcher("/views/user/mypage.jsp").forward(req, resp);
                 return;
             }
+        //유저 주소만 업데이트 검색바 용    
+        case "/updateAddress": {
+
+            Long autoId = AuthUtil.getAutoId(req);
+            if (autoId == -1) {
+                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
+
+            String upRoadAddress = req.getParameter("roadAddress");
+            String upJibunAddress = req.getParameter("jibunAddress");
+            String upAddrDetail  = req.getParameter("addrDetail");
+            String upLatitude    = req.getParameter("latitude");
+            String upLongitude   = req.getParameter("longitude");
+
+            try {
+                // 기존 서비스 로직 재사용
+                userService.updateUser(
+                    autoId,
+                    null,   // password
+                    null,   // nickname
+                    upRoadAddress,
+                    upJibunAddress,
+                    upAddrDetail,
+                    upLatitude,
+                    upLongitude
+                );
+
+                // 세션 갱신
+                UserAddressDTO updatedAddress =
+                        userService.getAddressInfo(autoId);
+                req.getSession().setAttribute("addressInfo", updatedAddress);
+
+                resp.setStatus(HttpServletResponse.SC_OK);
+
+            } catch (Exception e) {
+                resp.sendError(
+                    HttpServletResponse.SC_BAD_REQUEST,
+                    e.getMessage()
+                );
+            }
+            return;
+        }
 
         /* ==========================================================
          * 회원 탈퇴 (예외 기반)

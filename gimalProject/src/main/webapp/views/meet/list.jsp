@@ -89,12 +89,13 @@
         .content {
             flex: 1;
         }
-        .content-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
+		.content-header {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    margin-bottom: 20px;
+		     margin-left: 330px;
+		}
         .search-box input {
             width: 350px;
             height: 42px;
@@ -311,6 +312,23 @@
 <div class="page-wrapper">
 
     <jsp:include page="/include/header.jsp" />
+    
+                    <div class="content-header">
+                    <!-- 검색어 -->
+                    <div class="search-box">
+                        <input type="text"
+                               name="keyword"
+                               placeholder="검색어를 입력하세요"
+                               value="<%= keyword %>">
+                    </div>
+
+                    <!-- 모임 생성 버튼 -->
+                    <% if (isLogin) { %>
+                        <a href="<%= request.getContextPath() %>/views/meet/meetForm.jsp" class="write-btn">모임 생성 ✏️</a>
+                    <% } else { %>
+                        <a href="#" class="write-btn" onclick="needLogin()">모임 생성 ✏️</a>
+                    <% } %>
+                </div>
 
     <!-- 전체 필터 + 검색을 하나의 GET 폼으로 -->
     <form id="filterForm" method="get" action="<%= request.getContextPath() %>/meeting/list">
@@ -419,27 +437,10 @@
                     </select>
                 </div>
             </div>
+            
             <!-- 우측 콘텐츠 -->
             <div class="content">
-
-                <div class="content-header">
-                    <!-- 검색어 -->
-                    <div class="search-box">
-                        <input type="text"
-                               name="keyword"
-                               placeholder="검색어를 입력하세요"
-                               value="<%= keyword %>">
-                    </div>
-
-                    <!-- 모임 생성 버튼 -->
-                    <% if (isLogin) { %>
-                        <a href="<%= request.getContextPath() %>/views/meet/meetForm.jsp" class="write-btn">모임 생성 ✏️</a>
-                    <% } else { %>
-                        <a href="#" class="write-btn" onclick="needLogin()">모임 생성 ✏️</a>
-                    <% } %>
-                </div>
-
-               
+              
                 <!-- ====== 모임 리스트 출력 ====== -->
 			<%
 			    List<MeetingInfoDTO> list = (List<MeetingInfoDTO>) request.getAttribute("meetingList");
@@ -458,7 +459,7 @@
 			
 			    <div class="meeting-meta-top">
 				    <span class="meet-date"><%= m.getDateStr() %></span>
-				    <span class="meet-dong"><%= m.getDong() %></span>
+				    <span class="meet-dong"><%= m.getDongName() %></span>
 				</div>
 				
 				<div class="meeting-meta-bottom">

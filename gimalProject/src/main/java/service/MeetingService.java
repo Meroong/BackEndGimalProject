@@ -25,6 +25,7 @@ import dto.MeetingDTO;
 import dto.MeetingInfoDTO;
 import dto.MeetingLocationDTO;
 import dto.MeetingParticipantDTO;
+import util.DongUtil;
 import util.TimeUtil;
 
 public class MeetingService {
@@ -77,7 +78,8 @@ public class MeetingService {
         System.out.println(locationDto.getAddrDetail());
         infoDto.setLatitude(locationDto.getLatitude());
         infoDto.setLongitude(locationDto.getLongitude());
-
+        infoDto.setDongName(locationDto.getDongName());
+        
         // 이미지 정보 가져오기
         ImageService imageService = new ImageService(); 
         List<FileResourceDTO> imageUrls = imageService.getMeetingImage(meetingId, "MEETING");
@@ -113,8 +115,6 @@ public class MeetingService {
             if (dto.getDate() != null) {
                 dto.setDateStr(sdf.format(dto.getDate()));
             }
-            dto.setDong(extractAreaUnit(dto.getJibunAddress()));
-        
         // 작성자인지
         boolean isCreator = (loginUserId != -1 && loginUserId == dto.getCreatorId());
         dto.setCreator(isCreator);
@@ -151,7 +151,6 @@ public class MeetingService {
             if (dto.getDate() != null) {
                 dto.setDateStr(sdf.format(dto.getDate()));
             }
-            dto.setDong(extractAreaUnit(dto.getJibunAddress()));
         }
         return aList;
     }
@@ -170,7 +169,8 @@ public class MeetingService {
     ) throws Exception {
     	System.out.println("Service: updateLocation");
         if (locationId <= 0) throw new IllegalArgumentException("주소정보가 없습니다.");
-
+        String dong = new DongUtil().extractAreaUnit(jibunAddress);
+        
         MeetingLocationDTO dto = new MeetingLocationDTO();
         dto.setId(locationId);
         dto.setRoadAddress(roadAddress);
@@ -178,6 +178,7 @@ public class MeetingService {
         dto.setAddrDetail(addrDetail);
         dto.setLatitude(latitude);
         dto.setLongitude(longitude);
+        dto.setDongName(dong);
 
         boolean result = new MeetingLocationDAO().updateLocation(dto);
         if (!result) throw new Exception("모임 장소 업데이트 실패");
@@ -192,14 +193,17 @@ public class MeetingService {
             double latitude,
             double longitude
     ) throws Exception {
-        System.out.println("Service: insertLocation");
-
+    	System.out.println("Service: insertLocation");
         MeetingLocationDTO dto = new MeetingLocationDTO();
         dto.setRoadAddress(roadAddress);
         dto.setJibunAddress(jibunAddress);
         dto.setAddrDetail(addrDetail);
         dto.setLatitude(latitude);
         dto.setLongitude(longitude);
+
+        //동 정보 저장하도록 추가
+        String dong = new DongUtil().extractAreaUnit(jibunAddress);
+        dto.setDongName(dong);
 
         Long rs = new MeetingLocationDAO().insertLocation(dto);
         if (rs != null) return rs;
@@ -510,26 +514,7 @@ public class MeetingService {
 
         new MeetingDAO().updateStatus(meetingId, "OPEN");
     }
-    private String extractAreaUnit(String jibunAddress) {
-    	System.out.println("Service: extractAreaUnit");
-        if (jibunAddress == null || jibunAddress.isBlank()) {
-            return "구로동"; // 기본값
-        }
 
-        String[] parts = jibunAddress.split(" ");
-        for (int i = parts.length - 1; i >= 0; i--) {
-            String p = parts[i];
-            if (
-                p.endsWith("동") ||
-                p.endsWith("읍") ||
-                p.endsWith("면") ||
-                p.endsWith("리")
-            ) {
-                return p;
-            }
-        }
-        return "구로동";
-    }
     //홈 지도용 - 활성 모임 조회 (최소 정보)
     public List<MeetingInfoDTO> getActiveMeetingsForMap() {
     	System.out.println("Service: getActiveMeeintgsForMap");

@@ -1,37 +1,58 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
-    // 팝업에서 전달되는 주소 파라미터
+    String mode = request.getParameter("mode"); // search | mypage
     String roadAddr = request.getParameter("roadAddrPart1");
     String jibunAddr = request.getParameter("jibunAddr");
     String addrDetail = request.getParameter("addrDetail");
 
-    // ====== 🔥 디버깅용 출력 ======
-    System.out.println("==== [주소 API 반환값 확인] ====");
-    System.out.println("roadAddrPart1 = " + roadAddr);
-    System.out.println("jibunAddr     = " + jibunAddr);
-    System.out.println("addrDetail    = " + addrDetail);
-    System.out.println("===============================");
+    String dongName = "";
+    if (jibunAddr != null) {
+        String[] parts = jibunAddr.split(" ");
+        dongName = parts[parts.length - 1];
+    }
 %>
+
 <script>
-if (window.opener) {
+if (window.opener && !window.opener.closed) {
 
+    // 🔹 공통: input 채우기
+    function setValue(id, val) {
+        const el = opener.document.getElementById(id);
+        if (el) el.value = val || "";
+    }
 
-    // 도로명주소
-    window.opener.document.getElementById("roadAddress").value = "<%= roadAddr %>";
-    window.opener.document.getElementById("roadAddressValue").value = "<%= roadAddr %>";
+    setValue("roadAddress", "<%= roadAddr %>");
+    setValue("jibunAddress", "<%= jibunAddr %>");
+    setValue("addrDetail", "<%= addrDetail %>");
 
-    // 지번주소
-    window.opener.document.getElementById("jibunAddress").value = "<%= jibunAddr %>";
-    window.opener.document.getElementById("jibunAddressValue").value = "<%= jibunAddr %>";
+    const mode = "<%= mode %>";
 
-    // 상세주소
-    window.opener.document.getElementById("addrDetail").value = "<%= addrDetail != null ? addrDetail.replace("\"", "\\\"") : "" %>";
-    window.opener.document.getElementById("addrDetailValue").value = "<%= addrDetail != null ? addrDetail.replace("\"", "\\\"") : "" %>";
-    //공통 검색바에서 열렸을 때
-	 if (opener.setSelectedAddress) {
-	     opener.setSelectedAddress(dongName);
-	 }
-    
+    // =========================
+    // 🔍 공통 검색바에서 열림
+    // =========================
+    if (mode === "search") {
+        if (opener.setSelectedAddress) {
+            opener.setSelectedAddress("<%= dongName %>");
+        }
+
+        // 👉 서버 반영은 "검색 버튼" 또는 즉시 submit에서 처리
+        if (opener.onSearchAddressSelected) {
+            opener.onSearchAddressSelected({
+                roadAddress: "<%= roadAddr %>",
+                jibunAddress: "<%= jibunAddr %>",
+                dongName: "<%= dongName %>"
+            });
+        }
+    }
+
+    // =========================
+    // 👤 마이페이지에서 열림
+    // =========================
+    if (mode === "mypage") {
+        // ❗ 여기서는 DB 업데이트 절대 안 함
+        // 사용자가 "수정하기" 눌러야 UserController 탄다
+    }
+
     window.close();
 }
 </script>

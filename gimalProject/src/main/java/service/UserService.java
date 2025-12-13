@@ -7,6 +7,7 @@ import dao.UserDAO;
 import dto.UserAddressDTO;
 import dto.UserDTO;
 import jakarta.servlet.http.HttpSession;
+import util.DongUtil;
 
 public class UserService {
 
@@ -170,6 +171,11 @@ public class UserService {
         } catch (Exception e) {
             throw new RuntimeException("잘못된 위도/경도 값입니다.");
         }
+        //동음면리 정보 추출 
+        DongUtil dongUtil = new DongUtil();
+        String dongName = dongUtil.extractAreaUnit(jibunAddress);
+
+        addr.setDongName(dongName);
 
         addressDAO.saveOrUpdate(addr);
 

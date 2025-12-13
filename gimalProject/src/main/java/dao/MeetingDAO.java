@@ -45,25 +45,26 @@ public class MeetingDAO {
 
         StringBuilder sql = new StringBuilder();
         sql.append("""
-                SELECT 
-                    m.id,
-                    m.title,
-                    m.content,
-                    m.date,
-                    m.location_id,
-                    m.max_members,
-                    m.current_members,
-                    m.tag,
-                    m.status,
-                    m.view_count,
-                    m.weather,
-                    m.created_at,
-                    l.road_address,
-                    l.jibun_address
-                FROM meeting m
-                JOIN meeting_location l ON m.location_id = l.id
-                WHERE 1 = 1
-                """);
+        	    SELECT 
+        	        m.id,
+        	        m.title,
+        	        m.content,
+        	        m.date,
+        	        m.location_id,
+        	        m.max_members,
+        	        m.current_members,
+        	        m.tag,
+        	        m.status,
+        	        m.view_count,
+        	        m.weather,
+        	        m.created_at,
+        	        l.road_address,
+        	        l.jibun_address,
+        	        l.dong_name
+        	    FROM meeting m
+        	    JOIN meeting_location l ON m.location_id = l.id
+        	    WHERE 1 = 1
+        	""");
 
         // 동적 파라미터
         List<Object> params = new ArrayList<>();
@@ -144,6 +145,7 @@ public class MeetingDAO {
                     dto.setCreatedAt(rs.getTimestamp("created_at"));
                     dto.setRoadAddress(rs.getString("road_address"));
                     dto.setJibunAddress(rs.getString("jibun_address"));
+                    dto.setDongName(rs.getString("dong_name"));
                     list.add(dto);
                 }
             }
@@ -496,7 +498,8 @@ public class MeetingDAO {
                 m.current_members,
                 m.max_members,
                 m.tag,
-                l.road_address
+                l.road_address,
+                l.dong_name
             FROM meeting m
             JOIN meeting_location l ON m.location_id = l.id
             WHERE m.status = 'OPEN'
@@ -521,7 +524,7 @@ public class MeetingDAO {
                 dto.setMaxMembers(rs.getInt("max_members"));
                 dto.setTag(rs.getString("tag"));
                 dto.setRoadAddress(rs.getString("road_address"));
-
+                dto.setDongName(rs.getString("dong_name"));
                 list.add(dto);
             }
 
@@ -544,6 +547,7 @@ public class MeetingDAO {
                 m.view_count,
                 m.created_at,
                 l.road_address,
+                l.dong_name,
                 MIN(fr.file_url) AS thumbnail
             FROM meeting m
             JOIN meeting_location l ON m.location_id = l.id

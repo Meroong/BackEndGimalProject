@@ -1,51 +1,85 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-<div class="common-search-bar">
+<%@ page contentType="text/html;charset=UTF-8" %>
 
-    <!-- 📍 지역 버튼 -->
-    <button type="button"
-            class="location-btn"
-            onclick="openJusoPopup()">
-        📍 <span id="currentDong">
-            ${sessionScope.addressInfo != null
-                ? sessionScope.addressInfo.dongName
-                : "우리 동네"}
-        </span>
-    </button>
+<%
+    String mode = request.getParameter("mode");
+    if (mode == null) mode = "home";
+%>
 
-    <!-- 🔍 검색어 -->
-    <input type="text"
-           name="keyword"
-           placeholder="제목 또는 내용을 검색하세요"
-           value="${param.keyword != null ? param.keyword : ''}" />
+<form id="commonSearchForm" method="get">
+<section class="search-section">
+    <div class="search-row">
 
-    <!-- 검색 버튼 -->
-    <button type="submit" class="search-btn">검색</button>
+        <%-- 📍 우리동네 : home에서만 표시 --%>
+        <% if ("home".equals(mode)) { %>
+        <button type="button"
+                class="select-like"
+                onclick="openJusoPopup()">
+            📍 <span id="currentDong">
+                ${sessionScope.addressInfo != null
+                    ? sessionScope.addressInfo.dongName
+                    : "우리 동네"}
+            </span>
+        </button>
+        <% } %>
 
-    <!-- ✅ 주소 hidden (단 하나만) -->
-    <input type="hidden"
-           name="dong"
-           id="dongInput"
-           value="${sessionScope.addressInfo != null
-                   ? sessionScope.addressInfo.dongName
-                   : ''}">
-</div>
+        <%-- 대상 선택 --%>
+        <% if ("home".equals(mode)) { %>
+            <select id="targetSelect" name="target">
+                <option value="meeting">모임</option>
+                <option value="dream">드림</option>
+            </select>
+        <% } else { %>
+            <!-- meeting/list에서는 모임 고정 -->
+            <input type="hidden" name="target" value="meeting">
+        <% } %>
+
+        <!-- 검색어 -->
+        <input type="text"
+               name="keyword"
+               placeholder="검색어를 입력해주세요"
+               value="${param.keyword != null ? param.keyword : ''}">
+
+        <button type="submit" class="search-btn">검색</button>
+
+        <!-- 동 정보 (home에서만 의미 있음) -->
+        <input type="hidden"
+               name="dong"
+               id="dongInput"
+               value="${sessionScope.addressInfo != null
+                       ? sessionScope.addressInfo.dongName
+                       : ''}">
+    </div>
+</section>
+</form>
+
 
 <script>
+document.getElementById("commonSearchForm").addEventListener("submit", function () {
+    const targetInput = document.querySelector("[name='target']");
+    const target = targetInput ? targetInput.value : "meeting";
+
+    if (target === "dream") {
+        this.action = "<%= request.getContextPath() %>/dream/list.do";
+    } else {
+        this.action = "<%= request.getContextPath() %>/meeting/list";
+    }
+});
+
 function openJusoPopup() {
     window.open(
         "https://business.juso.go.kr/addrlink/addrLinkUrl.do"
         + "?confmKey=devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc="
         + "&returnUrl=" + encodeURIComponent(
-            "http://localhost:8080/gimalProject/views/util/addressPopupReturn.jsp"
-          )
+            "http://localhost:8080/gimalProject/views/util/addressPopupReturn.jsp?mode=search"
+        )
         + "&resultType=4",
         "jusoPopup",
         "width=570,height=420,scrollbars=yes,resizable=yes"
     );
 }
 
-// 🔥 addressPopupReturn.jsp 에서 호출됨
 function setSelectedAddress(dongName) {
     document.getElementById("currentDong").innerText = dongName;
     document.getElementById("dongInput").value = dongName;

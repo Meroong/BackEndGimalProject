@@ -11,13 +11,27 @@ public class UserAddressDTO {
     private Double longitude;     // 경도
     private Timestamp createdAt;  // 등록일시
     private Timestamp updatedAt;  // 수정일시
+    
+    private String dongName;
 
-    public UserAddressDTO() {}
 
 
+	public UserAddressDTO() {}
+
+
+	
     // ---------------------------
     // Getter / Setter
     // ---------------------------
+	
+    public String getDongName() {
+		return dongName;
+	}
+
+
+	public void setDongName(String dongName) {
+		this.dongName = dongName;
+	}
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
 

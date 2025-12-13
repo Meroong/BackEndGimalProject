@@ -250,8 +250,11 @@
         const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
         function openJusoPopup() {
             window.open(
-                "https://business.juso.go.kr/addrlink/addrLinkUrl.do?confmKey=" + POPUP_KEY
-                + "&returnUrl=" + encodeURIComponent(RETURN_URL)
+                "https://business.juso.go.kr/addrlink/addrLinkUrl.do"
+                + "?confmKey=devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc="
+                + "&returnUrl=" + encodeURIComponent(
+                    "http://localhost:8080/gimalProject/views/util/addressPopupReturn.jsp?mode=mypage"
+                )
                 + "&resultType=4",
                 "jusoPopup",
                 "width=570,height=420,scrollbars=yes,resizable=yes"
