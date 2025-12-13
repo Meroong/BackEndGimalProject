@@ -66,7 +66,6 @@ public class HomeController extends HttpServlet {
         req.setAttribute("weather", weather);
         req.setAttribute("lat", lat);
         req.setAttribute("lng", lon);
-        req.setAttribute("weather", weather);
         req.setAttribute("popularMeetings", popularMeetings);
 
         // 포워드

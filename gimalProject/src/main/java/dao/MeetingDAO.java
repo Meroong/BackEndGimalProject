@@ -487,56 +487,9 @@ public class MeetingDAO {
      *  - 조회수 높은 순
      *  - 최대 3개
      */
-    public List<MeetingInfoDTO> findPopularMeetings() {
 
-        String sql = """
-            SELECT
-                m.id,
-                m.title,
-                m.created_at,
-                m.view_count,
-                m.current_members,
-                m.max_members,
-                m.tag,
-                l.road_address,
-                l.dong_name
-            FROM meeting m
-            JOIN meeting_location l ON m.location_id = l.id
-            WHERE m.status = 'OPEN'
-              AND m.created_at >= NOW() - INTERVAL 7 DAY
-            ORDER BY m.view_count DESC, m.created_at DESC
-            LIMIT 3
-        """;
-
-        List<MeetingInfoDTO> list = new ArrayList<>();
-
-        try (Connection con = JDBCUtil.jdbcCon();
-             PreparedStatement pstmt = con.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            while (rs.next()) {
-                MeetingInfoDTO dto = new MeetingInfoDTO();
-                dto.setMeetingId(rs.getLong("id"));
-                dto.setTitle(rs.getString("title"));
-                dto.setCreatedAt(rs.getTimestamp("created_at"));
-                dto.setViewCount(rs.getInt("view_count"));
-                dto.setCurrentMembers(rs.getInt("current_members"));
-                dto.setMaxMembers(rs.getInt("max_members"));
-                dto.setTag(rs.getString("tag"));
-                dto.setRoadAddress(rs.getString("road_address"));
-                dto.setDongName(rs.getString("dong_name"));
-                list.add(dto);
-            }
-
-        } catch (SQLException e) {
-            System.out.println("인기 모임 조회 중 SQL 오류");
-            e.printStackTrace();
-        }
-
-        return list;
-    }
     public List<MeetingInfoDTO> findPopularMeetings(int limit) {
-
+    	System.out.println("DAO: findPopularMeetings");
         String sql = """
             SELECT
                 m.id,
@@ -570,6 +523,7 @@ public class MeetingDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
+                	System.out.println("DAO: findPopularMeetings");
                     MeetingInfoDTO dto = new MeetingInfoDTO();
                     dto.setMeetingId(rs.getLong("id"));
                     dto.setTitle(rs.getString("title"));
@@ -580,6 +534,7 @@ public class MeetingDAO {
                     dto.setCreatedAt(rs.getTimestamp("created_at"));
                     dto.setRoadAddress(rs.getString("road_address"));
                     dto.setThumbnailUrl(rs.getString("thumbnail"));
+                    dto.setDongName(rs.getString("dong_name"));
                     list.add(dto);
                 }
             }
