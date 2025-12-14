@@ -43,19 +43,19 @@ function needLoginForJoin() {
     }
 }
 // 신고버튼 클릭 시 로그인 여부 확인
-function handleReportClick(usedType, targetUserId, usedId) {
-    if (!IS_LOGIN) {
-        // 로그인 안 된 경우
-        if (confirm("신고하려면 로그인이 필요합니다.\n로그인 하시겠습니까?")) {
-            // 현재 페이지를 로그인 후 복귀용으로 저장
-            const currentUrl = encodeURIComponent(window.location.href);
-            location.href = "<%= request.getContextPath() %>/page/login";
-        }
-        return;
-    }
+<script>
+function needLoginForJoin() {
+    if (confirm("참여하시려면 로그인이 필요합니다.\n로그인 하시겠습니까?")) {
 
-    // 로그인 된 경우 → 기존 모달 호출
-    openReportModal(usedType, targetUserId, usedId);
+        const redirectUrl = encodeURIComponent(
+            "<%= request.getContextPath() %>" +
+            window.location.pathname +
+            window.location.search
+        );
+
+        location.href =
+            "<%= request.getContextPath() %>/page/login?redirect=" + redirectUrl;
+    }
 }
 </script>
 

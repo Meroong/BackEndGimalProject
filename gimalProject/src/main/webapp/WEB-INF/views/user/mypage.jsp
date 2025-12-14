@@ -280,12 +280,15 @@
     %>
 
     <%-- alert용 메시지 (MVC2 원칙대로 Controller에서만 세팅) --%>
-    <c:if test="${not empty errorMessage}">
-        <script>alert("${errorMessage}");</script>
-    </c:if>
-    <c:if test="${not empty successMessage}">
-        <script>alert("${successMessage}");</script>
-    </c:if>
+	<c:if test="${not empty errorMessage}">
+	    <script>alert("${errorMessage}");</script>
+	    <c:remove var="errorMessage" scope="session"/>
+	</c:if>
+	
+	<c:if test="${not empty successMessage}">
+	    <script>alert("${successMessage}");</script>
+	    <c:remove var="successMessage" scope="session"/>
+	</c:if>
 
     <%
         if (user != null) {
@@ -383,7 +386,9 @@
             <%-- 가운데: 포인트 / 지갑 / 충전 영역 --%>
             <div class="map-card">
 	<div class="map-card">
-    <jsp:include page="/WEB-INF/views/wallet/wallet_section.jsp" />
+    <jsp:include page="/WEB-INF/views/wallet/wallet_section.jsp">
+	    <jsp:param name="returnUrl" value="/page/mypage" />
+	</jsp:include>
 	</div>
 
             <%-- 오른쪽: 알림 / 추천 활동 --%>

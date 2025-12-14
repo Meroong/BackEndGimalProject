@@ -19,7 +19,7 @@ public class WeatherService {
      */
     public WeatherDTO getWeather(double lat, double lon) {
 
-        // 1️⃣ DB 캐시 조회
+        // DB 캐시 조회
         WeatherDTO cached =
             weatherDAO.findRecentByLocation(lat, lon, 30);
 
@@ -28,15 +28,15 @@ public class WeatherService {
             return cached;
         }
 
-        // 2️⃣ API 호출
+        // API 호출
         System.out.println("🌤 API 호출");
         String jsonStr = callAnAPI(lat, lon);
         if (jsonStr == null) return null;
 
-        // 3️⃣ JSON → DTO
+        // JSON → DTO
         WeatherDTO dto = parseWeather(jsonStr, lat, lon);
 
-        // 4️⃣ DB 저장
+        //DB 저장
         weatherDAO.insertWeather(dto);
 
         return dto;

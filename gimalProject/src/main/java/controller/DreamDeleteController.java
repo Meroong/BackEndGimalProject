@@ -27,7 +27,7 @@ public class DreamDeleteController extends HttpServlet {
 
         Long autoId = AuthUtil.getAutoId(request);
         if (autoId == -1) {
-            response.sendRedirect(request.getContextPath() + "/views/user/login.jsp");
+        	response.sendRedirect(request.getContextPath() + "/page/login");
             return;
         }
 

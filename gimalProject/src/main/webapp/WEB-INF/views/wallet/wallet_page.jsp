@@ -35,14 +35,13 @@
 <script>
 function goBack() {
     const params = new URLSearchParams(window.location.search);
-    const roomId = params.get("roomId");
+    const returnUrl = params.get("returnUrl");
 
-    if (roomId) {
-        location.href =
-          "${pageContext.request.contextPath}/chat/room/" + roomId;
+    if (returnUrl && returnUrl.startsWith("/")) {
+        location.href = "${pageContext.request.contextPath}" + returnUrl;
     } else {
         location.href =
-          "${pageContext.request.contextPath}/chat/roomList";
+          "${pageContext.request.contextPath}/page/mypage";
     }
 }
 </script>

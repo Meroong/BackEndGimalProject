@@ -13,7 +13,6 @@ import dto.DailySignupDTO;
 import dto.ReportDTO;
 import dto.ReportStatusCountDTO;
 import dto.UserDTO;
-import dto.UserTrustRankDTO;
 import dao.AdminMeetingDAO;
 import dto.AdminMeetingDTO;
 import dao.AdminMeetingDAO;
@@ -265,16 +264,7 @@ public class AdminService {
         }
     }
 
-    // 표: 신뢰도 높은 유저 TOP N
-    public List<UserTrustRankDTO> getTopUsersByTrustScore(int limit) {
-        try {
-            AdminStatsDAO dao = new AdminStatsDAO();
-            return dao.getTopUsersByTrustScore(limit);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+
 
     // 그래프: 신고 상태별 개수
     public List<ReportStatusCountDTO> getReportStatusCounts() {

@@ -34,12 +34,12 @@ public class DreamWriteController extends HttpServlet {
     	Long autoId = AuthUtil.getAutoId(request);
     	
     	if(autoId == -1) {
-        	response.sendRedirect(request.getContextPath() + "/views/user/login.jsp");
+    		response.sendRedirect(request.getContextPath() + "/page/login");
         	return;
         }
 
-        RequestDispatcher rd = request.getRequestDispatcher("/dream/write.jsp");
-        rd.forward(request, response);
+    	RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/dream/write.jsp");
+    		rd.forward(request, response);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class DreamWriteController extends HttpServlet {
         Long autoId = AuthUtil.getAutoId(request);
     	
     	if(autoId == -1) {
-        	response.sendRedirect(request.getContextPath() + "/views/user/login.jsp");
+    		response.sendRedirect(request.getContextPath() + "/page/login");
         	return;
         }
 
@@ -81,8 +81,8 @@ public class DreamWriteController extends HttpServlet {
             newId = dreamPostDAO.insert(dto);
             if (newId == null) {
                 request.setAttribute("errorMessage", "게시글 등록에 실패했습니다. 잠시 후 다시 시도해주세요.");
-                RequestDispatcher rd = request.getRequestDispatcher("/dream/write.jsp");
-                rd.forward(request, response);
+                RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/dream/write.jsp");
+                	rd.forward(request, response);
                 return;
             }
         } catch (SQLException e) {

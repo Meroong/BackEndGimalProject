@@ -33,7 +33,7 @@ public class DreamEditController extends HttpServlet {
 
         Long autoId = AuthUtil.getAutoId(request);
         if (autoId == -1) {
-            response.sendRedirect(request.getContextPath() + "/views/user/login.jsp");
+        	response.sendRedirect(request.getContextPath() + "/page/login");
             return;
         }
 
@@ -59,7 +59,7 @@ public class DreamEditController extends HttpServlet {
         }
 
         request.setAttribute("post", post);
-        RequestDispatcher rd = request.getRequestDispatcher("/dream/edit.jsp");
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/dream/edit.jsp");
         rd.forward(request, response);
     }
 
@@ -71,7 +71,7 @@ public class DreamEditController extends HttpServlet {
 
         Long autoId = AuthUtil.getAutoId(request);
         if (autoId == -1) {
-            response.sendRedirect(request.getContextPath() + "/views/user/login.jsp");
+        	response.sendRedirect(request.getContextPath() + "/page/login");
             return;
         }
 
@@ -113,7 +113,7 @@ public class DreamEditController extends HttpServlet {
         if (!updated) {
             request.setAttribute("errorMessage", "게시글 수정에 실패했습니다. 잠시 후 다시 시도해주세요.");
             request.setAttribute("post", original);
-            RequestDispatcher rd = request.getRequestDispatcher("/dream/edit.jsp");
+            RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/dream/edit.jsp");
             rd.forward(request, response);
             return;
         }

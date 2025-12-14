@@ -60,7 +60,7 @@ public class ChattingController extends HttpServlet {
             session.setAttribute("redirectAfterLogin", currentUrl);
 
             // 로그인 페이지로 이동
-            resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+            resp.sendRedirect(req.getContextPath() + "/page/login");
             return;
         }
 
@@ -69,7 +69,7 @@ public class ChattingController extends HttpServlet {
         	System.out.println("roomList 요청");
             ArrayList<ChatRoomDTO> chatRooms =  service.getRoomList(autoId); //chatList를 그대로 받아
             req.setAttribute("chatList", chatRooms);
-            req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/chat/chatRoomList.jsp").forward(req, resp);
             return;
         }
         
@@ -152,7 +152,7 @@ public class ChattingController extends HttpServlet {
                 session.removeAttribute("errorMessage");
             }
 
-            req.getRequestDispatcher("/views/chat/chatting.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/chat/chatting.jsp").forward(req, resp);
             return;
         }
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -181,7 +181,7 @@ public class ChattingController extends HttpServlet {
             session.setAttribute("redirectAfterLogin", currentUrl);
 
             // 로그인 페이지로 이동
-            resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+            resp.sendRedirect(req.getContextPath() + "/page/login");
             return;
         }
         
@@ -279,17 +279,17 @@ public class ChattingController extends HttpServlet {
 
             Long roomId = Long.valueOf(parts[2]);
 
-            // ✅ 방 정보 조회(재활용)
+            //  방 정보 조회(재활용)
             ChatRoomDTO roomDto = service.getRoomInfo(roomId);
             if (roomDto == null) {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Room not found");
                 return;
             }
 
-            // ✅ 1) 우선 채팅방에서 나가기(공통)
+            //  우선 채팅방에서 나가기(공통)
             boolean chatQuit = service.quitRoomById(autoId, roomId);
 
-            // ✅ 2) GROUP이면 모임에서도 나가기 (호스트는 삭제 유도 or 못 나가게 처리)
+            //  GROUP이면 모임에서도 나가기 (호스트는 삭제 유도 or 못 나가게 처리)
             if ("GROUP".equalsIgnoreCase(roomDto.getRoomType()) && roomDto.getMeetingId() != null) {
 
                 // 호스트면 나가기 대신 “삭제” 유도하거나 막는 게 깔끔함

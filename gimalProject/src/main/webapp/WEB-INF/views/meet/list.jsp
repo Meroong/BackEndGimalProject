@@ -326,7 +326,7 @@ function needLogin() {
 
                     <!-- 모임 생성 버튼 -->
                     <% if (isLogin) { %>
-                        <a href="<%= request.getContextPath() %>/page/meetForm" class="write-btn">모임 생성 ✏️</a>
+                        <a href="<%= request.getContextPath() %>/page/meet/form" class="write-btn">모임 생성 ✏️</a>
                     <% } else { %>
                         <a href="#" class="write-btn" onclick="needLogin()">모임 생성 ✏️</a>
                     <% } %>

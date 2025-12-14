@@ -26,7 +26,7 @@ public class ReportController extends HttpServlet {
 
         if (loginId == -1) {
             // 로그인 페이지 이동
-            resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+        	resp.sendRedirect(req.getContextPath() + "/page/login");
             return;
         }
 
@@ -48,7 +48,7 @@ public class ReportController extends HttpServlet {
 
                 // 이전 페이지 (모임 상세 등)
                 String referer = req.getHeader("Referer");
-                if (referer == null) {
+                if (referer == null || !referer.startsWith(req.getScheme() + "://" + req.getServerName())) {
                     referer = req.getContextPath() + "/home";
                 }
 

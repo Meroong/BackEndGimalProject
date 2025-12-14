@@ -9,7 +9,6 @@ import dto.DailySignupDTO;
 import dto.ReportDTO;
 import dto.ReportStatusCountDTO;
 import dto.UserDTO;
-import dto.UserTrustRankDTO;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -364,7 +363,6 @@ public class AdminController extends HttpServlet {
 
         // 그래프/표용
         List<DailySignupDTO>       signupStats = adminService.getDailySignupStats(7);     // 최근 7일
-        List<UserTrustRankDTO>     topUsers    = adminService.getTopUsersByTrustScore(5); // TOP 5
         List<ReportStatusCountDTO> reportStats = adminService.getReportStatusCounts();
 
         // JSP에 전달
@@ -377,7 +375,6 @@ public class AdminController extends HttpServlet {
         req.setAttribute("pendingReports", pendingReports);
 
         req.setAttribute("signupStats", signupStats);
-        req.setAttribute("topUsers", topUsers);
         req.setAttribute("reportStats", reportStats);
 
         RequestDispatcher rd =

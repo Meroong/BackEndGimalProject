@@ -245,6 +245,7 @@ public class ChattingService {
             Part imagePart,
             String uploadPath
     ) {
+    	System.out.println("sendImageMessage");
         // 메시지 먼저 생성 (IMAGE 타입)
         ChatMessageDTO msg = new ChatMessageDTO();
         msg.setSenderId(senderId);

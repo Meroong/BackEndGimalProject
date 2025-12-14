@@ -55,7 +55,7 @@ public class DreamDetailController extends HttpServlet {
         request.setAttribute("post", post);
         request.setAttribute("isOwner", isOwner);
 
-        RequestDispatcher rd = request.getRequestDispatcher("/dream/detail.jsp");
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/dream/detail.jsp");
         rd.forward(request, response);
     }
 }

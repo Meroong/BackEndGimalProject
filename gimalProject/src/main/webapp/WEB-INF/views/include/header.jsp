@@ -100,8 +100,7 @@
                 String role = AuthUtil.getRole(request); // JWT에서 역할 추출
         %>
             <!-- 로그인 상태 공통: 메시지 버튼 -->
-            <button class="msg-btn"
-                    onclick="location.href='<%= request.getContextPath() %>/chat/roomList'">
+            <button class="msg-btn"  onclick="openChatList()">
                 메시지
             </button>
 
@@ -130,4 +129,13 @@
             </button>
         <% } %>
     </div>
+    <script>
+function openChatList() {
+    window.open(
+        "<%= request.getContextPath() %>/chat/roomList",
+        "chatPopup",
+        "width=430,height=640,top=100,left=100,scrollbars=yes"
+    );
+}
+</script>
 </header>

@@ -6,7 +6,6 @@
 
 <%	// 기조에는 수정 시 모임날짜를 매번 입력해야했음 그리고 이전 날짜도 선택가능했고 7일 이후 날짜도 선택가능했어서 만든 기능 
     MeetingInfoDTO m = (MeetingInfoDTO) request.getAttribute("meetingInfo");
-    UserAddressDTO addr = (UserAddressDTO) session.getAttribute("addressInfo");
 
     // 모임 날짜 포맷 (yyyy-MM-dd)
     String meetingDateStr = "";
@@ -339,16 +338,23 @@
         <button type="button" onclick="openJusoPopup()">주소 검색</button>
 
         <label>도로명주소</label>
-        <input type="text" id="roadAddress" disabled value="<%= (addr!=null)? addr.getRoadAddress() : "" %>">
-        <input type="hidden" id="roadAddressValue" name="roadAddress" value="<%= (addr!=null)? addr.getRoadAddress() : "" %>">
+		<input type="text" id="roadAddress" disabled
+		       value="<%= m.getRoadAddress() != null ? m.getRoadAddress() : "" %>">
+		
+		<input type="hidden" id="roadAddressValue" name="roadAddress"
+		       value="<%= m.getRoadAddress() != null ? m.getRoadAddress() : "" %>">
 
         <label>지번주소</label>
-        <input type="text" id="jibunAddress" disabled value="<%= (addr!=null)? addr.getJibunAddress() : "" %>">
-        <input type="hidden" id="jibunAddressValue" name="jibunAddress" value="<%= (addr!=null)? addr.getJibunAddress() : "" %>">
+		<input type="text" id="jibunAddress" disabled
+		       value="<%= m.getJibunAddress() != null ? m.getJibunAddress() : "" %>">
+		
+		<input type="hidden" id="jibunAddressValue" name="jibunAddress"
+		       value="<%= m.getJibunAddress() != null ? m.getJibunAddress() : "" %>">
 
         <label>상세주소</label>
-        <input type="text" id="addrDetail" name="addrDetail" value="<%= m.getAddrDetail() %>">
-        <input type="hidden" id="addrDetailValue" name="addrDetail">
+		<input type="text" id="addrDetail" name="addrDetail"
+		       value="<%= m.getAddrDetail() != null ? m.getAddrDetail() : "" %>">
+
 
         <input type="hidden" id="latitude" name="latitude" value="<%= m.getLatitude() %>">
         <input type="hidden" id="longitude" name="longitude" value="<%= m.getLongitude() %>">

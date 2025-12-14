@@ -29,8 +29,13 @@ body {
     flex-direction: column;
     overflow: hidden;
     z-index: 1000;
-}
+    }
 
+/* 메뉴들은 container 기준으로 */
+.host-menu,
+.pay-box {
+    position: absolute;
+}
 /* =====================
    헤더
 ===================== */
@@ -82,6 +87,7 @@ body {
     background: #FCFBFE;
     border-radius: 12px;
 }
+
 
 /* 메시지 공통 */
 .msg {
@@ -318,7 +324,6 @@ body {
 </div>
 
 <!-- 채팅 메시지 -->
-<div class="chat-box">
 <div class="chat-messages">
 
 <c:url var="defaultProfile" value="/resources/images/default.jpg"/>
@@ -369,7 +374,7 @@ body {
       method="post"
       action="${pageContext.request.contextPath}/chat/sendChat"
       enctype="multipart/form-data"
-      onsubmit="clearImagePreview()">
+      >
 
     <!-- 반드시 필요 -->
     <input type="hidden" name="roomId" value="${selectedRoomId}">
@@ -394,7 +399,7 @@ body {
 
 </div>
 
-</div>
+
 </div>
 
 <!-- 모달 -->
@@ -457,12 +462,12 @@ function clearImagePreview() {
 <script>
 function handlePay(meetingCost, myPoint) {
 
-    if (myPoint < meetingCost) {
-        alert("포인트가 부족합니다. 충전 페이지로 이동합니다.");
-        location.href =
-        	  "${pageContext.request.contextPath}/views/wallet/wallet_page.jsp?roomId=${selectedRoomId}";
-        return;
-    }
+	if (myPoint < meetingCost) {
+	    alert("포인트가 부족합니다. 충전 페이지로 이동합니다.");
+	    location.href =
+	        "${pageContext.request.contextPath}/page/wallet?returnUrl=/chat/room/${selectedRoomId}";
+	    return;
+	}
 
     if (!confirm("회비 " + meetingCost + "원을 결제하시겠습니까?")) {
         return;
@@ -472,26 +477,33 @@ function handlePay(meetingCost, myPoint) {
     form.method = "post";
     form.action = "${pageContext.request.contextPath}/wallet/pay";
 
-    // ✅ meetingId
+    // meetingId
     const meetInput = document.createElement("input");
     meetInput.type = "hidden";
     meetInput.name = "meetingId";
     meetInput.value = "${roomInfo.meetingId}";
     form.appendChild(meetInput);
 
-    // ✅ roomId
+    // roomId
     const roomInput = document.createElement("input");
     roomInput.type = "hidden";
     roomInput.name = "roomId";
     roomInput.value = "${selectedRoomId}";
     form.appendChild(roomInput);
 
-    // ✅ amount
+    // amount
     const amountInput = document.createElement("input");
     amountInput.type = "hidden";
     amountInput.name = "amount";
     amountInput.value = meetingCost;
     form.appendChild(amountInput);
+
+    // ⭐ returnUrl (핵심)
+    const returnInput = document.createElement("input");
+    returnInput.type = "hidden";
+    returnInput.name = "returnUrl";
+    returnInput.value = "/chat/room/${selectedRoomId}";
+    form.appendChild(returnInput);
 
     document.body.appendChild(form);
     form.submit();
@@ -513,6 +525,20 @@ document.addEventListener("click", function (e) {
     if (!box.contains(e.target) && !btn.contains(e.target)) {
         box.style.display = "none";
     }
+});
+
+window.addEventListener("load", () => {
+    scrollToBottom();  // 페이지 로딩 후 스크롤을 맨 아래로 내립니다.
+});
+function scrollToBottom() {
+    const box = document.querySelector('.chat-messages');  // id가 아니라 class를 선택
+    if (box) {
+        box.scrollTop = box.scrollHeight;  // 메시지가 추가될 때 자동으로 맨 아래로 스크롤
+    }
+}
+// 예시: 메시지가 전송될 때마다 호출
+document.querySelector('.chat-form').addEventListener('submit', function() {
+    scrollToBottom();  // 새 메시지 전송 후 최하단으로 이동
 });
 </script>
 

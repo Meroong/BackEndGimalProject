@@ -1,7 +1,6 @@
 package controller;
 
 import java.io.IOException;
-
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,7 +20,6 @@ public class WalletController extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         walletService = new WalletService();
-        System.out.println("walletController: ON");
     }
 
     @Override
@@ -30,108 +28,74 @@ public class WalletController extends HttpServlet {
 
         String path = req.getPathInfo();
 
+        // ⭐ 핵심: 복귀 주소
+        String returnUrl = req.getParameter("returnUrl");
+        if (returnUrl == null || returnUrl.isBlank() || !returnUrl.startsWith("/")) {
+            returnUrl = "/page/mypage";
+        }
+
+        Long userId = AuthUtil.getAutoId(req);
+        if (userId == -1) {
+            resp.sendRedirect(req.getContextPath() + "/page/login");
+            return;
+        }
+
         switch (path) {
 
-        // 포인트 충전 
-        case "/charge":
-        	System.out.println("Controller: charge");
-            Long autoId = AuthUtil.getAutoId(req);
-
-            if (autoId == -1) {
-                resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
-                return;
-            }
-
-            String cardNumber = req.getParameter("cardNumber");
-            String cvc = req.getParameter("cvc");
-            String cardPw = req.getParameter("cardPw");
-            String amountStr = req.getParameter("amount");
-
+        // =====================
+        // 포인트 충전
+        // =====================
+        case "/charge": {
             try {
-                int amount = Integer.parseInt(amountStr);
+                int amount = Integer.parseInt(req.getParameter("amount"));
 
-                walletService.charge(autoId, cardNumber, cvc, cardPw, amount);
-
-                req.setAttribute("successMessage", "포인트가 충전되었습니다.");
-
-                int balance = walletService.getBalance(autoId);
-                req.getSession().setAttribute("walletBalance", balance);
-
-                req.getRequestDispatcher("/views/user/mypage.jsp").forward(req, resp);
-                return;
-
-            } catch (Exception e) {
-                req.setAttribute("errorMessage", e.getMessage());
-
-                try {
-                    int balance = walletService.getBalance(autoId);
-                    req.setAttribute("walletBalance", balance);
-                } catch (Exception ex) {
-                    req.setAttribute("walletBalance", 0);
-                }
-
-                req.getRequestDispatcher("/views/user/mypage.jsp").forward(req, resp);
-                return;
-            }
-
-        // 모임 회비 결제 (채팅방에서 사용)
-        case "/pay":
-            System.out.println("Controller: meeting pay");
-
-            Long userId = AuthUtil.getAutoId(req);
-
-            if (userId == -1) {
-                resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
-                return;
-            }
-
-            String meetId = req.getParameter("meetingId"); // 회비 기록용
-            String roomId = req.getParameter("roomId");    // 채팅방 이동용
-            String amountStr2 = req.getParameter("amount");
-
-            try {
-                int amount = Integer.parseInt(amountStr2);
-
-                // 회비 차감 처리
-                walletService.payForMeeting(
+                walletService.charge(
                         userId,
-                        amount,
-                        "meeting_fee"
+                        req.getParameter("cardNumber"),
+                        req.getParameter("cvc"),
+                        req.getParameter("cardPw"),
+                        amount
                 );
-                new MeetingService().markAsPaid(Long.parseLong(meetId), userId);
-                
-                // ⭐ 지갑 잔액 갱신 (세션 업데이트)
-                int updatedBalance = walletService.getBalance(userId);
-                req.getSession().setAttribute("walletBalance", updatedBalance);
-                
-                // 성공 처리 후 채팅방으로 이동 (roomId로 이동해야 정상)
+
+                int balance = walletService.getBalance(userId);
+                req.getSession().setAttribute("walletBalance", balance);
+                req.getSession().setAttribute("successMessage", "포인트가 충전되었습니다.");
+
+            } catch (Exception e) {
+                req.getSession().setAttribute("errorMessage", e.getMessage());
+            }
+
+            resp.sendRedirect(req.getContextPath() + returnUrl);
+            return;
+        }
+
+        // =====================
+        // 모임 회비 결제
+        // =====================
+        case "/pay": {
+            String meetingId = req.getParameter("meetingId");
+            String roomId    = req.getParameter("roomId");
+
+            try {
+                int amount = Integer.parseInt(req.getParameter("amount"));
+
+                walletService.payForMeeting(userId, amount, "meeting_fee");
+                new MeetingService().markAsPaid(Long.parseLong(meetingId), userId);
+
+                int balance = walletService.getBalance(userId);
+                req.getSession().setAttribute("walletBalance", balance);
                 req.getSession().setAttribute("successMessage", "회비 결제가 완료되었습니다.");
+
+                // ⭐ 채팅 결제는 채팅으로
                 resp.sendRedirect(req.getContextPath() + "/chat/room/" + roomId);
                 return;
 
             } catch (Exception e) {
-
-                String msg = e.getMessage();
-                
-                // ⭐ 실패 시에도 잔액 한번 갱신해주는 것이 안정적
-                try {
-                    int updatedBalance = walletService.getBalance(userId);
-                    req.getSession().setAttribute("walletBalance", updatedBalance);
-                } catch (Exception ignore) {}
-
-                // 포인트 부족 시 마이페이지로 이동
-                if (msg != null && msg.contains("포인트")) {
-                    req.getSession().setAttribute("errorMessage", "포인트가 부족합니다. 충전 후 다시 결제해주세요.");
-                    resp.sendRedirect(req.getContextPath() + "/views/user/mypage.jsp");
-                    return;
-                }
-
-                // 기타 오류는 다시 채팅방으로
-                req.getSession().setAttribute("errorMessage", msg);
-                resp.sendRedirect(req.getContextPath() + "/chat/room/" + roomId);
+                req.getSession().setAttribute("errorMessage", e.getMessage());
+                resp.sendRedirect(req.getContextPath() + returnUrl);
                 return;
             }
-
+        }
 
         default:
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);

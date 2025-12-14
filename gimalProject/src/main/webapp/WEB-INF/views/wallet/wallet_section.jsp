@@ -2,7 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <div class="map-card">
-
+	
     <!-- ✅ 포인트 보유 내역 -->
     <div class="wallet-title-row">
         <span class="label">현재 보유 포인트</span>

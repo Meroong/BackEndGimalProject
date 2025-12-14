@@ -26,6 +26,11 @@ public class PageController extends HttpServlet {
 
             // 🔐 로그인
             case "/login":
+            	String redirect = req.getParameter("redirect");
+            	System.out.println("🔥 redirect param = " + redirect);
+                if (redirect != null && !redirect.isBlank()) {
+                    req.getSession().setAttribute("LOGIN_REDIRECT", redirect);
+                }
                 forward(req, resp, "/WEB-INF/views/user/login.jsp");
                 break;
 
@@ -40,7 +45,7 @@ public class PageController extends HttpServlet {
                     resp.sendRedirect(req.getContextPath() + "/page/login");
                     return;
                 }
-                forward(req, resp, "/WEB-INF/views/user/myPage.jsp");
+                forward(req, resp, "/WEB-INF/views/user/mypage.jsp");
                 break;
 
             // 🧩 모임 생성

@@ -88,7 +88,7 @@ public class DreamListController extends HttpServlet {
         // JSP에서 체크박스 상태 찍을 때 쓰기 위함
         request.setAttribute("mine", mine);
         
-        RequestDispatcher rd = request.getRequestDispatcher("/dream/list.jsp");
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/dream/list.jsp");
         rd.forward(request, response);
     }
 

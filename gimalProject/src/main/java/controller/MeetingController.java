@@ -41,6 +41,8 @@ public class MeetingController extends HttpServlet {
 
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		System.out.println("URI = " + req.getRequestURI());
+		System.out.println("PathInfo = " + req.getPathInfo());
 		String path = req.getPathInfo();
 		switch(path) {
 		case "/list": {
@@ -97,7 +99,7 @@ public class MeetingController extends HttpServlet {
 		    req.setAttribute("selectedStatus", status);
 		    req.setAttribute("selectedWeather", weather);
 
-		    req.getRequestDispatcher("/views/meet/list.jsp").forward(req, resp);
+		    req.getRequestDispatcher("/WEB-INF/views/meet/list.jsp").forward(req, resp);
 		    return;
 		}
 
@@ -176,7 +178,7 @@ public class MeetingController extends HttpServlet {
 	
 			    // JSP 전달
 			    req.setAttribute("meetingInfo", infoDto);
-			    req.getRequestDispatcher("/views/meet/info.jsp").forward(req, resp);
+			    req.getRequestDispatcher("/WEB-INF/views/meet/info.jsp").forward(req, resp);
 			    return;
 			}
 
@@ -185,12 +187,13 @@ public class MeetingController extends HttpServlet {
 			 *  모임 수정 화면
 			 * ========================= */
 			case "/edit": {
+				System.out.println("edit");
 				long meetingId = Long.parseLong(req.getParameter("meetingId"));
 				MeetingInfoDTO dto = meetingService.getMeetingInfo(meetingId);
 
 				if (dto != null) {
 					req.setAttribute("meetingInfo", dto);
-					req.getRequestDispatcher("/views/meet/meetUpdate.jsp").forward(req, resp);
+					req.getRequestDispatcher("/WEB-INF/views/meet/meetUpdate.jsp").forward(req, resp);
 				} else {
 					resp.sendRedirect(req.getContextPath() + "/meeting/list");
 				}
@@ -212,18 +215,15 @@ public class MeetingController extends HttpServlet {
         if (autoId == -1) {
             HttpSession session = req.getSession();
 
-            // 현재 요청 URL + 쿼리스트링 조회
-            String currentUrl = req.getRequestURI();
-            String queryString = req.getQueryString();
-            if (queryString != null && !queryString.isEmpty()) {
-                currentUrl += "?" + queryString;
+            // 🔑 사용자가 보고 있던 페이지
+            String referer = req.getHeader("Referer");
+            if (referer != null && referer.contains(req.getContextPath())) {
+                String page = referer.replace(req.getContextPath(), "");
+                session.setAttribute("LOGIN_REDIRECT", page);
             }
 
-            // 세션에 저장
-            session.setAttribute("redirectAfterLogin", currentUrl);
-
             // 로그인 페이지로 이동
-            resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+            resp.sendRedirect(req.getContextPath() + "/page/login");
             return;
         }
         
@@ -236,80 +236,107 @@ public class MeetingController extends HttpServlet {
 	    String uploadPath = "C:/upload/meeting";
 	    String usedType = "MEETING";
 	    
-	    try {
+	    
 	    	System.out.println(path);
 	        switch (path) {
 	        
 	        
 	        
 	        //INSERT create로 변경할까 
-            case "/insert":
-                // location insert
-                long newLocationId = meetingService.insertLocation(
-                        req.getParameter("roadAddress"),
-                        req.getParameter("jibunAddress"),
-                        req.getParameter("addrDetail"),
-                        latitude,
-                        longitude
-                );
+	        case "/insert":
+	            try {
+	                // ========================
+	                // 1. location insert
+	                // ========================
+	                long locationId = meetingService.insertLocation(
+	                        req.getParameter("roadAddress"),
+	                        req.getParameter("jibunAddress"),
+	                        req.getParameter("addrDetail"),
+	                        latitude,
+	                        longitude
+	                );
 
-                // meeting insert
-                // 2️⃣ meeting date 처리 (date / datetime-local 모두 대응)
-                String dateStrInsert = req.getParameter("date");
+	                // ========================
+	                // 2. meeting date 처리
+	                // ========================
+	                String dateStr = req.getParameter("date");
+	                if (dateStr == null || dateStr.isBlank()) {
+	                    throw new Exception("날짜 값이 전달되지 않았습니다.");
+	                }
 
-                if (dateStrInsert == null || dateStrInsert.isBlank()) {
-                    throw new Exception("날짜 값이 전달되지 않았습니다.");
-                }
+	                dateStr = dateStr.replace("T", " ");
+	                if (dateStr.length() == 16) dateStr += ":00";
+	                if (dateStr.length() == 10) dateStr += " 00:00:00";
 
-                // datetime-local 대응: T → 공백
-                dateStrInsert = dateStrInsert.replace("T", " ");
+	                Timestamp meetingDate = Timestamp.valueOf(dateStr);
 
-                // 초(:ss) 보정
-                if (dateStrInsert.length() == 16) { // yyyy-MM-dd HH:mm
-                    dateStrInsert += ":00";
-                }
+	                // ========================
+	                // 3. meeting insert
+	                // ========================
+	                long meetingId = meetingService.insertMeetingInfo(
+	                        req.getParameter("title"),
+	                        req.getParameter("content"),
+	                        meetingDate,
+	                        locationId,
+	                        Integer.parseInt(req.getParameter("maxMembers")),
+	                        Integer.parseInt(req.getParameter("currentMembers")) - 1,
+	                        Integer.parseInt(req.getParameter("cost")),
+	                        req.getParameter("tag"),
+	                        req.getParameter("status"),
+	                        latitude,
+	                        longitude,
+	                        autoId
+	                );
 
-                // date만 온 경우 보정
-                if (dateStrInsert.length() == 10) { // yyyy-MM-dd
-                    dateStrInsert += " 00:00:00";
-                }
+	                // ========================
+	                // 4. 이미지 업로드
+	                // ========================
+	                for (Part part : req.getParts()) {
+	                    if ("images".equals(part.getName()) && part.getSize() > 0) {
+	                        imageService.uploadFile(
+	                                meetingId,
+	                                part,
+	                                uploadPath,
+	                                usedType
+	                        );
+	                    }
+	                }
 
-                Timestamp meetingDate = Timestamp.valueOf(dateStrInsert);
-                
-                long meetingId = meetingService.insertMeetingInfo(
-                        req.getParameter("title"),
-                        req.getParameter("content"),
-                        meetingDate,
-                        newLocationId,
-                        Integer.parseInt(req.getParameter("maxMembers")),
-                        Integer.parseInt(req.getParameter("currentMembers"))-1,
-                        Integer.parseInt(req.getParameter("cost")),
-                        req.getParameter("tag"),
-                        req.getParameter("status"),
-                        latitude,
-                        longitude,
-                        autoId //로그인 추가시 동작
-                );
+	                // ========================
+	                // 5. 참가 + 채팅방 생성
+	                // ========================
+	                meetingService.joinMeet(meetingId, autoId);
+	                new ChattingService().makeGroupRoom(meetingId, "Group", autoId);
 
-                /* ================================
-                 *   다중 이미지 업로드 처리
-                 * ================================ */
-                for (Part part : req.getParts()) {
-                    if ("images".equals(part.getName()) && part.getSize() > 0) {
-                        imageService.uploadFile(
-                                meetingId,
-                                part,
-                                uploadPath,
-                                usedType);
-                    }
-                }
-                //호스트 모임참가자에 넣기 
-                meetingService.joinMeet(meetingId, autoId);
-                new ChattingService().makeGroupRoom(meetingId, "Group", autoId); // meetingId, hostId(creator)
-                
-                resp.sendRedirect(req.getContextPath() + "/meeting/list");
-                return;
+	                // 성공 → 목록
+	                resp.sendRedirect(req.getContextPath() + "/meeting/list");
+	                return;
 
+	            } catch (Exception e) {
+	                e.printStackTrace();
+
+	                // ========================
+	                // ❗ 입력값 유지
+	                // ========================
+	                req.setAttribute("errorMsg", e.getMessage());
+
+	                req.setAttribute("title", req.getParameter("title"));
+	                req.setAttribute("content", req.getParameter("content"));
+	                req.setAttribute("date", req.getParameter("date"));
+	                req.setAttribute("maxMembers", req.getParameter("maxMembers"));
+	                req.setAttribute("currentMembers", req.getParameter("currentMembers"));
+	                req.setAttribute("cost", req.getParameter("cost"));
+	                req.setAttribute("tag", req.getParameter("tag"));
+	                req.setAttribute("status", req.getParameter("status"));
+
+	                req.setAttribute("roadAddress", req.getParameter("roadAddress"));
+	                req.setAttribute("jibunAddress", req.getParameter("jibunAddress"));
+	                req.setAttribute("addrDetail", req.getParameter("addrDetail"));
+
+	                // ❗ 생성 페이지로만 복귀
+	                req.getRequestDispatcher("/WEB-INF/views/meet/meetForm.jsp").forward(req, resp);
+	                return;
+	            }
 
 	            /* ========================
 	             * UPDATE
@@ -336,9 +363,12 @@ public class MeetingController extends HttpServlet {
 
                     // ---------- 날짜 처리 ----------
                     String dateStr = req.getParameter("date");
-                    if (dateStr.length() == 10) {
-                        dateStr += " 00:00:00";
+                    if (dateStr == null || dateStr.isBlank()) {
+                        throw new Exception("날짜 값이 전달되지 않았습니다.");
                     }
+                    dateStr = dateStr.replace("T", " ");
+                    if (dateStr.length() == 16) dateStr += ":00";
+                    if (dateStr.length() == 10) dateStr += " 00:00:00";
                     Timestamp date = Timestamp.valueOf(dateStr);
 
                     // ---------- 위치 업데이트 ----------
@@ -402,7 +432,7 @@ public class MeetingController extends HttpServlet {
 
 	                Long loginUserId = AuthUtil.getAutoId(req);
 	                if (loginUserId == -1) {
-	                    resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+	                	resp.sendRedirect(req.getContextPath() + "/page/login");
 	                    return;
 	                }
 
@@ -450,15 +480,14 @@ public class MeetingController extends HttpServlet {
 				 
 				        boolean result	=	meetingService.joinMeet(meetId, autoId);
 				        if (result) {
-				            resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + meetId);
+				        	resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + meetId);
 				        }
 				    } catch (Exception e) {
 				        e.printStackTrace();
 				        req.setAttribute("errorMsg", e.getMessage());
 
 				        // 에러 메시지와 함께 상세 페이지로 되돌리기
-				        req.getRequestDispatcher("/meeting/info?meetingId=" + meetId)
-				           .forward(req, resp);
+				        resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + meetId);
 				    }
 				    return;
 				    
@@ -479,7 +508,7 @@ public class MeetingController extends HttpServlet {
 	                    } catch (Exception e) {
 	                        e.printStackTrace();
 	                        req.setAttribute("errorMsg", e.getMessage());
-	                        req.getRequestDispatcher("/meeting/info?meetingId=" + quitMeetId).forward(req, resp);
+	                        resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + quitMeetId);
 	                    }
 	                    return;
 	                    
@@ -488,7 +517,7 @@ public class MeetingController extends HttpServlet {
 	                    // 로그인 확인
 	                    Long loginUserId = AuthUtil.getAutoId(req);
 	                    if (loginUserId == -1) {
-	                        resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+	                    	resp.sendRedirect(req.getContextPath() + "/page/login");
 	                        return;
 	                    }
 
@@ -540,29 +569,6 @@ public class MeetingController extends HttpServlet {
 	            default:
 	                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "잘못된 요청 경로입니다.");
 	        }
-
-	    	} catch (Exception e) {
-	        e.printStackTrace();
-
-	        // 에러 메시지를 request에 담아서 회원가입/모임 페이지로 포워딩
-	        req.setAttribute("errorMsg", e.getMessage());
-
-	        // 기존 입력값도 유지
-	        req.setAttribute("roadAddress", req.getParameter("roadAddress"));
-	        req.setAttribute("jibunAddress", req.getParameter("jibunAddress"));
-	        req.setAttribute("addrDetail", req.getParameter("addrDetail"));
-	        req.setAttribute("title", req.getParameter("title"));
-	        req.setAttribute("content", req.getParameter("content"));
-	        req.setAttribute("date", req.getParameter("date"));
-	        req.setAttribute("maxMembers", req.getParameter("maxMembers"));
-	        req.setAttribute("currentMembers", req.getParameter("currentMembers"));
-	        req.setAttribute("cost", req.getParameter("cost"));
-	        req.setAttribute("tag", req.getParameter("tag"));
-	        req.setAttribute("status", req.getParameter("status"));
-
-	        // 포워딩
-	        req.getRequestDispatcher("/meetingForm.jsp").forward(req, resp);
-	    }
 	}
 
 }

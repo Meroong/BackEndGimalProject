@@ -1,6 +1,5 @@
 package controller;
 
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -44,7 +43,7 @@ public class UserController extends HttpServlet {
         	Long autoId = AuthUtil.getAutoId(req);
             
             if(autoId == -1) {
-            	resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+            	resp.sendRedirect(req.getContextPath() + "/page/login");
             	return;
             }
             HttpSession session = req.getSession(false);
@@ -100,19 +99,21 @@ public class UserController extends HttpServlet {
                 session.setAttribute("Authorization", "Bearer " + jwt);
 
              // 이전 URL 체크 후 리다이렉트
-                String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
-                if (redirectUrl != null) {
-                    session.removeAttribute("redirectAfterLogin"); // 한 번만 사용
+                String redirectUrl = (String) session.getAttribute("LOGIN_REDIRECT");
+                session.removeAttribute("LOGIN_REDIRECT"); // 있든 없든 한 번만 사용
+
+                if (redirectUrl != null && !redirectUrl.isBlank()) {
+                    // redirectUrl은 이미 "/meeting/info?meetingId=3" 형태
                     resp.sendRedirect(redirectUrl);
                 } else {
-                	resp.sendRedirect(req.getContextPath() + "/home");
+                    resp.sendRedirect(req.getContextPath() + "/home");
                 }
 
                 return;
 
             } else {
                 req.setAttribute("errorMsg", "아이디 또는 비밀번호를 확인해주세요.");
-                req.getRequestDispatcher("/views/user/login.jsp").forward(req, resp);
+                req.getRequestDispatcher("/WEB-INF/views/user/login.jsp").forward(req, resp);
                 return;
             }
 
@@ -144,7 +145,7 @@ public class UserController extends HttpServlet {
                 req.setAttribute("jibunAddress", jibunAddress);
                 req.setAttribute("addrDetail", addrDetail);
 
-                req.getRequestDispatcher("/views/user/register.jsp").forward(req, resp);
+                req.getRequestDispatcher("/WEB-INF/views/user/register.jsp").forward(req, resp);
                 return;
             }
 
@@ -169,7 +170,7 @@ public class UserController extends HttpServlet {
         	    updateSession.setAttribute("redirectAfterLogin", currentUrl);
 
         	    // 로그인 페이지로 이동
-        	    resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+        	    resp.sendRedirect(req.getContextPath() + "/page/login");
         	    return;
         	}
 
@@ -192,12 +193,12 @@ public class UserController extends HttpServlet {
                 req.getSession().setAttribute("userInfo", updatedUser);
                 req.getSession().setAttribute("addressInfo", updatedAddress);
 
-                resp.sendRedirect(req.getContextPath() + "/views/user/mypage.jsp");
+                resp.sendRedirect(req.getContextPath() + "/page/mypage");
                 return;
 
             } catch (Exception e) {
                 req.setAttribute("errorMsg", e.getMessage());
-                req.getRequestDispatcher("/views/user/mypage.jsp").forward(req, resp);
+                resp.sendRedirect(req.getContextPath() + "/page/mypage");
                 return;
             }
         //유저 주소만 업데이트 검색바 용    
@@ -283,7 +284,7 @@ public class UserController extends HttpServlet {
         	    deleteSession.setAttribute("redirectAfterLogin", currentUrl);
 
         	    // 로그인 페이지로 이동
-        	    resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+        	    resp.sendRedirect(req.getContextPath() + "/page/login");
         	    return;
         	}
 
@@ -295,7 +296,7 @@ public class UserController extends HttpServlet {
 
             } catch (Exception e) {
                 req.setAttribute("errorMsg", e.getMessage());
-                req.getRequestDispatcher("/views/user/mypage.jsp").forward(req, resp);
+                resp.sendRedirect(req.getContextPath() + "/page/mypage");
                 return;
             }
 

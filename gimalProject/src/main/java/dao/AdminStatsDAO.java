@@ -9,7 +9,6 @@ import java.util.List;
 
 import dto.AdminStatsDTO;
 import dto.DailySignupDTO;
-import dto.UserTrustRankDTO;
 import dto.ReportStatusCountDTO;
 import util.JDBCUtil;
 
@@ -160,41 +159,7 @@ public class AdminStatsDAO {
     }
 
 
-    // ===========================
-    // ③ 신뢰도 높은 유저 TOP N
-    // ===========================
-    public List<UserTrustRankDTO> getTopUsersByTrustScore(int limit) {
 
-        String sql =
-                "SELECT user_id, nickname, trust_score, created_at " +
-                "FROM user " +
-                "ORDER BY trust_score DESC, created_at ASC " + 
-                "LIMIT ?";
-
-        List<UserTrustRankDTO> list = new ArrayList<>();
-
-        try (Connection con = JDBCUtil.jdbcCon();
-             PreparedStatement pstmt = con.prepareStatement(sql)) {
-
-            pstmt.setInt(1, limit);
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    UserTrustRankDTO dto = new UserTrustRankDTO();
-                    dto.setUserId(rs.getString("user_id"));
-                    dto.setNickname(rs.getString("nickname"));
-                    dto.setTrustScore(rs.getInt("trust_score"));
-                    dto.setCreatedAt(rs.getTimestamp("created_at"));
-                    list.add(dto);
-                }
-            }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return list;
-    }
 
 
     // ===========================

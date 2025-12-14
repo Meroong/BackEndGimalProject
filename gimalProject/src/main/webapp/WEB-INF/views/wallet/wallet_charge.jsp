@@ -3,8 +3,12 @@
 <div class="wallet-charge-box">
     <h4>포인트 충전</h4>
     <small>테스트용 모의 카드 정보를 입력하면 포인트가 충전됩니다.</small>
+	
 
+           
     <form method="post" action="${pageContext.request.contextPath}/wallet/charge">
+    	<input type="hidden" name="returnUrl" value="${param.returnUrl != null ? param.returnUrl : '/page/mypage'}">
+    	
         <label>카드번호</label>
         <input type="text" name="cardNumber" placeholder="예: 1111-2222-3333-4444">
 
