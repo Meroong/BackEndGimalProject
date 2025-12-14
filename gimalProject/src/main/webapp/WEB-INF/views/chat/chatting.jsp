@@ -405,9 +405,40 @@ body {
 <!-- 모달 -->
 <div id="memberModal" class="modal">
     <h3>모임원 관리</h3>
+
     <c:forEach var="u" items="${participantUsers}">
-        <div>${u.nickname}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span>${u.nickname}</span>
+            
+                        <c:if test="${u.participantId ne loginUserId 
+                         and u.participantId ne roomInfo.hostId}">
+
+            <!-- 이미 참여중 → 강퇴 -->
+            <c:if test="${u.inChat}">
+                <form method="post"
+                      action="${pageContext.request.contextPath}/chat/kick"
+                      onsubmit="return confirm('정말 강퇴하시겠습니까?');">
+                    <input type="hidden" name="roomId" value="${selectedRoomId}">
+                    <input type="hidden" name="meetId" value="${roomInfo.meetingId}">
+                    <input type="hidden" name="targetUserId" value="${u.participantId}">
+                    <button type="submit">강퇴</button>
+                </form>
+            </c:if>
+
+            <!-- 아직 참여 X → 초대 -->
+            <c:if test="${!u.inChat}">
+                <form method="post"
+                      action="${pageContext.request.contextPath}/chat/invite">
+                    <input type="hidden" name="roomId" value="${selectedRoomId}">
+                    <input type="hidden" name="meetId" value="${roomInfo.meetingId}">
+                    <input type="hidden" name="receiverId" value="${u.participantId}">
+                    <button type="submit">초대</button>
+                </form>
+            </c:if>
+            </c:if>
+        </div>
     </c:forEach>
+
     <button onclick="closeMemberModal()">닫기</button>
 </div>
 

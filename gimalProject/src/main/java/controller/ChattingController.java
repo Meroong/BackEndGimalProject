@@ -167,15 +167,16 @@ public class ChattingController extends HttpServlet {
         if (autoId == -1) {
             HttpSession session = req.getSession();
 
-            // ✅ 어떤 POST든 "방으로" 돌아가게: roomId 추출
-            Long roomId = extractRoomIdForRedirect(req);
+            String ctx = req.getContextPath();
+            String uri = req.getRequestURI();
+            String qs  = req.getQueryString();
 
-            String target = (roomId != null)
-                    ? "/chat/room/" + roomId
-                    : "/chat/roomList";
+            String page = uri.startsWith(ctx) ? uri.substring(ctx.length()) : uri;
+            if (qs != null && !qs.isBlank()) page += "?" + qs;
 
-            session.setAttribute("LOGIN_REDIRECT", target); // ✅ contextPath 없는 형태로 저장
-            resp.sendRedirect(req.getContextPath() + "/page/login");
+            session.setAttribute("LOGIN_REDIRECT", page);
+
+            resp.sendRedirect(ctx + "/page/login");
             return;
         }
 
