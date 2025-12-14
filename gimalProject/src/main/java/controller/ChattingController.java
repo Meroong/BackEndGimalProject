@@ -11,11 +11,13 @@ import dto.UserDTO;
 import dto.chatParticipantsUserDTO;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import service.ChattingService;
 import service.ImageService;
 import service.MeetingService;
@@ -23,6 +25,11 @@ import service.PollService;
 import service.UserService;
 import util.AuthUtil;
 
+@MultipartConfig(
+	    fileSizeThreshold = 1024 * 1024,  // 1MB
+	    maxFileSize = 5 * 1024 * 1024,     // 5MB
+	    maxRequestSize = 20 * 1024 * 1024  // 20MB
+	)
 @WebServlet("/chat/*")
 public class ChattingController extends HttpServlet {
     ChattingService service;
@@ -53,7 +60,7 @@ public class ChattingController extends HttpServlet {
             session.setAttribute("redirectAfterLogin", currentUrl);
 
             // 로그인 페이지로 이동
-            resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+            resp.sendRedirect(req.getContextPath() + "/page/login");
             return;
         }
 
@@ -62,7 +69,7 @@ public class ChattingController extends HttpServlet {
         	System.out.println("roomList 요청");
             ArrayList<ChatRoomDTO> chatRooms =  service.getRoomList(autoId); //chatList를 그대로 받아
             req.setAttribute("chatList", chatRooms);
-            req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
+            req.getRequestDispatcher("/WEB-INF/views/chat/chatRoomList.jsp").forward(req, resp);
             return;
         }
         
@@ -129,8 +136,22 @@ public class ChattingController extends HttpServlet {
                 ArrayList<chatParticipantsUserDTO> users = service.getParticipantUsers(roomDto);
                 req.setAttribute("participantUsers", users);
             }
+            // 체크: wallet/pay에서 전달한 메시지 처리
+            HttpSession session = req.getSession();
 
-            req.getRequestDispatcher("/views/chat/chatting.jsp").forward(req, resp);
+            String success = (String) session.getAttribute("successMessage");
+            if (success != null) {
+                req.setAttribute("successMessage", success);  // JSP에서 1회 사용
+                session.removeAttribute("successMessage");    // 1회성 메시지 제거!
+            }
+
+            String error = (String) session.getAttribute("errorMessage");
+            if (error != null) {
+                req.setAttribute("errorMessage", error);
+                session.removeAttribute("errorMessage");
+            }
+
+            req.getRequestDispatcher("/WEB-INF/views/chat/chatting.jsp").forward(req, resp);
             return;
         }
         resp.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -159,35 +180,76 @@ public class ChattingController extends HttpServlet {
             session.setAttribute("redirectAfterLogin", currentUrl);
 
             // 로그인 페이지로 이동
-            resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+            resp.sendRedirect(req.getContextPath() + "/page/login");
             return;
         }
         
         // !! 개인 거래채팅방 개설
-        if ("/pRoomMake".equals(path)) {
-        	System.out.println("/pRoomMake 요청");
+     // !! 개인 거래 채팅방 개설
+        if ("/private".equals(path)) {
+            System.out.println("/private 요청");
+
+            HttpSession session = req.getSession();
+            UserDTO loginUser = (UserDTO) session.getAttribute("userInfo");
+
+            if (loginUser == null) {
+                resp.sendRedirect(req.getContextPath() + "/login");
+                return;
+            }
+
             long itemId = Long.parseLong(req.getParameter("itemId"));
             long hostId = Long.parseLong(req.getParameter("hostId"));
-            long receiverId = Long.parseLong(req.getParameter("receiverId"));
 
-            // 개인용 채팅방 생성
-            boolean result = service.makePrivateRoom(itemId, "PRIVATE", hostId, receiverId);
+            ChattingService chatService = new ChattingService();
 
-            req.getRequestDispatcher("/views/chat/chatRoomList.jsp").forward(req, resp);
+            // 기존 PRIVATE 채팅방 조회 or 생성
+            long roomId = chatService.getOrCreatePrivateRoom(
+                itemId, "PRIVATE", hostId, autoId
+            );
+
+            //  팝업으로 채팅방 이동
+            resp.sendRedirect(
+                req.getContextPath() + "/chat/room/" + roomId
+            );
             return;
         }
         
         // !! 채팅 보내기 기능
-        if("/sendChat".equals(path)) {
-        	System.out.println("sendChat 요청");
-            long roomId = Long.parseLong(req.getParameter("roomId"));
+        if ("/sendChat".equals(path)) {
+            System.out.println("sendChat 요청");
+
+            // multipart 환경에서도 roomId는 getParameter 가능
+            String roomIdStr = req.getParameter("roomId");
+            if (roomIdStr == null || roomIdStr.isBlank()) {
+                throw new RuntimeException("roomId 파라미터 누락");
+            }
+            long roomId = Long.parseLong(roomIdStr);
+
+            //  텍스트
             String content = req.getParameter("content");
-            
-            service.chattingWithUserAndRoomId(autoId, roomId,content);
-            
+
+            //  이미지 Part
+            Part imagePart = null;
+            try {
+                imagePart = req.getPart("image"); // 없으면 null
+            } catch (Exception ignore) {}
+
+            //  업로드 경로 (※ chat 폴더 기준)
+            String uploadPath = "C:/upload";
+
+            // 서비스 단일 진입점 호출
+            boolean result = service.sendChat(
+                autoId,
+                roomId,
+                content,
+                imagePart,
+                uploadPath
+            );
+
             resp.sendRedirect(req.getContextPath() + "/chat/room/" + roomId);
             return;
         }
+
         // !! 채팅방 삭제  //일단 냅두기로 관리자용도 있어도 되니까
         if (path.startsWith("/roomDelete/")) {
         	System.out.println("roomDelte 요청");
@@ -206,19 +268,48 @@ public class ChattingController extends HttpServlet {
         
         // !! 채팅방 나오기
         if (path.startsWith("/roomQuit/")) {
-        	System.out.println("roomQuit 요청");
-        	String[] parts = path.split("/");
-        	if(parts.length != 3) {
+            System.out.println("roomQuit 요청");
+
+            String[] parts = path.split("/");
+            if (parts.length != 3) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Room ID Missing");
                 return;
-        	}
-        	Long roomId = Long.valueOf(parts[2]);
-        	boolean result =service.quitRoomById(autoId, roomId);
-        	
-        	// 추후 수정 result 활용해야함
-        	resp.sendRedirect(req.getContextPath() + "/chat/roomList");
-        	return;
+            }
+
+            Long roomId = Long.valueOf(parts[2]);
+
+            //  방 정보 조회(재활용)
+            ChatRoomDTO roomDto = service.getRoomInfo(roomId);
+            if (roomDto == null) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Room not found");
+                return;
+            }
+
+            //  우선 채팅방에서 나가기(공통)
+            boolean chatQuit = service.quitRoomById(autoId, roomId);
+
+            //  GROUP이면 모임에서도 나가기 (호스트는 삭제 유도 or 못 나가게 처리)
+            if ("GROUP".equalsIgnoreCase(roomDto.getRoomType()) && roomDto.getMeetingId() != null) {
+
+                // 호스트면 나가기 대신 “삭제” 유도하거나 막는 게 깔끔함
+                if (autoId == roomDto.getHostId()) {
+                    resp.setContentType("text/html; charset=UTF-8");
+                    resp.getWriter().println("<script>alert('호스트는 방 나가기 대신 모임을 삭제하세요.');history.back();</script>");
+                    return;
+                }
+
+                try {
+                    new MeetingService().quitMeet(roomDto.getMeetingId(), autoId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // 모임 나가기는 실패했어도 채팅 나가기는 됐을 수 있으니 목록으로 보냄
+                }
+            }
+
+            resp.sendRedirect(req.getContextPath() + "/chat/roomList");
+            return;
         }
+
         if ("/invite".equals(path)) {
             System.out.println("/invite 요청");
 

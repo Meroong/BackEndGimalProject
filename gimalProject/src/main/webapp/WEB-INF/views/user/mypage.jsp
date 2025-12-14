@@ -249,11 +249,15 @@
 
     <script>
         const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>"; // 팝업용 키
-        const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
+        const RETURN_URL =
+            "<%= request.getContextPath() %>/page/addressPopupReturn?mode=mypage";
         function openJusoPopup() {
             window.open(
-                "https://business.juso.go.kr/addrlink/addrLinkUrl.do?confmKey=" + POPUP_KEY
-                + "&returnUrl=" + encodeURIComponent(RETURN_URL)
+                "https://business.juso.go.kr/addrlink/addrLinkUrl.do"
+                + "?confmKey=devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc="
+                + "&returnUrl=" + encodeURIComponent(
+                    "http://localhost:8080/gimalProject/views/util/addressPopupReturn.jsp?mode=mypage"
+                )
                 + "&resultType=4",
                 "jusoPopup",
                 "width=570,height=420,scrollbars=yes,resizable=yes"
@@ -266,24 +270,27 @@
 <body>
 <div class="container">
     <%-- 헤더 include --%>
-    <jsp:include page="/include/header.jsp" />
+    <jsp:include page="/WEB-INF/views/include/header.jsp" />
 
     <%
         UserDTO user = (UserDTO) session.getAttribute("userInfo");
         UserAddressDTO addr = (UserAddressDTO) session.getAttribute("addressInfo");
 
-        // 컨트롤러에서 request.setAttribute("walletBalance", int) 해준다고 가정
-        Integer walletBalance = (Integer) request.getAttribute("walletBalance");
+        // 세션에 저장된 포인트 값 가져옴
+        Integer walletBalance = (Integer) session.getAttribute("walletBalance");
         if (walletBalance == null) walletBalance = 0;
     %>
 
     <%-- alert용 메시지 (MVC2 원칙대로 Controller에서만 세팅) --%>
-    <c:if test="${not empty errorMessage}">
-        <script>alert("${errorMessage}");</script>
-    </c:if>
-    <c:if test="${not empty successMessage}">
-        <script>alert("${successMessage}");</script>
-    </c:if>
+	<c:if test="${not empty errorMessage}">
+	    <script>alert("${errorMessage}");</script>
+	    <c:remove var="errorMessage" scope="session"/>
+	</c:if>
+	
+	<c:if test="${not empty successMessage}">
+	    <script>alert("${successMessage}");</script>
+	    <c:remove var="successMessage" scope="session"/>
+	</c:if>
 
     <%
         if (user != null) {
@@ -380,43 +387,11 @@
 
             <%-- 가운데: 포인트 / 지갑 / 충전 영역 --%>
             <div class="map-card">
-                <div class="center-title">포인트 & 회비 지갑</div>
-                <div class="center-desc">모임 회비 결제에 사용할 포인트를 관리할 수 있습니다.</div>
-
-                <div class="wallet-title-row">
-                    <span class="label">현재 보유 포인트</span>
-                    <span class="balance"><%= walletBalance %> P</span>
-                </div>
-                <div class="wallet-sub">
-                    포인트는 모임 회비 결제에 사용되며, 추후 회비 정산 기능과 연동될 예정입니다.
-                </div>
-
-                <div class="wallet-charge-box">
-                    <h4>포인트 충전</h4>
-                    <small>테스트용 모의 카드 정보를 입력하면 포인트가 충전됩니다.</small>
-
-                    <form method="post" action="<%= request.getContextPath() %>/wallet/charge">
-                        <label>카드번호</label>
-                        <input type="text" name="cardNumber" placeholder="예: 1111-2222-3333-4444">
-
-                        <label>CVC</label>
-                        <input type="text" name="cvc" placeholder="3자리 숫자">
-
-                        <label>비밀번호 앞 2자리</label>
-                        <input type="password" name="cardPw" placeholder="예: 12">
-
-                        <label>충전 금액</label>
-                        <input type="number" name="amount" placeholder="예: 10000">
-
-                        <button type="submit">충전하기</button>
-                    </form>
-
-                    <div class="wallet-hint">
-                        ※ 실제 결제는 일어나지 않고,<br>
-                        테스트용 mock 카드 데이터로만 포인트가 충전됩니다.
-                    </div>
-                </div>
-            </div>
+	<div class="map-card">
+    <jsp:include page="/WEB-INF/views/wallet/wallet_section.jsp">
+	    <jsp:param name="returnUrl" value="/page/mypage" />
+	</jsp:include>
+	</div>
 
             <%-- 오른쪽: 알림 / 추천 활동 --%>
             <div class="weather-card">
@@ -436,7 +411,9 @@
     %>
     <div class="main-box" style="text-align:center;">
         <p>로그인이 필요합니다.
-            <a href="<%= request.getContextPath() %>/views/user/login.jsp">로그인 페이지로 이동</a>
+            <a href="<%= request.getContextPath() %>/page/login">
+			    로그인 페이지로 이동
+			</a>
         </p>
     </div>
     <%

@@ -42,39 +42,34 @@ public class MeetingLocationDAO {
 	}
 
     // 주소 삽입
-    public Long insertLocation(MeetingLocationDTO dto) {
-        String sql = "INSERT INTO meeting_location (road_address, jibun_address, addr_detail, latitude, longitude) "
-                   + "VALUES (?, ?, ?, ?, ?);";
-        try (Connection con = JDBCUtil.jdbcCon();
-        		PreparedStatement pstmt = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+	public Long insertLocation(MeetingLocationDTO dto) {
+	    String sql = """
+	        INSERT INTO meeting_location
+	        (road_address, jibun_address, addr_detail, latitude, longitude, dong_name)
+	        VALUES (?, ?, ?, ?, ?, ?)
+	    """;
 
-            
-            pstmt.setString(1, dto.getRoadAddress());
-            pstmt.setString(2, dto.getJibunAddress());
-			pstmt.setString(3, dto.getAddrDetail());
-			pstmt.setDouble(4, dto.getLatitude()); 
-			pstmt.setDouble(5, dto.getLongitude());
-													 
+	    try (Connection con = JDBCUtil.jdbcCon();
+	         PreparedStatement pstmt =
+	             con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-	        int affectedRows = pstmt.executeUpdate();
-	        if (affectedRows == 0) {
-	            throw new SQLException("Insertion failed, no rows affected.");
-	        }
-	        //인서트 결과로 생성된 키를 반환
-	        try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-	            if (generatedKeys.next()) {
-	                return generatedKeys.getLong(1); // 생성된 PK 반환
-	            } else {
-	                throw new SQLException("삽입 실패, 아이디 포함안됨.");
-	            }
-	        }
+	        pstmt.setString(1, dto.getRoadAddress());
+	        pstmt.setString(2, dto.getJibunAddress());
+	        pstmt.setString(3, dto.getAddrDetail());
+	        pstmt.setDouble(4, dto.getLatitude());
+	        pstmt.setDouble(5, dto.getLongitude());
+	        pstmt.setString(6, dto.getDongName());
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("DB 연결 또는 쿼리 오류");
-            return null;
-        }
-    }
+	        pstmt.executeUpdate();
+
+	        ResultSet rs = pstmt.getGeneratedKeys();
+	        if (rs.next()) return rs.getLong(1);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
     //주소 수정
     public boolean updateLocation(MeetingLocationDTO dto) {
     	String sql = "UPDATE meeting_location SET road_address = ?, jibun_address = ?, addr_detail = ?, latitude = ?, longitude = ?"
@@ -103,6 +98,26 @@ public class MeetingLocationDAO {
            }
            return false;
     }
+    
+    // 주소 삭제 (모임 삭제 시 사용)
+    public boolean deleteLocation(long locationId) {
+        String sql = "DELETE FROM meeting_location WHERE id = ?;";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, locationId);
+
+            int result = pstmt.executeUpdate();
+            return result > 0;
+
+        } catch (SQLException e) {
+            System.out.println("주소 삭제 중 오류 발생");
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 
 
 }

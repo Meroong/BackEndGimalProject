@@ -177,6 +177,35 @@ public class ChatRoomDAO {
 		            e.printStackTrace();
 		            return false;
 		        }
-		 
+	 }
+	 // PRIVATE 채팅방 조회
+	 public Integer findPrivateRoom(long itemId, long hostId, long receiverId) {
+	     String sql = """
+	         SELECT cr.id
+	         FROM chat_room cr
+	         JOIN chat_room_user u1 ON cr.id = u1.room_id
+	         JOIN chat_room_user u2 ON cr.id = u2.room_id
+	         WHERE cr.item_id = ?
+	           AND cr.room_type = 'PRIVATE'
+	           AND u1.user_id = ?
+	           AND u2.user_id = ?
+	     """;
+
+	     try (Connection con = JDBCUtil.jdbcCon();
+	          PreparedStatement ps = con.prepareStatement(sql)) {
+
+	         ps.setLong(1, itemId);
+	         ps.setLong(2, hostId);
+	         ps.setLong(3, receiverId);
+
+	         try (ResultSet rs = ps.executeQuery()) {
+	             if (rs.next()) {
+	                 return rs.getInt("id");
+	             }
+	         }
+	     } catch (Exception e) {
+	         e.printStackTrace();
+	     }
+	     return null;
 	 }
 }

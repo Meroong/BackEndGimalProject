@@ -1,0 +1,48 @@
+@charset "UTF-8";
+
+.select-like {
+    padding: 13px 16px;
+    border-radius: 12px;
+    border: 1px solid #DDD;
+    font-size: 15px;
+    background: white;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.15s;
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 포커스 느낌 */
+.select-like:hover,
+.select-like:focus {
+    border-color: #FF7C40;
+    outline: none;
+}
+
+/* 우리동네 전용 폭 */
+.location-select {
+    min-width: 110px;
+    justify-content: space-between;
+}
+
+/* 드롭다운 화살표 */
+.select-arrow {
+    font-size: 10px;
+    color: #666;
+    margin-left: 4px;
+}
+
+/* hover 시 select 느낌 */
+.search-select:hover {
+    border-color: #ccc;
+}
+
+/* button 기본 스타일 제거 */
+button.search-select {
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 10px;
+}

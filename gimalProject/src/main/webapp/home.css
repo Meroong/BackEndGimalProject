@@ -260,6 +260,8 @@ select:focus, input:focus {
     border-radius: 20px;
     padding: 25px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        position: relative;
+    overflow: hidden;   /* 🔥 아이콘이 커도 삐져나오지 않게 */
 }
 
 .weather-title {
@@ -280,6 +282,23 @@ select:focus, input:focus {
     font-size: 17px;
     color: #555;
     font-weight: 500;
+}
+
+
+/* 상단: 제목 + 아이콘 */
+.weather-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* 🔥 문제의 핵심 */
+.weather-icon {
+    width: 64px;        /* ← 여기서 크기 제어 */
+    height: 64px;
+    object-fit: contain;
+    flex-shrink: 0;
+    opacity: 0.95;      /* 선택 */
 }
 
 /* 활동 카드 */
@@ -308,10 +327,191 @@ select:focus, input:focus {
     width: 40px;
     height: 40px;
 }
-
+.activity-card img {
+    display: block;
+}
 .activity-card span {
     display: block;
     margin-top: 6px;
     font-size: 16px;
     font-weight: 700;
 }
+/* =========================
+   지도 모임 리스트 팝업
+========================= */
+.meeting-popup {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 10px;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.meeting-popup-title {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: #222;
+}
+
+.meeting-popup-item {
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+}
+
+.meeting-popup-item:hover {
+    background: #f1f5f9;
+}
+
+/* 선택: 팝업 화살표 느낌 */
+.meeting-popup::after {
+    content: "";
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 8px 6px 0;
+    border-style: solid;
+    border-color: white transparent transparent;
+}
+/* 활동 카드(a태그) 밑줄/색 강제 제거 */
+.activities a.activity-card,
+.activities a.activity-card:link,
+.activities a.activity-card:visited,
+.activities a.activity-card:hover,
+.activities a.activity-card:active {
+  text-decoration: none !important;
+  color: inherit !important;
+}
+
+/* 혹시 span에 밑줄이 적용되는 경우까지 차단 */
+.activities a.activity-card span {
+  text-decoration: none !important;
+}
+
+/* a 태그가 inline이면 이상한 선/간격 생길 수 있어서 block/flex로 고정 */
+.activities a.activity-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 가로 인기 모임 카드 */
+.popular-meeting-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;   /* ⬆ 기존 18 → 22 */
+}
+
+.popular-meeting-item {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 5px 18px rgba(0,0,0,0.06);
+    text-decoration: none;
+    color: #222;
+    transition: 0.25s;
+    display: flex;
+    flex-direction: column;
+}
+
+.popular-meeting-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.1);
+}
+
+/* 이미지 */
+.pmi-image {
+    width: 100%;
+    height: 110px;
+    overflow: hidden;
+    border-radius: 12px 12px 0 0;
+}
+
+.pmi-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* 이미지 없을 때 */
+.pmi-image.no-image {
+    background: linear-gradient(135deg, #F1F5F9, #E5E7EB);
+}
+/* 본문 */
+.pmi-body {
+    padding: 14px 14px;     /* ⬆ 상하 여백 증가 */
+    display: flex;
+    flex-direction: column;
+    gap: 6px;              /* ⭐ 핵심 */
+}
+
+.pmi-title {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;       /* ⭐ 숨통 */
+    margin-bottom: 2px;
+}
+
+.pmi-meta {
+    display: flex;
+    flex-direction: column;   /* ⭐ 가로 → 세로 */
+    gap: 1px;                 /* 숨 쉬는 공간 */
+    font-size: 13px;
+    color: #666;
+}
+
+.pmi-footer {
+    margin-top: 6px;   /* ⭐ 본문과 분리 */
+    padding-top: 6px;
+    border-top: 1px solid #F1F1F1; /* 심리적 구분선 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pmi-people {
+    font-size: 13px;
+    color: #444;
+}
+
+.pmi-status {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+}
+
+.pmi-status.open {
+    background: #FFE5D0;
+    color: #FF7C40;
+}
+
+.pmi-status.closed {
+    background: #EEE;
+    color: #777;
+}
+.weather-message {
+  margin: 18px auto 10px;
+  padding: 12px 20px;
+  max-width: 720px;
+  background: #fff7ed; /* 드림 배경과 통일 */
+  border-radius: 999px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.weather-emoji {
+  font-size: 18px;
+}
+
+

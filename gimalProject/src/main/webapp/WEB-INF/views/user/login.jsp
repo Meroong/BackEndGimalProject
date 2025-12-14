@@ -1,5 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
+<%
+    String redirect = request.getParameter("redirect");
+    if (redirect != null) {
+        session.setAttribute("redirectAfterLogin", redirect);
+    }
+%>
+
 <html>
 <head>
 <meta charset="UTF-8">
@@ -134,8 +141,18 @@
 
         <button type="submit">로그인</button>
     </form>
+<<<<<<< HEAD:gimalProject/src/main/webapp/views/user/login.jsp
     <p>회원이 아니신가요? <a href="<%= request.getContextPath() %>/views/user/register.jsp">회원가입</a>
 </p>
+=======
+
+    <p>
+	  회원이 아니신가요?
+	  <a href="<%= request.getContextPath() %>/page/register">
+	      회원가입
+	  </a>
+	</p>
+>>>>>>> backup:gimalProject/src/main/webapp/WEB-INF/views/user/login.jsp
 </div>
 
 </body>

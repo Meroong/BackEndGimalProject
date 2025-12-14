@@ -5,15 +5,18 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import dao.FileResourceDAO;
 import dao.MeetingDAO;
 import dao.MeetingLocationDAO;
 import dao.MeetingParticipantDAO;
@@ -22,10 +25,13 @@ import dto.MeetingDTO;
 import dto.MeetingInfoDTO;
 import dto.MeetingLocationDTO;
 import dto.MeetingParticipantDTO;
+import util.DongUtil;
+import util.TimeUtil;
 
 public class MeetingService {
 	//회비 조회용
 	public int getMeetingCost(long meetingId) {
+		System.out.println("Service: getMeetingCost");
 	    Integer cost = new MeetingDAO().getMeetingCostByMeetingId(meetingId);
 
 	    if (cost == null) {
@@ -72,7 +78,8 @@ public class MeetingService {
         System.out.println(locationDto.getAddrDetail());
         infoDto.setLatitude(locationDto.getLatitude());
         infoDto.setLongitude(locationDto.getLongitude());
-
+        infoDto.setDongName(locationDto.getDongName());
+        
         // 이미지 정보 가져오기
         ImageService imageService = new ImageService(); 
         List<FileResourceDTO> imageUrls = imageService.getMeetingImage(meetingId, "MEETING");
@@ -88,10 +95,68 @@ public class MeetingService {
     }
 
     // 게시판 리스트 조회
-    public ArrayList<MeetingDTO> getMeetingList() {
+    public ArrayList<MeetingInfoDTO> getMeetingList(long loginUserId) {
         System.out.println("Service: getMeetingList");
-        return new MeetingDAO().getPostList();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        ArrayList<MeetingInfoDTO> aList =  new MeetingDAO().getPostList();
+        
+        //상태 보정 (자동 마감)
+        int closedCount = new MeetingDAO().closeExpiredMeetings();
+        System.out.println("자동 마감 처리된 모임 수: " + closedCount);
+        
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        for (MeetingInfoDTO dto : aList) {
+        	//timeAgo 세팅 몇분전
+            if (dto.getCreatedAt() != null) {
+                String timeAgo = TimeUtil.toTimeAgo(dto.getCreatedAt());
+                dto.setTimeAgo(timeAgo);
+            }
+            //데이트 추출 후 문자열로 포멧팅
+            if (dto.getDate() != null) {
+                dto.setDateStr(sdf.format(dto.getDate()));
+            }
+        // 작성자인지
+        boolean isCreator = (loginUserId != -1 && loginUserId == dto.getCreatorId());
+        dto.setCreator(isCreator);
+
+        // 참여자인지
+        boolean isParticipant = false;
+        if (loginUserId != -1) {
+            isParticipant = new MeetingParticipantDAO()
+                    .isParticipant(dto.getMeetingId(), loginUserId);
+        }
+        dto.setParticipant(isParticipant);
     }
+        return aList;
+        
+    }
+    // 🔍 필터가 적용된 게시판 리스트 조회 (카테고리 + 기간 + 키워드 + 상태 + 날씨)
+    public ArrayList<MeetingInfoDTO> getMeetingListFiltered(String category,
+                                                            String dateFrom,
+                                                            String dateTo,
+                                                            String keyword,
+                                                            String status,
+                                                            String weather) {
+        System.out.println("Service: getMeetingListFiltered");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+
+        ArrayList<MeetingInfoDTO> aList =
+                new MeetingDAO().getPostListFiltered(category, dateFrom, dateTo, keyword, status, weather);
+
+        for (MeetingInfoDTO dto : aList) {
+            if (dto.getCreatedAt() != null) {
+                String timeAgo = TimeUtil.toTimeAgo(dto.getCreatedAt());
+                dto.setTimeAgo(timeAgo);
+            }
+            if (dto.getDate() != null) {
+                dto.setDateStr(sdf.format(dto.getDate()));
+            }
+        }
+        return aList;
+    }
+
+
+
 
     // 모임 장소 업데이트
     public boolean updateLocation(
@@ -102,8 +167,10 @@ public class MeetingService {
             double latitude,
             double longitude
     ) throws Exception {
+    	System.out.println("Service: updateLocation");
         if (locationId <= 0) throw new IllegalArgumentException("주소정보가 없습니다.");
-
+        String dong = new DongUtil().extractAreaUnit(jibunAddress);
+        
         MeetingLocationDTO dto = new MeetingLocationDTO();
         dto.setId(locationId);
         dto.setRoadAddress(roadAddress);
@@ -111,6 +178,7 @@ public class MeetingService {
         dto.setAddrDetail(addrDetail);
         dto.setLatitude(latitude);
         dto.setLongitude(longitude);
+        dto.setDongName(dong);
 
         boolean result = new MeetingLocationDAO().updateLocation(dto);
         if (!result) throw new Exception("모임 장소 업데이트 실패");
@@ -125,14 +193,17 @@ public class MeetingService {
             double latitude,
             double longitude
     ) throws Exception {
-        System.out.println("Service: insertLocation");
-
+    	System.out.println("Service: insertLocation");
         MeetingLocationDTO dto = new MeetingLocationDTO();
         dto.setRoadAddress(roadAddress);
         dto.setJibunAddress(jibunAddress);
         dto.setAddrDetail(addrDetail);
         dto.setLatitude(latitude);
         dto.setLongitude(longitude);
+
+        //동 정보 저장하도록 추가
+        String dong = new DongUtil().extractAreaUnit(jibunAddress);
+        dto.setDongName(dong);
 
         Long rs = new MeetingLocationDAO().insertLocation(dto);
         if (rs != null) return rs;
@@ -171,7 +242,7 @@ public class MeetingService {
         dto.setMaxMembers(maxMembers);
         dto.setCurrentMembers(currentMembers);
         dto.setCost(cost);
-        dto.setTag(tag);
+        dto.setTag(processTags(tag));
         dto.setStatus(status);
         dto.setCreatorId(creatorId); // 게시자 ID 세팅
         
@@ -181,7 +252,10 @@ public class MeetingService {
         
         return new MeetingDAO().insert(dto);
     }
+    public boolean increaseViewCount(long meetId) {
+    	return new MeetingDAO().increaseViewCount(meetId);
 
+    }
     // 모임 업데이트
     public boolean updateMeetingInfo(
             long meetingId,
@@ -198,6 +272,7 @@ public class MeetingService {
             double longitude,
             long creatorId // 로그인 세션에서 받은 게시자 ID
     ) throws Exception {
+    	System.out.println("Service: updateMeetingInfo");
         if (date == null) throw new IllegalArgumentException("모임 날짜가 존재하지 않습니다.");
 
         LocalDate meetingDate = date.toLocalDateTime().toLocalDate();
@@ -214,7 +289,7 @@ public class MeetingService {
         dto.setMaxMembers(maxMembers);
         dto.setCurrentMembers(currentMembers);
         dto.setCost(cost);
-        dto.setTag(tag);
+        dto.setTag(processTags(tag));
         dto.setStatus(status);
         dto.setCreatorId(creatorId); // 게시자 ID 세팅
 
@@ -270,6 +345,7 @@ public class MeetingService {
 
     // 오픈웨더 API 호출
     public String callAnAPI(double lat, double lon) {
+    	System.out.println("Service: callAnApi");
         String key = "fcdf715f2e4faa898d33ff124104cafe";
         BufferedReader br = null;
         HttpURLConnection conn = null;
@@ -323,6 +399,7 @@ public class MeetingService {
 
     // 날씨 정보 추출
     public String extractWeather(String jsonStr, int dayIndex) {
+    	System.out.println("Service: extractWeather");
         JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
         JsonArray dailyArr = json.getAsJsonArray("daily");
 
@@ -365,7 +442,86 @@ public class MeetingService {
     }
 
     // 게시글 삭제
-    public void deleteMeeting(long meetingId, long creator_id) throws Exception {
-        new MeetingDAO().delete(meetingId, creator_id);
+    public boolean deleteMeeting(long meetingId, long creatorId) {
+    	System.out.println("Service: deleteMeeting");
+        MeetingDAO meetingDao = new MeetingDAO();
+        ImageService imageService = new ImageService();
+
+        //업로드 실제 경로
+        String uploadPath = "C:/upload/meeting";
+
+        // 모임 이미지 (DB + 실제 파일) 전체 삭제
+        imageService.deleteAllByUsed("MEETING", meetingId, uploadPath);
+
+        // location 삭제
+        Long locationId = meetingDao.getLocationIdByMeetingId(meetingId);
+        if (locationId != null) {
+            new MeetingLocationDAO().deleteLocation(locationId);
+        }
+
+        //meeting 삭제 (participant, chat_room 등은 CASCADE)
+        return meetingDao.delete(meetingId, creatorId);
     }
+    
+    public void updateMeetingStatus(long meetingId, String status) {
+    	System.out.println("Service: updateMeetingStatus");
+        if (!"OPEN".equals(status) && !"CLOSED".equals(status)) {
+            throw new IllegalArgumentException("잘못된 상태값");
+        }
+
+        boolean result = new MeetingDAO().updateStatus(meetingId, status);
+        if (!result) {
+            throw new RuntimeException("모임 상태 변경 실패");
+        }
+    }
+    private String processTags(String rawTag) {
+    	System.out.println("Service: processTags");
+        if (rawTag == null || rawTag.isBlank()) return null;
+
+        String[] arr = rawTag.split(",");
+        LinkedHashSet<String> set = new LinkedHashSet<>();
+
+        for (String t : arr) {
+            String tag = t.trim();
+            if (!tag.isEmpty()) {
+                set.add(tag);
+            }
+            if (set.size() >= 5) break; // 최대 5개 제한
+        }
+
+        return set.isEmpty() ? null : String.join(",", set);
+    }
+    public void reopenMeeting(long meetingId, Long loginUserId) {
+    	System.out.println("Service: reopenMeeting");
+        MeetingDTO meeting = new MeetingDAO().getPostDetail(meetingId);
+
+        if (meeting == null) {
+            throw new IllegalArgumentException("존재하지 않는 모임입니다.");
+        }
+
+        // 작성자 검증
+        if (!loginUserId.equals(meeting.getCreatorId())) {
+            throw new SecurityException("권한이 없습니다.");
+        }
+
+        // 🔥 날짜 검증
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        if (meeting.getDate().before(now)) {
+            throw new IllegalStateException("이미 지난 모임은 모집을 재개할 수 없습니다.");
+        }
+
+        new MeetingDAO().updateStatus(meetingId, "OPEN");
+    }
+
+    //홈 지도용 - 활성 모임 조회 (최소 정보)
+    public List<MeetingInfoDTO> getActiveMeetingsForMap() {
+    	System.out.println("Service: getActiveMeeintgsForMap");
+        return new MeetingDAO().findActiveMeetingsForMap();
+    }
+    // 인기 게시글 조회
+    public List<MeetingInfoDTO> getPopularMeetings(int limit) {
+    	System.out.println("Service: findPopularMeeting");
+        return new MeetingDAO().findPopularMeetings(limit);
+    }
+ 
 }

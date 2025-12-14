@@ -86,7 +86,7 @@
 <!-- 헤더 HTML -->
 <header>
     <div class="logo">
-        <a href="<%= request.getContextPath() %>/index.jsp">
+        <a href="<%= request.getContextPath() %>/home">
             <img src="<%= request.getContextPath() %>/resources/images/logo.png" alt="logo">
         </a>
     </div>
@@ -100,8 +100,7 @@
                 String role = AuthUtil.getRole(request); // JWT에서 역할 추출
         %>
             <!-- 로그인 상태 공통: 메시지 버튼 -->
-            <button class="msg-btn"
-                    onclick="location.href='<%= request.getContextPath() %>/chat/roomList'">
+            <button class="msg-btn"  onclick="openChatList()">
                 메시지
             </button>
 
@@ -111,8 +110,8 @@
                     관리자
                 </button>
             <% } else { %>
-                <button class="mypage-btn"
-                        onclick="location.href='<%= request.getContextPath() %>/views/user/mypage.jsp'">
+            <button class="mypage-btn"
+                    onclick="location.href='<%= request.getContextPath() %>/page/mypage'">
                     마이페이지
                 </button>
             <% } %>
@@ -125,9 +124,18 @@
         <% } else { %>
             <!-- 비로그인 상태 -->
             <button class="log-btn"
-                    onclick="location.href='<%= request.getContextPath() %>/views/user/login.jsp'">
+                    onclick="location.href='<%= request.getContextPath() %>/page/login'">
                 Log in
             </button>
         <% } %>
     </div>
+    <script>
+function openChatList() {
+    window.open(
+        "<%= request.getContextPath() %>/chat/roomList",
+        "chatPopup",
+        "width=430,height=640,top=100,left=100,scrollbars=yes"
+    );
+}
+</script>
 </header>

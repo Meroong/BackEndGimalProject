@@ -369,6 +369,7 @@ public class AdminController extends HttpServlet {
         List<DailySignupDTO>       signupStats = adminService.getDailySignupStats(7);  // 최근 7일
         List<ReportStatusCountDTO> reportStats = adminService.getReportStatusCounts(); // 상태별 신고 건수
 
+
         // 4) JSP로 전달
         req.setAttribute("basicStats", basicStats);
         req.setAttribute("stats", basicStats);   // 예전 JSP 호환용 이름

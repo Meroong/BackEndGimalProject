@@ -59,9 +59,9 @@ public class AdminUserDAO {
         String deleteChatRoomsSql =
                 "DELETE FROM chat_room WHERE buyer_id = ? OR seller_id = ?";
 
-        // 5. 이 유저가 올린 상품 삭제
-        String deleteItemsSql =
-                "DELETE FROM item WHERE seller_id = ?";
+        // 5. 이 유저가 올린 나눔게시글 삭제
+        String deleteDreamSql =
+                "DELETE FROM dream_post WHERE writer_id = ?";
 
         // 6. 마지막으로 회원 삭제
         String deleteUserSql =
@@ -76,7 +76,7 @@ public class AdminUserDAO {
                 PreparedStatement pstmtReview = con.prepareStatement(deleteReviewsSql);
                 PreparedStatement pstmtTrans  = con.prepareStatement(deleteTransactionsSql);
                 PreparedStatement pstmtChat   = con.prepareStatement(deleteChatRoomsSql);
-                PreparedStatement pstmtItem   = con.prepareStatement(deleteItemsSql);
+                PreparedStatement pstmtItem   = con.prepareStatement(deleteDreamSql);
                 PreparedStatement pstmtUser   = con.prepareStatement(deleteUserSql);
             ) {
                 // 1) 신고 삭제

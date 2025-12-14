@@ -1,0 +1,84 @@
+@charset "UTF-8";
+
+/* ===============================
+   💳 WALLET CHARGE COMPONENT
+   =============================== */
+
+/* 충전 카드 컨테이너 */
+.wallet-charge-box {
+    margin-top: 15px;
+    padding: 18px;
+    border-radius: 14px;
+    background: #FFFFFF;
+    border: 1px solid #EEE;
+    box-sizing: border-box;
+}
+
+/* 제목 */
+.wallet-charge-box h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #222;
+}
+
+/* 설명 텍스트 */
+.wallet-charge-box small {
+    display: block;
+    margin-bottom: 10px;
+    color: #999;
+    font-size: 12px;
+}
+
+/* 폼 레이아웃 */
+.wallet-charge-box form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* 라벨 */
+.wallet-charge-box label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+/* 입력 필드 */
+.wallet-charge-box input[type="text"],
+.wallet-charge-box input[type="password"],
+.wallet-charge-box input[type="number"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    border: 1px solid #DDD;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* 충전 버튼 */
+.wallet-charge-box button {
+    width: 100%;
+    padding: 10px 0;
+    border-radius: 10px;
+    border: none;
+    background: #FF6600;
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.wallet-charge-box button:hover {
+    background: #e65c00;
+}
+
+/* 하단 안내 문구 */
+.wallet-hint {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #AAA;
+    line-height: 1.4;
+}

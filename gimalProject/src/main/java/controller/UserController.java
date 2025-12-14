@@ -1,6 +1,5 @@
 package controller;
 
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -10,7 +9,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import service.ImageService;
 import service.UserService;
+import service.WalletService;
 import util.AuthUtil;
+import util.DongUtil;
 import dto.UserAddressDTO;
 import dto.UserDTO;
 import auth.JwtAuth;
@@ -42,7 +43,7 @@ public class UserController extends HttpServlet {
         	Long autoId = AuthUtil.getAutoId(req);
             
             if(autoId == -1) {
-            	resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+            	resp.sendRedirect(req.getContextPath() + "/page/login");
             	return;
             }
             HttpSession session = req.getSession(false);
@@ -88,23 +89,31 @@ public class UserController extends HttpServlet {
 
                 String profileUrl = new ImageService().getProfileImage(userDto.getAutoId(), "PROFILE");
                 session.setAttribute("profileUrl", profileUrl);
+                
+                // 지갑 잔액 세션에 저장
+                int balance = new WalletService().getBalance(userDto.getAutoId());
+                System.out.println("AutoId: "+userDto.getAutoId()+", balance: "+balance);
+                session.setAttribute("walletBalance", balance);
+                
                 String jwt = JwtAuth.generateToken(userDto.getUserId(), userDto.getAutoId(), userDto.getRole());
                 session.setAttribute("Authorization", "Bearer " + jwt);
 
              // 이전 URL 체크 후 리다이렉트
-                String redirectUrl = (String) session.getAttribute("redirectAfterLogin");
-                if (redirectUrl != null) {
-                    session.removeAttribute("redirectAfterLogin"); // 한 번만 사용
+                String redirectUrl = (String) session.getAttribute("LOGIN_REDIRECT");
+                session.removeAttribute("LOGIN_REDIRECT"); // 있든 없든 한 번만 사용
+
+                if (redirectUrl != null && !redirectUrl.isBlank()) {
+                    // redirectUrl은 이미 "/meeting/info?meetingId=3" 형태
                     resp.sendRedirect(redirectUrl);
                 } else {
-                	resp.sendRedirect(req.getContextPath() + "/home");
+                    resp.sendRedirect(req.getContextPath() + "/home");
                 }
 
                 return;
 
             } else {
                 req.setAttribute("errorMsg", "아이디 또는 비밀번호를 확인해주세요.");
-                req.getRequestDispatcher("/views/user/login.jsp").forward(req, resp);
+                req.getRequestDispatcher("/WEB-INF/views/user/login.jsp").forward(req, resp);
                 return;
             }
 
@@ -123,6 +132,7 @@ public class UserController extends HttpServlet {
             try {
                 userService.registerUser(userId, password, nickName, userName,
                         roadAddress, jibunAddress, addrDetail);
+
                 resp.sendRedirect(req.getContextPath() + "/home");
                 return;
 
@@ -135,7 +145,7 @@ public class UserController extends HttpServlet {
                 req.setAttribute("jibunAddress", jibunAddress);
                 req.setAttribute("addrDetail", addrDetail);
 
-                req.getRequestDispatcher("/views/user/register.jsp").forward(req, resp);
+                req.getRequestDispatcher("/WEB-INF/views/user/register.jsp").forward(req, resp);
                 return;
             }
 
@@ -160,7 +170,7 @@ public class UserController extends HttpServlet {
         	    updateSession.setAttribute("redirectAfterLogin", currentUrl);
 
         	    // 로그인 페이지로 이동
-        	    resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+        	    resp.sendRedirect(req.getContextPath() + "/page/login");
         	    return;
         	}
 
@@ -183,14 +193,77 @@ public class UserController extends HttpServlet {
                 req.getSession().setAttribute("userInfo", updatedUser);
                 req.getSession().setAttribute("addressInfo", updatedAddress);
 
-                resp.sendRedirect(req.getContextPath() + "/views/user/mypage.jsp");
+                resp.sendRedirect(req.getContextPath() + "/page/mypage");
                 return;
 
             } catch (Exception e) {
                 req.setAttribute("errorMsg", e.getMessage());
-                req.getRequestDispatcher("/views/user/mypage.jsp").forward(req, resp);
+                resp.sendRedirect(req.getContextPath() + "/page/mypage");
                 return;
             }
+        //유저 주소만 업데이트 검색바 용    
+        case "/updateAddress": {
+        	System.out.println("UserController: updateAddress");
+        	
+            String upRoadAddress = req.getParameter("roadAddress");
+            String upJibunAddress = req.getParameter("jibunAddress");
+            String upAddrDetail  = req.getParameter("addrDetail");
+            String upLatitude    = req.getParameter("latitude");
+            String upLongitude   = req.getParameter("longitude");
+            String dongName = null;
+            System.out.println(upLatitude);
+            if (upLatitude != null && upLatitude.isBlank()) upLatitude = null;
+            if (upLongitude != null && upLongitude.isBlank()) upLongitude = null;
+            
+            Long autoId = AuthUtil.getAutoId(req);
+            if (autoId == -1) {
+                UserAddressDTO temp = new UserAddressDTO();
+                temp.setRoadAddress(upRoadAddress);
+                temp.setJibunAddress(upJibunAddress);
+
+                // ⭐⭐⭐ 이게 핵심
+                if (upLatitude != null && upLongitude != null) {
+                    temp.setLatitude(Double.parseDouble(upLatitude));
+                    temp.setLongitude(Double.parseDouble(upLongitude));
+                }
+                temp.setDongName(new DongUtil().extractAreaUnit(upJibunAddress));
+
+                req.getSession().setAttribute("addressInfo", temp);
+
+                resp.sendRedirect(req.getContextPath() + "/home");
+                return;
+            }
+
+
+            try {
+                // 기존 서비스 로직 재사용
+                userService.updateUser(
+                    autoId,
+                    null,   // password
+                    null,   // nickname
+                    upRoadAddress,
+                    upJibunAddress,
+                    upAddrDetail,
+                    upLatitude,
+                    upLongitude
+                );
+
+                // 세션 갱신
+                UserAddressDTO updatedAddress =
+                        userService.getAddressInfo(autoId);
+                req.getSession().setAttribute("addressInfo", updatedAddress);
+
+                resp.setStatus(HttpServletResponse.SC_OK);
+                resp.sendRedirect(req.getContextPath() + "/home");
+                return;
+            } catch (Exception e) {
+                resp.sendError(
+                    HttpServletResponse.SC_BAD_REQUEST,
+                    e.getMessage()
+                );
+            }
+            return;
+        }
 
         /* ==========================================================
          * 회원 탈퇴 (예외 기반)
@@ -211,7 +284,7 @@ public class UserController extends HttpServlet {
         	    deleteSession.setAttribute("redirectAfterLogin", currentUrl);
 
         	    // 로그인 페이지로 이동
-        	    resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+        	    resp.sendRedirect(req.getContextPath() + "/page/login");
         	    return;
         	}
 
@@ -223,7 +296,7 @@ public class UserController extends HttpServlet {
 
             } catch (Exception e) {
                 req.setAttribute("errorMsg", e.getMessage());
-                req.getRequestDispatcher("/views/user/mypage.jsp").forward(req, resp);
+                resp.sendRedirect(req.getContextPath() + "/page/mypage");
                 return;
             }
 

@@ -77,7 +77,7 @@ public class AdminStatsDAO {
 
     // 상품 수
     public int getTotalItems() {
-        String sql = "SELECT COUNT(*) FROM item";
+        String sql = "SELECT COUNT(*) FROM dream_post";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {

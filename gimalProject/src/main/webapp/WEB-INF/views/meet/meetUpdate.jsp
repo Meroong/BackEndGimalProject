@@ -6,7 +6,6 @@
 
 <%	// 기조에는 수정 시 모임날짜를 매번 입력해야했음 그리고 이전 날짜도 선택가능했고 7일 이후 날짜도 선택가능했어서 만든 기능 
     MeetingInfoDTO m = (MeetingInfoDTO) request.getAttribute("meetingInfo");
-    UserAddressDTO addr = (UserAddressDTO) session.getAttribute("addressInfo");
 
     // 모임 날짜 포맷 (yyyy-MM-dd)
     String meetingDateStr = "";
@@ -66,6 +65,30 @@
         background: rgba(0,0,0,0.6); color: white;
         padding: 3px 5px; font-size: 10px; border-radius: 4px; cursor: pointer;
     }
+    
+	.tag-btn {
+	    padding: 6px 12px;
+	    border-radius: 20px;
+	    border: 1px solid #FF7C40;
+	    background: #fff;
+	    color: #FF7C40;
+	    font-size: 12px;
+	    cursor: pointer;
+	}
+	
+	.tag-btn.active {
+	    background: #FF7C40;
+	    color: #fff;
+	}
+	
+	.selected-tag {
+	    padding: 6px 12px;
+	    border-radius: 20px;
+	    background: #FF7C40;
+	    color: #fff;
+	    font-size: 12px;
+	    cursor: pointer;
+	}
 </style>
 
 <script>
@@ -183,6 +206,110 @@
 
         return false;
     }
+    const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>";
+    const RETURN_URL =
+        "<%= request.getContextPath() %>/page/addressPopupReturn?mode=mypage";
+    function openJusoPopup() {
+        window.open(
+            "https://business.juso.go.kr/addrlink/addrLinkUrl.do?confmKey=" + POPUP_KEY
+            + "&returnUrl=" + encodeURIComponent(RETURN_URL)
+            + "&resultType=4",
+            "jusoPopup",
+            "width=570,height=420,scrollbars=yes,resizable=yes"
+        );
+    }
+    
+    /* =========================
+    태그 선택 로직 (수정)
+	 ========================= */
+	 const recommendedTags = [
+	     "운동","육아","산책","조깅","러닝",
+	     "반려견","반려묘","카페","스터디",
+	     "독서","취미","여행","사진","게임"
+	 ];
+	
+	 const MAX_TAGS = 5;
+	
+	 // 🔥 기존 태그를 JS 배열로 변환
+	 let selectedTags = [];
+	 <%
+	     if (m.getTag() != null && !m.getTag().isBlank()) {
+	         for (String t : m.getTag().split(",")) {
+	 %>
+	 selectedTags.push("<%= t.trim() %>");
+	 <%
+	         }
+	     }
+	 %>
+	
+	 document.addEventListener("DOMContentLoaded", () => {
+	     const area = document.getElementById("recommendedTagArea");
+	
+	     recommendedTags.forEach(tag => {
+	         const btn = document.createElement("button");
+	         btn.type = "button";
+	         btn.className = "tag-btn";
+	         btn.dataset.tag = tag;
+	         btn.innerText = "#" + tag;
+	
+	         if (selectedTags.includes(tag)) {
+	             btn.classList.add("active");
+	         }
+	
+	         btn.onclick = () => toggleTag(tag, btn);
+	         area.appendChild(btn);
+	     });
+	
+	     renderSelectedTags();
+	     syncTagInput();
+	 });
+	
+	 function toggleTag(tag, btn) {
+	     const idx = selectedTags.indexOf(tag);
+	
+	     if (idx !== -1) {
+	         selectedTags.splice(idx, 1);
+	         btn.classList.remove("active");
+	     } else {
+	         if (selectedTags.length >= MAX_TAGS) {
+	             alert("태그는 최대 5개까지 가능합니다.");
+	             return;
+	         }
+	         selectedTags.push(tag);
+	         btn.classList.add("active");
+	     }
+	
+	     renderSelectedTags();
+	     syncTagInput();
+	 }
+	
+	 function renderSelectedTags() {
+	     const area = document.getElementById("selectedTagArea");
+	     area.innerHTML = "";
+	
+	     selectedTags.forEach(tag => {
+	         const chip = document.createElement("span");
+	         chip.className = "selected-tag";
+	         chip.innerText = "#" + tag + " ✕";
+	
+	         chip.onclick = () => {
+	             selectedTags = selectedTags.filter(t => t !== tag);
+	
+	             document.querySelectorAll(".tag-btn").forEach(b => {
+	                 if (b.dataset.tag === tag) b.classList.remove("active");
+	             });
+	
+	             renderSelectedTags();
+	             syncTagInput();
+	         };
+	
+	         area.appendChild(chip);
+	     });
+	 }
+	
+	 function syncTagInput() {
+	     document.getElementById("tagInput").value = selectedTags.join(",");
+	 }
 </script>
 
 <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ef8233e9a835b606aa5918095ec92f2b&libraries=services"></script>
@@ -211,15 +338,23 @@
         <button type="button" onclick="openJusoPopup()">주소 검색</button>
 
         <label>도로명주소</label>
-        <input type="text" id="roadAddress" disabled value="<%= (addr!=null)? addr.getRoadAddress() : "" %>">
-        <input type="hidden" id="roadAddressValue" name="roadAddress" value="<%= (addr!=null)? addr.getRoadAddress() : "" %>">
+		<input type="text" id="roadAddress" disabled
+		       value="<%= m.getRoadAddress() != null ? m.getRoadAddress() : "" %>">
+		
+		<input type="hidden" id="roadAddressValue" name="roadAddress"
+		       value="<%= m.getRoadAddress() != null ? m.getRoadAddress() : "" %>">
 
         <label>지번주소</label>
-        <input type="text" id="jibunAddress" disabled value="<%= (addr!=null)? addr.getJibunAddress() : "" %>">
-        <input type="hidden" id="jibunAddressValue" name="jibunAddress" value="<%= (addr!=null)? addr.getJibunAddress() : "" %>">
+		<input type="text" id="jibunAddress" disabled
+		       value="<%= m.getJibunAddress() != null ? m.getJibunAddress() : "" %>">
+		
+		<input type="hidden" id="jibunAddressValue" name="jibunAddress"
+		       value="<%= m.getJibunAddress() != null ? m.getJibunAddress() : "" %>">
 
         <label>상세주소</label>
-        <input type="text" id="addrDetail" name="addrDetail" value="<%= m.getAddrDetail() %>">
+		<input type="text" id="addrDetail" name="addrDetail"
+		       value="<%= m.getAddrDetail() != null ? m.getAddrDetail() : "" %>">
+
 
         <input type="hidden" id="latitude" name="latitude" value="<%= m.getLatitude() %>">
         <input type="hidden" id="longitude" name="longitude" value="<%= m.getLongitude() %>">
@@ -242,8 +377,15 @@
         <label>참가비</label>
         <input type="number" name="cost" value="<%= m.getCost() %>">
 
-        <label>태그</label>
-        <input type="text" name="tag" value="<%= m.getTag() %>">
+		<label>태그 선택 (최대 5개)</label>
+		
+		<label>선택된 태그</label>
+		<div id="selectedTagArea" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+		
+		<input type="hidden" name="tag" id="tagInput">
+		
+		<label>추천 태그 (클릭해서 선택)</label>
+		<div id="recommendedTagArea" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
 
         <label>상태</label>
         <select name="status">

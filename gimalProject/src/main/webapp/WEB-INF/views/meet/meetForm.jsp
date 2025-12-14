@@ -42,13 +42,111 @@
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         object-fit: cover; cursor: pointer;
     }
+    /* 태그 */
+    .tag-btn {
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1px solid #FF7C40;
+        background: #fff;
+        color: #FF7C40;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .tag-btn.active {
+        background: #FF7C40;
+        color: #fff;
+    }
+
+    .selected-tag {
+        padding: 6px 12px;
+        border-radius: 20px;
+        background: #FF7C40;
+        color: #fff;
+        font-size: 12px;
+        cursor: pointer;
 </style>
 
 <script>
     let imageList = []; // 업로드한 이미지 파일들을 저장하는 배열(최대 5개)
     const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>";
-    const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
-
+    const RETURN_URL =
+        "<%= request.getContextPath() %>/page/addressPopupReturn?mode=meetingCreate";
+    
+    /* =========================
+    태그 선택 로직
+	 ========================= */
+	 const recommendedTags = [
+	     "운동","육아","산책","조깅","러닝",
+	     "반려견","반려묘","카페","스터디",
+	     "독서","취미","여행","사진","게임"
+	 ];
+	
+	 const MAX_TAGS = 5;
+	 let selectedTags = [];
+	
+	 document.addEventListener("DOMContentLoaded", () => {
+	     const area = document.getElementById("recommendedTagArea");
+	
+	     recommendedTags.forEach(tag => {
+	         const btn = document.createElement("button");
+	         btn.type = "button";
+	         btn.className = "tag-btn";
+	         btn.dataset.tag = tag;
+	         btn.innerText = "#" + tag;
+	
+	         btn.onclick = () => toggleTag(tag, btn);
+	         area.appendChild(btn);
+	     });
+	 });
+	
+	 function toggleTag(tag, btn) {
+	     const idx = selectedTags.indexOf(tag);
+	
+	     if (idx !== -1) {
+	         selectedTags.splice(idx, 1);
+	         btn.classList.remove("active");
+	     } else {
+	         if (selectedTags.length >= MAX_TAGS) {
+	             alert("태그는 최대 5개까지 가능합니다.");
+	             return;
+	         }
+	         selectedTags.push(tag);
+	         btn.classList.add("active");
+	     }
+	
+	     renderSelectedTags();
+	     syncTagInput();
+	 }
+	
+	 function renderSelectedTags() {
+	     const area = document.getElementById("selectedTagArea");
+	     area.innerHTML = "";
+	
+	     selectedTags.forEach(tag => {
+	         const chip = document.createElement("span");
+	         chip.className = "selected-tag";
+	         chip.innerText = "#" + tag + " ✕";
+	
+	         chip.onclick = () => {
+	             selectedTags = selectedTags.filter(t => t !== tag);
+	
+	             document.querySelectorAll(".tag-btn").forEach(b => {
+	                 if (b.dataset.tag === tag) b.classList.remove("active");
+	             });
+	
+	             renderSelectedTags();
+	             syncTagInput();
+	         };
+	
+	         area.appendChild(chip);
+	     });
+	 }
+	
+	 function syncTagInput() {
+	     document.getElementById("tagInput").value = selectedTags.join(",");
+	 }
+    
     // 주소 검색 팝업
     function openJusoPopup() {
         window.open(
@@ -170,6 +268,7 @@
 
         <label>상세주소</label>
         <input type="text" id="addrDetail" name="addrDetail">
+        <input type="hidden" id="addrDetailValue" name="addrDetail">
 
         <input type="hidden" id="latitude" name="latitude">
         <input type="hidden" id="longitude" name="longitude">
@@ -184,7 +283,19 @@
         <%
             String today = java.time.LocalDate.now().toString();
         %>
-        <input type="date" name="date" value="<%= today %>" required>
+        <%
+		    java.time.LocalDateTime now = java.time.LocalDateTime.now();
+		    java.time.LocalDateTime max = now.plusDays(7);
+		
+		    String minDate = now.toString().substring(0,16);
+		    String maxDate = max.toString().substring(0,16);
+		%>
+		
+		<input type="datetime-local"
+		       name="date"
+		       min="<%= minDate %>"
+		       max="<%= maxDate %>"
+		       required>
 
         <label>최대 인원</label>
         <input type="number" name="maxMembers" value="10">
@@ -195,8 +306,18 @@
         <label>참가비</label>
         <input type="number" name="cost" value="0">
 
-        <label>태그</label>
-        <input type="text" name="tag">
+		<label>태그 선택 (최대 5개)</label>
+		
+        <label>선택된 태그</label>
+        <div id="selectedTagArea" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+
+        <input type="hidden" name="tag" id="tagInput">
+
+        <label>추천 태그 (클릭해서 선택)</label>
+        <div id="recommendedTagArea" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+
+
+        
 
         <label>상태</label>
         <select name="status">
