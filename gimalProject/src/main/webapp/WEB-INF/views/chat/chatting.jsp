@@ -264,6 +264,45 @@ body {
     font-size: 14px;
     z-index: 5000;
 }
+.vote-box {
+    padding: 8px 12px;
+    background: #FFF7F2;
+    border-bottom: 1px solid #eee;
+}
+
+.vote-item {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 8px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+.vote-title {
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #FF7C40;
+}
+
+.vote-option-btn {
+    width: 100%;
+    padding: 6px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+}
+
+.vote-delete-btn {
+    margin-top: 6px;
+    background: #FF4D4D;
+    color: #fff;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
 
 </style>
 </head>
@@ -283,6 +322,68 @@ body {
 
     <button class="member-btn" onclick="toggleHostMenu()">＋</button>
 </div>
+<!-- 📊 투표 영역 (헤더 바로 아래 고정) -->
+<c:if test="${not empty voteList}">
+    <div class="vote-box">
+        <c:forEach var="vote" items="${voteList}">
+            <div class="vote-item">
+
+                <div class="vote-title">
+                    📊 ${vote.title}
+                    <c:if test="${vote.closed}">
+                        <span style="font-size:12px; color:#999;">(마감)</span>
+                    </c:if>
+                </div>
+
+                <!-- 투표 옵션 -->
+                <c:forEach var="opt" items="${vote.options}">
+                    <form method="post"
+                          action="${pageContext.request.contextPath}/vote/submit"
+                          style="margin:4px 0;">
+
+                        <input type="hidden" name="voteId" value="${vote.id}">
+                        <input type="hidden" name="optionId" value="${opt.id}">
+
+                        <button type="submit"
+                                class="vote-option-btn"
+                                <c:if test="${vote.closed}">disabled</c:if>>
+                            ${opt.optionText}
+                            (${opt.voteCount})
+                        </button>
+                    </form>
+                </c:forEach>
+
+                <!-- 👑 호스트 전용 -->
+                <c:if test="${isHost}">
+                    <div style="display:flex; gap:6px; margin-top:6px;">
+
+                        <!-- 마감 -->
+                        <c:if test="${!vote.closed}">
+							<form method="post"
+							      action="${pageContext.request.contextPath}/vote/close">
+							    <input type="hidden" name="voteId" value="${vote.id}">
+							    <input type="hidden" name="hostId" value="${roomInfo.hostId}">
+							    <button class="vote-option-btn">마감</button>
+							</form>
+                        </c:if>
+
+                        <!-- 삭제 -->
+                        <form method="post"
+                              action="${pageContext.request.contextPath}/vote/delete"
+                              onsubmit="return confirm('투표를 삭제할까요?');">
+                            <input type="hidden" name="voteId" value="${vote.id}">
+                            <input type="hidden" name="hostId" value="${roomInfo.hostId}">
+                            <button class="vote-delete-btn">🗑 삭제</button>
+                        </form>
+
+                    </div>
+                </c:if>
+
+            </div>
+        </c:forEach>
+    </div>
+</c:if>
+
 <!-- 회비 결제 박스 -->
 <div id="payBox" class="pay-box">
 

@@ -36,7 +36,7 @@ public class PollDAO {
     }
 
     public List<PollDTO> getPollList(long roomId) throws Exception {
-        String sql = "SELECT * FROM poll WHERE room_id = ? ORDER BY created_at DESC";
+        String sql = "SELECT * FROM poll WHERE room_id = ? ORDER BY created_at ASC";
         List<PollDTO> list = new ArrayList<>();
 
         try (Connection con = JDBCUtil.jdbcCon();
@@ -52,7 +52,14 @@ public class PollDAO {
                 p.setTitle(rs.getString("title"));
                 p.setExpireAt(rs.getTimestamp("expire_at"));
                 p.setCreatedAt(rs.getTimestamp("created_at"));
-                p.setClosed(rs.getTimestamp("expire_at").before(new Timestamp(System.currentTimeMillis())));
+                Timestamp expireAt = rs.getTimestamp("expire_at");
+                p.setExpireAt(expireAt);
+
+                boolean closed = false;
+                if (expireAt != null) {
+                    closed = expireAt.before(new Timestamp(System.currentTimeMillis()));
+                }
+                p.setClosed(closed);
                 list.add(p);
             }
         }
@@ -109,4 +116,76 @@ public class PollDAO {
             ps.executeUpdate();
         }
     }
+    public PollDTO getPoll(long pollId) throws Exception {
+        String sql = "SELECT * FROM poll WHERE id = ?";
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, pollId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                PollDTO p = new PollDTO();
+                p.setId(rs.getLong("id"));
+                p.setRoomId(rs.getLong("room_id"));
+                p.setTitle(rs.getString("title"));
+
+                Timestamp expireAt = rs.getTimestamp("expire_at");
+                p.setExpireAt(expireAt);
+                p.setCreatedAt(rs.getTimestamp("created_at"));
+
+                boolean closed = false;
+                if (expireAt != null) {
+                    closed = expireAt.before(new Timestamp(System.currentTimeMillis()));
+                }
+                p.setClosed(closed);
+
+                return p;
+            }
+        }
+        return null;
+    }
+    public void closePoll(long pollId) throws Exception {
+        String sql = "UPDATE poll SET expire_at = NOW() WHERE id=?";
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, pollId);
+            ps.executeUpdate();
+        }
+    }
+    public void deletePoll(long pollId) throws Exception {
+        Connection con = null;
+
+        try {
+            con = JDBCUtil.jdbcCon();
+            con.setAutoCommit(false);
+
+            try (PreparedStatement ps1 =
+                     con.prepareStatement("DELETE FROM poll_vote WHERE poll_id = ?")) {
+                ps1.setLong(1, pollId);
+                ps1.executeUpdate();
+            }
+
+            try (PreparedStatement ps2 =
+                     con.prepareStatement("DELETE FROM poll_option WHERE poll_id = ?")) {
+                ps2.setLong(1, pollId);
+                ps2.executeUpdate();
+            }
+
+            try (PreparedStatement ps3 =
+                     con.prepareStatement("DELETE FROM poll WHERE id = ?")) {
+                ps3.setLong(1, pollId);
+                ps3.executeUpdate();
+            }
+
+            con.commit();
+        } catch (Exception e) {
+            if (con != null) con.rollback();
+            throw e;
+        } finally {
+            if (con != null) con.setAutoCommit(true);
+        }
+    }
+
 }

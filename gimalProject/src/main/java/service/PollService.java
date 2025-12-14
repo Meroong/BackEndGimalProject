@@ -26,6 +26,7 @@ public class PollService {
         }
     }
 
+
     public List<PollDTO> getPollListByRoom(long roomId) throws Exception {
         List<PollDTO> list = pollDAO.getPollList(roomId);
         for (PollDTO p : list) {
@@ -35,6 +36,17 @@ public class PollService {
     }
 
     public boolean submitVote(long pollId, long userId, long optionId) throws Exception {
+        PollDTO poll = pollDAO.getPoll(pollId);
+
+        // ⛔ 마감된 투표
+        if (poll.isClosed()) return false;
+
+        // ⛔ 기간 만료
+        if (poll.getExpireAt() != null &&
+            poll.getExpireAt().before(new Timestamp(System.currentTimeMillis()))) {
+            return false;
+        }
+
         if (pollDAO.hasVoted(pollId, userId)) return false;
 
         PollVoteDTO v = new PollVoteDTO();
@@ -44,5 +56,15 @@ public class PollService {
 
         pollDAO.insertVote(v);
         return true;
+    }
+
+    // 👑 호스트용
+    public void closePoll(long pollId) throws Exception {
+        pollDAO.closePoll(pollId);
+    }
+
+    public void deletePoll(long pollId, long userId, long hostId) throws Exception {
+        if (userId != hostId) return;
+        pollDAO.deletePoll(pollId);
     }
 }

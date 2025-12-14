@@ -83,6 +83,7 @@ public class UserController extends HttpServlet {
                 UserDTO sessionUser = new UserDTO();
                 sessionUser.setUserId(userDto.getUserId());
                 sessionUser.setUserName(userDto.getUserName());
+                sessionUser.setAutoId(userDto.getAutoId());
                 sessionUser.setNickname(userDto.getNickname());
                 session.setAttribute("userInfo", sessionUser);
                 session.setAttribute("addressInfo", addressDto);
