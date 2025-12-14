@@ -100,15 +100,35 @@ public class UserController extends HttpServlet {
 
              // 이전 URL 체크 후 리다이렉트
                 String redirectUrl = (String) session.getAttribute("LOGIN_REDIRECT");
-                session.removeAttribute("LOGIN_REDIRECT"); // 있든 없든 한 번만 사용
+                session.removeAttribute("LOGIN_REDIRECT");
+
+                String ctx = req.getContextPath(); // "/gimalProject"
 
                 if (redirectUrl != null && !redirectUrl.isBlank()) {
-                    // redirectUrl은 이미 "/meeting/info?meetingId=3" 형태
-                    resp.sendRedirect(redirectUrl);
-                } else {
-                    resp.sendRedirect(req.getContextPath() + "/home");
+
+                    // 1) 전체 URL로 들어오는 경우(host 포함) → path만 추출
+                    //    ex) http://localhost:8080/gimalProject/meeting/list?x=1
+                    int idx = redirectUrl.indexOf(ctx);
+                    if (idx != -1) {
+                        redirectUrl = redirectUrl.substring(idx + ctx.length()); // "/meeting/list?x=1"
+                    }
+
+                    // 2) 혹시 이미 ctx로 시작하면 제거 (중복 방지)
+                    if (redirectUrl.startsWith(ctx)) {
+                        redirectUrl = redirectUrl.substring(ctx.length());
+                    }
+
+                    // 3) 슬래시 보정
+                    if (!redirectUrl.startsWith("/")) {
+                        redirectUrl = "/" + redirectUrl;
+                    }
+
+                    // ✅ 최종: ctx는 딱 1번만 붙인다
+                    resp.sendRedirect(ctx + redirectUrl);
+                    return;
                 }
 
+                resp.sendRedirect(ctx + "/home");
                 return;
 
             } else {

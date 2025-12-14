@@ -32,30 +32,11 @@ function initMap(lat, lng) {
 }
 
 // 로그인 필요 시 실행되는 함수
-function needLoginForJoin() {
-    if (confirm("참여하시려면 로그인이 필요합니다.\n로그인 하시겠습니까?")) {
-        const redirectUrl = encodeURIComponent(
-            window.location.pathname + window.location.search
-        );
-
-        location.href =
-            "<%= request.getContextPath() %>/page/login?redirect=" + redirectUrl;
-    }
-}
-// 신고버튼 클릭 시 로그인 여부 확인
-<script>
-function needLoginForJoin() {
-    if (confirm("참여하시려면 로그인이 필요합니다.\n로그인 하시겠습니까?")) {
-
-        const redirectUrl = encodeURIComponent(
-            "<%= request.getContextPath() %>" +
-            window.location.pathname +
-            window.location.search
-        );
-
-        location.href =
-            "<%= request.getContextPath() %>/page/login?redirect=" + redirectUrl;
-    }
+function goLoginWithRedirect() {
+  const redirectUrl = encodeURIComponent(
+    "<%= request.getContextPath() %>" + location.pathname + location.search
+  );
+  location.href = "<%= request.getContextPath() %>/page/login?redirect=" + redirectUrl;
 }
 </script>
 

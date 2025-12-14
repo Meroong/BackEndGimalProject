@@ -49,18 +49,16 @@ public class ChattingController extends HttpServlet {
         if (autoId == -1) {
             HttpSession session = req.getSession();
 
-            // 현재 요청 URL + 쿼리스트링 조회
-            String currentUrl = req.getRequestURI();
-            String queryString = req.getQueryString();
-            if (queryString != null && !queryString.isEmpty()) {
-                currentUrl += "?" + queryString;
-            }
+            String ctx = req.getContextPath();         // /gimalProject
+            String uri = req.getRequestURI();          // /gimalProject/chat/room/12
+            String qs  = req.getQueryString();
 
-            // 세션에 저장
-            session.setAttribute("redirectAfterLogin", currentUrl);
+            String page = uri.startsWith(ctx) ? uri.substring(ctx.length()) : uri; // /chat/room/12
+            if (qs != null && !qs.isBlank()) page += "?" + qs;
 
-            // 로그인 페이지로 이동
-            resp.sendRedirect(req.getContextPath() + "/page/login");
+            session.setAttribute("LOGIN_REDIRECT", page); // ✅ 이름도 통일 (추천)
+
+            resp.sendRedirect(ctx + "/page/login");
             return;
         }
 
@@ -169,20 +167,18 @@ public class ChattingController extends HttpServlet {
         if (autoId == -1) {
             HttpSession session = req.getSession();
 
-            // 현재 요청 URL + 쿼리스트링 조회
-            String currentUrl = req.getRequestURI();
-            String queryString = req.getQueryString();
-            if (queryString != null && !queryString.isEmpty()) {
-                currentUrl += "?" + queryString;
-            }
+            // ✅ 어떤 POST든 "방으로" 돌아가게: roomId 추출
+            Long roomId = extractRoomIdForRedirect(req);
 
-            // 세션에 저장
-            session.setAttribute("redirectAfterLogin", currentUrl);
+            String target = (roomId != null)
+                    ? "/chat/room/" + roomId
+                    : "/chat/roomList";
 
-            // 로그인 페이지로 이동
+            session.setAttribute("LOGIN_REDIRECT", target); // ✅ contextPath 없는 형태로 저장
             resp.sendRedirect(req.getContextPath() + "/page/login");
             return;
         }
+
         
         // !! 개인 거래채팅방 개설
      // !! 개인 거래 채팅방 개설

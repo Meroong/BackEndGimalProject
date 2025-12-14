@@ -190,6 +190,21 @@ public class MeetingController extends HttpServlet {
 				System.out.println("edit");
 				long meetingId = Long.parseLong(req.getParameter("meetingId"));
 				MeetingInfoDTO dto = meetingService.getMeetingInfo(meetingId);
+				
+			    Long autoId = AuthUtil.getAutoId(req);
+			    if (autoId == -1) {
+			        // ✅ 로그인 후 다시 edit로 돌아오게
+			        String currentUrl = req.getRequestURI();
+			        String qs = req.getQueryString();
+			        if (qs != null && !qs.isBlank()) currentUrl += "?" + qs;
+
+			        // 컨텍스트 제거한 path로 저장 (로그인 컨트롤러가 contextPath 붙여서 redirect 하게)
+			        String page = currentUrl.replace(req.getContextPath(), "");
+			        req.getSession().setAttribute("LOGIN_REDIRECT", page);
+
+			        resp.sendRedirect(req.getContextPath() + "/page/login");
+			        return;
+			    }
 
 				if (dto != null) {
 					req.setAttribute("meetingInfo", dto);
@@ -215,14 +230,21 @@ public class MeetingController extends HttpServlet {
         if (autoId == -1) {
             HttpSession session = req.getSession();
 
-            // 🔑 사용자가 보고 있던 페이지
             String referer = req.getHeader("Referer");
-            if (referer != null && referer.contains(req.getContextPath())) {
-                String page = referer.replace(req.getContextPath(), "");
-                session.setAttribute("LOGIN_REDIRECT", page);
+            if (referer != null && !referer.isBlank()) {
+                // referer가 전체 URL이든 뭐든, contextPath 이후만 뽑아서 저장
+                String ctx = req.getContextPath(); // /gimalProject
+                int idx = referer.indexOf(ctx);
+
+                if (idx != -1) {
+                    String page = referer.substring(idx + ctx.length()); // /meeting/info?meetingId=5 형태
+                    if (page.isBlank()) page = "/home";
+                    if (!page.startsWith("/")) page = "/" + page;
+
+                    session.setAttribute("LOGIN_REDIRECT", page);
+                }
             }
 
-            // 로그인 페이지로 이동
             resp.sendRedirect(req.getContextPath() + "/page/login");
             return;
         }
