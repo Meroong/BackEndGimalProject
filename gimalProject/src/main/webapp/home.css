@@ -494,5 +494,24 @@ select:focus, input:focus {
     background: #EEE;
     color: #777;
 }
+.weather-message {
+  margin: 18px auto 10px;
+  padding: 12px 20px;
+  max-width: 720px;
+  background: #fff7ed; /* 드림 배경과 통일 */
+  border-radius: 999px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.weather-emoji {
+  font-size: 18px;
+}
 
 

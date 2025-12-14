@@ -208,8 +208,8 @@
         return false;
     }
     const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>";
-    const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
-
+    const RETURN_URL =
+        "<%= request.getContextPath() %>/page/addressPopupReturn?mode=mypage";
     function openJusoPopup() {
         window.open(
             "https://business.juso.go.kr/addrlink/addrLinkUrl.do?confmKey=" + POPUP_KEY

@@ -25,53 +25,46 @@ public class HomeController extends HttpServlet {
             throws ServletException, IOException {
 
         HttpSession session = req.getSession();
-        MeetingService meetingService = new MeetingService();
+
         double lat = 37.501;
         double lon = 126.884;
 
-        // 로그인 사용자 주소 좌표 사용
         UserAddressDTO address =
             (UserAddressDTO) session.getAttribute("addressInfo");
 
-        if (address != null &&
-            address.getLatitude() != null &&
-            address.getLongitude() != null) {
-
-            lat = address.getLatitude();
-            lon = address.getLongitude();
+        // 로그인/비로그인 공통 처리
+        if (address != null) {
+            if (address.getLatitude() != null) {
+                lat = address.getLatitude();
+            }
+            if (address.getLongitude() != null) {
+                lon = address.getLongitude();
+            }
         }
 
-        //  WeatherService 단일 진입점 호출 ⭐
+        // 좌표만 넘김 (로그인 여부 모름)
         WeatherDTO weather = weatherService.getWeather(lat, lon);
 
-        // 안전 장치 (API/DB 오류 대비)
         if (weather == null) {
             weather = new WeatherDTO(0.0, "기타", 0, null);
         }
 
-
-        String bgImage = getBackgroundImage(weather.getWeather());
-        req.setAttribute("bgImage", bgImage);
-        
-        //지도용 모임 데이터
-        List<MeetingInfoDTO> meetings = meetingService.getActiveMeetingsForMap();
-        for( MeetingInfoDTO dto : meetings) {
-        	System.out.println(dto.getTitle());
-        }
-        // 인기 모임 가져오기
-        List<MeetingInfoDTO> popularMeetings = meetingService.getPopularMeetings(3);
-        
-        //JSP 전달
-        req.setAttribute("meetings", meetings);
         req.setAttribute("weather", weather);
         req.setAttribute("lat", lat);
         req.setAttribute("lng", lon);
-        req.setAttribute("popularMeetings", popularMeetings);
-        
+        req.setAttribute("bgImage",
+            getBackgroundImage(weather.getWeather()));
 
-        // 포워드
+        MeetingService meetingService = new MeetingService();
+
+        req.setAttribute("meetings",
+            meetingService.getActiveMeetingsForMap());
+        req.setAttribute("popularMeetings",
+            meetingService.getPopularMeetings(3));
+
         req.getRequestDispatcher("/index.jsp").forward(req, resp);
     }
+
 
     private String getBackgroundImage(String weather) {
         switch (weather) {

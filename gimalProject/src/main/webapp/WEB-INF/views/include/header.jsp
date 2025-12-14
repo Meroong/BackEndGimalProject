@@ -111,8 +111,8 @@
                     관리자
                 </button>
             <% } else { %>
-                <button class="mypage-btn"
-                        onclick="location.href='<%= request.getContextPath() %>/views/user/mypage.jsp'">
+            <button class="mypage-btn"
+                    onclick="location.href='<%= request.getContextPath() %>/page/mypage'">
                     마이페이지
                 </button>
             <% } %>
@@ -125,7 +125,7 @@
         <% } else { %>
             <!-- 비로그인 상태 -->
             <button class="log-btn"
-                    onclick="location.href='<%= request.getContextPath() %>/views/user/login.jsp'">
+                    onclick="location.href='<%= request.getContextPath() %>/page/login'">
                 Log in
             </button>
         <% } %>

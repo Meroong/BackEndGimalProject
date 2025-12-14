@@ -297,7 +297,7 @@ function needLogin() {
     if (confirm('로그인이 필요합니다.')) {
         const redirectUrl = encodeURIComponent(location.pathname + location.search);
         location.href =
-            "<%= request.getContextPath() %>/views/user/login.jsp?redirect=" + redirectUrl;
+            "<%= request.getContextPath() %>/page/login?redirect=" + redirectUrl;
     }
 }
 </script>
@@ -313,7 +313,7 @@ function needLogin() {
 
 <div class="page-wrapper">
 
-    <jsp:include page="/include/header.jsp" />
+    <jsp:include page="/WEB-INF/views/include/header.jsp" />
     
                     <div class="content-header">
                     <!-- 검색어 -->
@@ -326,7 +326,7 @@ function needLogin() {
 
                     <!-- 모임 생성 버튼 -->
                     <% if (isLogin) { %>
-                        <a href="<%= request.getContextPath() %>/views/meet/meetForm.jsp" class="write-btn">모임 생성 ✏️</a>
+                        <a href="<%= request.getContextPath() %>/page/meetForm" class="write-btn">모임 생성 ✏️</a>
                     <% } else { %>
                         <a href="#" class="write-btn" onclick="needLogin()">모임 생성 ✏️</a>
                     <% } %>

@@ -146,7 +146,7 @@
             <button type="submit">회원가입</button>
         </form>
 
-        <p>이미 계정이 있으신가요? <a href="login.jsp">로그인</a></p>
+        <a href="<%= request.getContextPath() %>/page/login">로그인</a>
     </div>
 </body>
 </html>

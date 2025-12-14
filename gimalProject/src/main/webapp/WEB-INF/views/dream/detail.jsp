@@ -21,7 +21,7 @@
 </head>
 <body>
 
-  <jsp:include page="/include/header.jsp" />
+  <jsp:include page="/WEB-INF/views/include/header.jsp" />
 
   <main class="dream-detail-page">
     <div class="dream-detail-shell">
@@ -302,7 +302,7 @@ ${fn:escapeXml(post.content)}
     function handleReportClick(usedType, targetUserId, usedId) {
         if (!IS_LOGIN) {
             if (confirm("신고하려면 로그인이 필요합니다.\n로그인 하시겠습니까?")) {
-                location.href = "<%= request.getContextPath() %>/views/user/login.jsp";
+            	location.href = "<%= request.getContextPath() %>/page/login";
             }
             return;
         }
@@ -313,4 +313,4 @@ ${fn:escapeXml(post.content)}
 
 </body>
 </html>
-<jsp:include page="/include/reportModal.jsp" />
+<jsp:include page="/WEB-INF/views/include/reportModal.jsp" />

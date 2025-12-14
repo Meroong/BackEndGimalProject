@@ -17,7 +17,7 @@
 </head>
 <body>
 
-  <jsp:include page="/include/header.jsp" />
+  <jsp:include page="/WEB-INF/views/include/header.jsp" />
 
   <main class="dream-page">
 

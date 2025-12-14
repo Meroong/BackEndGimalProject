@@ -1,7 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 
-<%@ page contentType="text/html;charset=UTF-8" %>
-
 <%
     String mode = request.getParameter("mode");
     if (mode == null) mode = "home";
@@ -72,13 +70,16 @@ function openJusoPopup() {
         "https://business.juso.go.kr/addrlink/addrLinkUrl.do"
         + "?confmKey=devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc="
         + "&returnUrl=" + encodeURIComponent(
-            "http://localhost:8080/gimalProject/views/util/addressPopupReturn.jsp?mode=search"
+            "<%= request.getContextPath() %>/page/address-return?mode=search"
         )
         + "&resultType=4",
         "jusoPopup",
         "width=570,height=420,scrollbars=yes,resizable=yes"
     );
 }
+/* ==============================
+   🔧 수정된 부분 END
+   ============================== */
 
 function setSelectedAddress(dongName) {
     document.getElementById("currentDong").innerText = dongName;

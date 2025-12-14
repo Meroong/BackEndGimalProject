@@ -253,7 +253,8 @@ public class UserController extends HttpServlet {
                 req.getSession().setAttribute("addressInfo", updatedAddress);
 
                 resp.setStatus(HttpServletResponse.SC_OK);
-
+                resp.sendRedirect(req.getContextPath() + "/home");
+                return;
             } catch (Exception e) {
                 resp.sendError(
                     HttpServletResponse.SC_BAD_REQUEST,

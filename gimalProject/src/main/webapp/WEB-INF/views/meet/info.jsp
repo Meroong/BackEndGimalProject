@@ -33,16 +33,13 @@ function initMap(lat, lng) {
 
 // 로그인 필요 시 실행되는 함수
 function needLoginForJoin() {
-    var currentUrl = encodeURIComponent(window.location.href);
     if (confirm("참여하시려면 로그인이 필요합니다.\n로그인 하시겠습니까?")) {
-    	<%
-	        String redirectUrl = request.getContextPath() 
-	                            + "/meeting/info?meetingId=" 
-	                            + request.getParameter("meetingId");
-	
-	        session.setAttribute("redirectAfterLogin", redirectUrl);
-	    %>
-    	location.href = "<%= request.getContextPath() %>/views/user/login.jsp";
+        const redirectUrl = encodeURIComponent(
+            window.location.pathname + window.location.search
+        );
+
+        location.href =
+            "<%= request.getContextPath() %>/page/login?redirect=" + redirectUrl;
     }
 }
 // 신고버튼 클릭 시 로그인 여부 확인
@@ -52,7 +49,7 @@ function handleReportClick(usedType, targetUserId, usedId) {
         if (confirm("신고하려면 로그인이 필요합니다.\n로그인 하시겠습니까?")) {
             // 현재 페이지를 로그인 후 복귀용으로 저장
             const currentUrl = encodeURIComponent(window.location.href);
-            location.href = "<%= request.getContextPath() %>/views/user/login.jsp";
+            location.href = "<%= request.getContextPath() %>/page/login";
         }
         return;
     }
@@ -141,7 +138,7 @@ function handleReportClick(usedType, targetUserId, usedId) {
 <body>
 <div class="container">
 
-    <jsp:include page="/include/header.jsp" />
+    <jsp:include page="/WEB-INF/views/include/header.jsp" />
 
     <!-- 검색창 -->
     <section class="search-section">
@@ -335,6 +332,6 @@ function handleReportClick(usedType, targetUserId, usedId) {
 
 <% } %>
 </div>
-<jsp:include page="/include/reportModal.jsp" />
+<jsp:include page="/WEB-INF/views/include/reportModal.jsp" />
 </body>
 </html>

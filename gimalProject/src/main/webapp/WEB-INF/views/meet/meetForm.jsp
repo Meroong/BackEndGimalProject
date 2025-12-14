@@ -70,7 +70,8 @@
 <script>
     let imageList = []; // 업로드한 이미지 파일들을 저장하는 배열(최대 5개)
     const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>";
-    const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
+    const RETURN_URL =
+        "<%= request.getContextPath() %>/page/addressPopupReturn?mode=meetingCreate";
     
     /* =========================
     태그 선택 로직

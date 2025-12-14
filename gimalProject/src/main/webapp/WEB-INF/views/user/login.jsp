@@ -142,8 +142,12 @@
         <button type="submit">로그인</button>
     </form>
 
-    <p>회원이 아니신가요? <a href="<%= request.getContextPath() %>/views/user/register.jsp">회원가입</a>
-</p>
+    <p>
+	  회원이 아니신가요?
+	  <a href="<%= request.getContextPath() %>/page/register">
+	      회원가입
+	  </a>
+	</p>
 </div>
 
 </body>

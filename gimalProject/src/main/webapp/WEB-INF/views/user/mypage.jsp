@@ -247,7 +247,8 @@
 
     <script>
         const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>"; // 팝업용 키
-        const RETURN_URL = "http://localhost:8080<%= request.getContextPath() %>/views/util/addressPopupReturn.jsp";
+        const RETURN_URL =
+            "<%= request.getContextPath() %>/page/addressPopupReturn?mode=mypage";
         function openJusoPopup() {
             window.open(
                 "https://business.juso.go.kr/addrlink/addrLinkUrl.do"
@@ -267,7 +268,7 @@
 <div class="container">
 
     <%-- 헤더 include --%>
-    <jsp:include page="/include/header.jsp" />
+    <jsp:include page="/WEB-INF/views/include/header.jsp" />
 
     <%
         UserDTO user = (UserDTO) session.getAttribute("userInfo");
@@ -381,23 +382,8 @@
 
             <%-- 가운데: 포인트 / 지갑 / 충전 영역 --%>
             <div class="map-card">
-    <div class="center-title">포인트 & 회비 지갑</div>
-    <div class="center-desc">
-        모임 회비 결제에 사용할 포인트를 관리할 수 있습니다.
-    </div>
-
-    <div class="wallet-title-row">
-        <span class="label">현재 보유 포인트</span>
-        <span class="balance"><%= walletBalance %> P</span>
-    </div>
-
-    <div class="wallet-sub">
-        포인트는 모임 회비 결제에 사용되며,
-        추후 회비 정산 기능과 연동될 예정입니다.
-    </div>
-
-    <%-- 🔽 충전 UI 분리 include --%>
-    <jsp:include page="/views/wallet/wallet_charge.jsp" />
+	<div class="map-card">
+    <jsp:include page="/WEB-INF/views/wallet/wallet_section.jsp" />
 	</div>
 
             <%-- 오른쪽: 알림 / 추천 활동 --%>
@@ -418,7 +404,9 @@
     %>
     <div class="main-box" style="text-align:center;">
         <p>로그인이 필요합니다.
-            <a href="<%= request.getContextPath() %>/views/user/login.jsp">로그인 페이지로 이동</a>
+            <a href="<%= request.getContextPath() %>/page/login">
+			    로그인 페이지로 이동
+			</a>
         </p>
     </div>
     <%

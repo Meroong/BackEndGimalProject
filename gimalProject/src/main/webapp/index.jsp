@@ -27,13 +27,16 @@
 <body>
 <div class="container">
 
-    <jsp:include page="/include/header.jsp" />
-
-    <!-- 검색 영역 -->
-	<jsp:include page="/include/searchBar.jsp">
+	<jsp:include page="/WEB-INF/views/include/header.jsp" />
+	
+	<jsp:include page="/WEB-INF/views/include/searchBar.jsp">
 	    <jsp:param name="page" value="home"/>
 	</jsp:include>
-
+	<div class="weather-message">
+	  <span class="weather-emoji"></span>
+	  <span id="weather-Text" class="weather-text"></span>
+	</div>
+	
     <!-- 메인 영역 -->
     <section class="main-box">
         <div class="box-title">우리 동네 기반 맞춤 추천</div>
@@ -184,13 +187,42 @@
 			        });
 			    });
 			};
+			  const weatherText = "<%= weather != null ? weather.getWeather() : "" %>";
+			  const temperature = <%= weather != null ? weather.getTemperature() : 0 %>;
+			function getWeatherMessage(weather, temp) {
+				  if (weather.includes("비")) {
+				    return "☔ 비가 오고 있어요. 우산 꼭 챙기세요!";
+				  }
+				  if (weather.includes("눈")) {
+				    return "❄️ 눈이 내려요! 길이 미끄러우니 조심하세요";
+				  }
+				  if (temp <= 5) {
+				    return "🥶 오늘은 많이 추워요. 따뜻하게 입으세요!";
+				  }
+				  if (temp <= 15) {
+				    return "🙂 선선한 날씨예요. 산책하기 좋아요";
+				  }
+				  if (temp <= 25) {
+				    return "😊 따뜻한 날씨예요! 나들이 가기 딱 좋아요";
+				  }
+				  return "🥵 오늘은 더워요! 물 자주 마시세요 💧";
+				}
+			const weatherMessage = getWeatherMessage(weatherText, temperature);
+
+			// DOM에 넣기
+			document.addEventListener("DOMContentLoaded", function () {
+			  const el = document.getElementById("weather-Text");
+			  if (el) {
+			    el.innerText = weatherMessage;
+			  }
+			});
 			</script>
 
             <!-- 가운데 카드 -->
 	<div class="center-card">
 	    <div class="center-title">오늘의 인기 모임 🔥</div>
 	    <div class="center-desc">
-	        지금 <%= dongName %>에서 가장 활발한 모임이에요
+	        지금 가장 활발한 모임이에요
 	    </div>
 	
 		<div class="popular-meeting-row">
@@ -284,4 +316,5 @@
     </section>
 </div>
 </body>
+
 </html>
