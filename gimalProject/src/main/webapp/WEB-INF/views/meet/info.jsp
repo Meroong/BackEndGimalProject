@@ -112,28 +112,103 @@ function goLoginWithRedirect() {
 	    font-size: 13px;
 	    font-weight: 500;
 	}
+		header {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
 
+/* 가운데 네비게이션 */
+.header-nav {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 24px;
+}
+
+.header-nav button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.header-nav button:hover {
+    background: #FFF1E8;
+    color: #FF6600;
+}
+header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 72px;              /* 🔥 기준 높이 */
+    padding: 0 20px;
+}
+.logo {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 42px;              /* 🔥 header 안에서 적당한 크기 */
+    width: auto;
+    object-fit: contain;
+}
+.header-nav {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.header-nav button {
+    height: 40px;
+    line-height: 40px;        /* 🔥 수직 정렬 핵심 */
+    padding: 0 14px;
+}
+.header-buttons {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-buttons button {
+    height: 40px;
+    line-height: 40px;
+    padding: 0 18px;
+}
+.header-spacer {
+    height: 80px;
+}
+.header-spacer1 {
+    height: 50px;
+}
+<div class="header-spacer"></div>
 </style>
 </head>
 
 <body>
+	<jsp:include page="/WEB-INF/views/include/header.jsp" />	
+	<div class="header-spacer1"></div>
+    <jsp:include page="/WEB-INF/views/include/searchBar.jsp">
+	    <jsp:param name="mode" value="home"/>
+	</jsp:include>
+	<div class="header-spacer"></div>
 <div class="container">
 
-    <jsp:include page="/WEB-INF/views/include/header.jsp" />
-
-    <!-- 검색창 -->
-    <section class="search-section">
-        <div class="search-row">
-            <select>
-                <option>동네 선택</option>
-                <option>구로동</option>
-                <option>가리봉동</option>
-                <option>고척동</option>
-            </select>
-            <input type="text" placeholder="검색어를 입력해주세요">
-            <button class="search-btn">검색</button>
-        </div>
-    </section>
 
 <%
     MeetingInfoDTO m = (MeetingInfoDTO) request.getAttribute("meetingInfo");
@@ -297,7 +372,14 @@ function goLoginWithRedirect() {
 
         </div>
     </div>
-</div>
+</div><button type="button" class="report-btn"
+        onclick="openReportModal(
+            'MEETING',
+            '<%= m.getCreatorId() %>',
+            '<%= m.getMeetingId() %>'
+        )">
+    신고하기
+</button>
 
 <div id="map"></div>
 <script>
@@ -305,11 +387,23 @@ function goLoginWithRedirect() {
         initMap(<%= m.getLatitude() %>, <%= m.getLongitude() %>);
     <% } %>
 </script>
+<script>
+function handleReportClick(type, targetUserId, targetId) {
 
-<a href="<%= request.getContextPath() %>/meeting/list" 
-   style="display:inline-block; margin-top:20px; color:#5271FF; font-weight:600;">
-   목록으로 돌아가기
-</a>
+    if (!IS_LOGIN) {
+        goLoginWithRedirect();
+        return;
+    }
+
+    // reportModal.jsp 에서 사용하는 hidden input 세팅
+    document.getElementById("reportType").value = type;
+    document.getElementById("targetUserId").value = targetUserId;
+    document.getElementById("targetId").value = targetId;
+
+    // 모달 열기
+    document.getElementById("reportModal").style.display = "block";
+}
+</script>
 
 <% } %>
 </div>

@@ -1408,4 +1408,82 @@ body {
   background: rgba(220, 38, 38, 0.85);
   color: #fff;
 }
+	header {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+}
+
+/* 가운데 네비게이션 */
+.header-nav {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 24px;
+}
+
+.header-nav button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.header-nav button:hover {
+    background: #FFF1E8;
+    color: #FF6600;
+}
+header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 72px;              /* 🔥 기준 높이 */
+    padding: 0 20px;
+}
+.logo {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 42px;              /* 🔥 header 안에서 적당한 크기 */
+    width: auto;
+    object-fit: contain;
+}
+.header-nav {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.header-nav button {
+    height: 40px;
+    line-height: 40px;        /* 🔥 수직 정렬 핵심 */
+    padding: 0 14px;
+}
+.header-buttons {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-buttons button {
+    height: 40px;
+    line-height: 40px;
+    padding: 0 18px;
+}
 

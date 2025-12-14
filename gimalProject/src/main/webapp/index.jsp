@@ -12,6 +12,7 @@
     <title>도란도란 - 우리 동네 유아·애견 커넥트</title>
     <link rel="stylesheet" href="home.css">
     <link rel="stylesheet" href="<%= request.getContextPath() %>/resources/css/searchBar.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/home.css">
 
     <style>
         .weather-card {

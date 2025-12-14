@@ -513,5 +513,60 @@ select:focus, input:focus {
 .weather-emoji {
   font-size: 18px;
 }
+.select-like {
+    padding: 13px 16px;
+    border-radius: 12px;
+    border: 1px solid #DDD;
+    background: white;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.15s;
+}
 
+.select-like:hover {
+    border-color: #FF7C40;
+    background: #FFF4EE;
+}
 
+.search-section {
+    position: relative;
+    z-index: 9;
+}
+header {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    z-index: 10;
+}
+
+/* 가운데 네비게이션 */
+.header-nav {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 24px;
+}
+
+.header-nav button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    color: #333;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: 0.2s;
+}
+
+.header-nav button:hover {
+    background: #FFF1E8;
+    color: #FF6600;
+}

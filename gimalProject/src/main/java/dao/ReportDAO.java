@@ -74,4 +74,30 @@ public class ReportDAO {
 
         return false;
     }
+    public boolean existsReport(long reporterId, long targetUserId, String targetType) {
+        String sql = """
+            SELECT 1
+            FROM report
+            WHERE reporter_id = ?
+              AND target_user_id = ?
+              AND target_type = ?
+            LIMIT 1
+        """;
+
+        try (Connection conn = JDBCUtil.jdbcCon();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setLong(1, reporterId);
+            ps.setLong(2, targetUserId);
+            ps.setString(3, targetType);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next(); // 있으면 true
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

@@ -10,6 +10,16 @@ public class ReportService {
     // 신고 생성
     public boolean createReport(ReportDTO dto) throws Exception {
 
+        // 1. 중복 신고 체크
+        boolean exists = reportDAO.existsReport(
+            dto.getReporterId(),
+            dto.getTargetUserId(),
+            dto.getTargetType()
+        );
+
+        if (exists) {
+            throw new Exception("이미 신고한 대상입니다.");
+        }
         // 기본 유효성 검사
         if (dto.getReporterId() <= 0) {
             throw new Exception("신고자 정보가 올바르지 않습니다.");

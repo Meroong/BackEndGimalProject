@@ -90,6 +90,12 @@
             <img src="<%= request.getContextPath() %>/resources/images/logo.png" alt="logo">
         </a>
     </div>
+    
+        <nav class="header-nav">
+        <button onclick="location.href='<%= request.getContextPath() %>/home'">홈</button>
+        <button onclick="location.href='<%= request.getContextPath() %>/meeting/list'">모임</button>
+        <button onclick="location.href='<%= request.getContextPath() %>/dream/list.do'">드림</button>
+    </nav>
 
     <div class="header-buttons">
         <%
