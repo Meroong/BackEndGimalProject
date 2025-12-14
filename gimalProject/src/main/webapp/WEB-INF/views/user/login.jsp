@@ -141,10 +141,7 @@
 
         <button type="submit">로그인</button>
     </form>
-<<<<<<< HEAD:gimalProject/src/main/webapp/views/user/login.jsp
-    <p>회원이 아니신가요? <a href="<%= request.getContextPath() %>/views/user/register.jsp">회원가입</a>
-</p>
-=======
+
 
     <p>
 	  회원이 아니신가요?
@@ -152,7 +149,6 @@
 	      회원가입
 	  </a>
 	</p>
->>>>>>> backup:gimalProject/src/main/webapp/WEB-INF/views/user/login.jsp
 </div>
 
 </body>

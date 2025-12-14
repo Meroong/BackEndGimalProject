@@ -188,11 +188,7 @@ ${fn:escapeXml(post.content)}
 			
 			<a href="javascript:void(0)"
 			   class="dream-detail-chat-btn"
-			   onclick="
-			     window.open('', 'chatPopup',
-			       'width=430,height=640,top=100,left=100,scrollbars=yes');
-			     document.getElementById('chatForm').submit();
-			   ">
+			   onclick="handleChatClick()">
 			   채팅하기
 			</a>
 
@@ -308,6 +304,20 @@ ${fn:escapeXml(post.content)}
         }
 
         openReportModal(usedType, targetUserId, usedId);
+    }
+    function handleChatClick() {
+        if (!IS_LOGIN) {
+            // 비로그인 상태에서는 팝업 대신 로그인 페이지로 이동
+            if (confirm("채팅하려면 로그인이 필요합니다.\n로그인 하시겠습니까?")) {
+                location.href = "<%= request.getContextPath() %>/page/login";
+            }
+            return;
+        }
+
+        // 로그인한 상태에서 채팅 팝업 실행
+        window.open('', 'chatPopup',
+            'width=430,height=640,top=100,left=100,scrollbars=yes');
+        document.getElementById('chatForm').submit();
     }
   </script>
 

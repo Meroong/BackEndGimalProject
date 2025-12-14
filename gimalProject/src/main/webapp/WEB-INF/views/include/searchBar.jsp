@@ -70,7 +70,7 @@ function openJusoPopup() {
         "https://business.juso.go.kr/addrlink/addrLinkUrl.do"
         + "?confmKey=devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc="
         + "&returnUrl=" + encodeURIComponent(
-            "<%= request.getContextPath() %>/page/address-return?mode=search"
+            "http://localhost:8080/gimalProject/views/util/addressPopupReturn.jsp?mode=search"
         )
         + "&resultType=4",
         "jusoPopup",
