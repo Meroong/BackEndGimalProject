@@ -178,29 +178,31 @@ public class ChatRoomDAO {
 		            return false;
 		        }
 	 }
-	 // PRIVATE 채팅방 조회
-	 public Integer findPrivateRoom(long itemId, long hostId, long receiverId) {
+	// PRIVATE 채팅방 조회 (중복 방지용)
+	 public Integer findPrivateRoom(long itemId, long userA, long userB) {
+
 	     String sql = """
-	         SELECT cr.id
+	         SELECT cr.room_id
 	         FROM chat_room cr
-	         JOIN chat_room_user u1 ON cr.id = u1.room_id
-	         JOIN chat_room_user u2 ON cr.id = u2.room_id
+	         JOIN chat_room_user u1 ON cr.room_id = u1.room_id
+	         JOIN chat_room_user u2 ON cr.room_id = u2.room_id
 	         WHERE cr.item_id = ?
 	           AND cr.room_type = 'PRIVATE'
 	           AND u1.user_id = ?
 	           AND u2.user_id = ?
+	         LIMIT 1
 	     """;
 
 	     try (Connection con = JDBCUtil.jdbcCon();
 	          PreparedStatement ps = con.prepareStatement(sql)) {
 
 	         ps.setLong(1, itemId);
-	         ps.setLong(2, hostId);
-	         ps.setLong(3, receiverId);
+	         ps.setLong(2, userA);
+	         ps.setLong(3, userB);
 
 	         try (ResultSet rs = ps.executeQuery()) {
 	             if (rs.next()) {
-	                 return rs.getInt("id");
+	                 return rs.getInt("room_id");
 	             }
 	         }
 	     } catch (Exception e) {
@@ -208,4 +210,5 @@ public class ChatRoomDAO {
 	     }
 	     return null;
 	 }
+
 }

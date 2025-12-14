@@ -330,7 +330,7 @@ public class ChattingService {
         // 2. 모임 참가자에서 제외
         boolean meetResult = new MeetingService().quitMeet(meetId, targetUserId);
         if (!meetResult) throw new Exception("모임 참가자 강퇴 실패");
-        
-        else throw new Exception("강퇴 실패");
+
+        return true; // ✅ 성공 시 정상 종료
     }
 }
