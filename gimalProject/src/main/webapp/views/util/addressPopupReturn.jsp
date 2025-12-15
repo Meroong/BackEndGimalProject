@@ -44,19 +44,19 @@
   // =========================
   // 👤 마이페이지: 기존대로 input만 채우고 종료
   // =========================
-  if (mode === "mypage") {
-    setValue("roadAddress", roadAddr);
-    setValue("roadAddressValue", roadAddr);
+  if (mode === "mypage" || mode === "meetingCreate") {
+	  setValue("roadAddress", roadAddr);
+	  setValue("roadAddressValue", roadAddr);
 
-    setValue("jibunAddress", jibunAddr);
-    setValue("jibunAddressValue", jibunAddr);
+	  setValue("jibunAddress", jibunAddr);
+	  setValue("jibunAddressValue", jibunAddr);
 
-    setValue("addrDetail", addrDetail);
-    setValue("addrDetailValue", addrDetail);
+	  setValue("addrDetail", addrDetail);
+	  setValue("addrDetailValue", addrDetail);
 
-    window.close();
-    return;
-  }
+	  window.close();
+	  return;
+	}
 
   // =========================
   // 🔍 search(home): 좌표까지 구해서 updateAddress로 POST

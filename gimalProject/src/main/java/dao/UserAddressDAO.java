@@ -28,7 +28,7 @@ public class UserAddressDAO {
                     dto.setAddrDetail(rs.getString("addr_detail"));
                     dto.setLatitude(rs.getDouble("latitude"));
 					dto.setLongitude(rs.getDouble("longitude"));
-					 
+					dto.setDongName(rs.getString("dong_name"));
                     dto.setCreatedAt(rs.getTimestamp("created_at"));
                     dto.setUpdatedAt(rs.getTimestamp("updated_at"));
                     return dto;

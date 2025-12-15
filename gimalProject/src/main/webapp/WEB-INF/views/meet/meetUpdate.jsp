@@ -208,7 +208,8 @@
     }
     const POPUP_KEY = "<%= "devU01TX0FVVEgyMDI1MTEyNDEwMTMwNjExNjQ4NTc=" %>";
     const RETURN_URL =
-        "<%= request.getContextPath() %>/page/addressPopupReturn?mode=mypage";
+    	  "http://localhost:8080/gimalProject/views/util/addressPopupReturn.jsp?mode=mypage";
+
     function openJusoPopup() {
         window.open(
             "https://business.juso.go.kr/addrlink/addrLinkUrl.do?confmKey=" + POPUP_KEY
@@ -354,6 +355,7 @@
         <label>상세주소</label>
 		<input type="text" id="addrDetail" name="addrDetail"
 		       value="<%= m.getAddrDetail() != null ? m.getAddrDetail() : "" %>">
+		<input type="hidden" id="addrDetailValue">
 
 
         <input type="hidden" id="latitude" name="latitude" value="<%= m.getLatitude() %>">

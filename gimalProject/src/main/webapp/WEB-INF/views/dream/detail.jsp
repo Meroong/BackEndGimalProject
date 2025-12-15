@@ -316,7 +316,7 @@ ${fn:escapeXml(post.content)}
 
         // 로그인한 상태에서 채팅 팝업 실행
         window.open('', 'chatPopup',
-            'width=430,height=640,top=100,left=100,scrollbars=yes');
+            'width=330,height=440,top=100,left=100,scrollbars=yes');
         document.getElementById('chatForm').submit();
     }
   </script>

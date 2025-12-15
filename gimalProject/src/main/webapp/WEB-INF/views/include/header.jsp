@@ -140,7 +140,7 @@ function openChatList() {
     window.open(
         "<%= request.getContextPath() %>/chat/roomList",
         "chatPopup",
-        "width=430,height=640,top=100,left=100,scrollbars=yes"
+        "width=330,height=440,top=100,left=100,scrollbars=yes"
     );
 }
 </script>
