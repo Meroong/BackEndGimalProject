@@ -33,7 +33,7 @@ public class AdminAuthFilter implements Filter {
 
         // 로그인 안 되어 있으면 → 로그인 페이지로
         if (authHeader == null || authHeader.isBlank()) {
-            resp.sendRedirect(req.getContextPath() + "/views/user/login.jsp");
+        	resp.sendRedirect(req.getContextPath() + "/page/login");
             return;
         }
 

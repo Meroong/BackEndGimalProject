@@ -47,17 +47,14 @@ public class AdminUserDAO {
         String deleteReportsSql =
                 "DELETE FROM report WHERE reporter_id = ? OR target_user_id = ?";
 
-        // 2. 리뷰 삭제 (작성자/대상 둘 다)
-        String deleteReviewsSql =
-                "DELETE FROM review WHERE reviewer_id = ? OR reviewee_id = ?";
 
-        // 3. 거래 기록 삭제
-        String deleteTransactionsSql =
-                "DELETE FROM transaction WHERE buyer_id = ? OR seller_id = ?";
+        // 2. 거래 기록 삭제
+        String deleteMeetingSql =
+                "DELETE FROM meeting WHERE  creator_id = ? ";
 
-        // 4. 채팅방 삭제
+        // 3. 채팅방 삭제
         String deleteChatRoomsSql =
-                "DELETE FROM chat_room WHERE buyer_id = ? OR seller_id = ?";
+                "DELETE FROM chat_room WHERE host_id = ?";
 
         // 5. 이 유저가 올린 나눔게시글 삭제
         String deleteDreamSql =
@@ -73,8 +70,7 @@ public class AdminUserDAO {
 
             try (
                 PreparedStatement pstmtReport = con.prepareStatement(deleteReportsSql);
-                PreparedStatement pstmtReview = con.prepareStatement(deleteReviewsSql);
-                PreparedStatement pstmtTrans  = con.prepareStatement(deleteTransactionsSql);
+                PreparedStatement pstmtMeeting  = con.prepareStatement(deleteMeetingSql);
                 PreparedStatement pstmtChat   = con.prepareStatement(deleteChatRoomsSql);
                 PreparedStatement pstmtItem   = con.prepareStatement(deleteDreamSql);
                 PreparedStatement pstmtUser   = con.prepareStatement(deleteUserSql);
@@ -84,19 +80,14 @@ public class AdminUserDAO {
                 pstmtReport.setLong(2, autoId);
                 pstmtReport.executeUpdate();
 
-                // 2) 리뷰 삭제
-                pstmtReview.setLong(1, autoId);
-                pstmtReview.setLong(2, autoId);
-                pstmtReview.executeUpdate();
 
-                // 3) 거래 기록 삭제
-                pstmtTrans.setLong(1, autoId);
-                pstmtTrans.setLong(2, autoId);
-                pstmtTrans.executeUpdate();
 
+                // 3) 모임 기록 삭제
+                pstmtMeeting.setLong(1, autoId);
+                pstmtMeeting.executeUpdate();
+                
                 // 4) 채팅방 삭제
                 pstmtChat.setLong(1, autoId);
-                pstmtChat.setLong(2, autoId);
                 pstmtChat.executeUpdate();
 
                 // 5) 상품 삭제

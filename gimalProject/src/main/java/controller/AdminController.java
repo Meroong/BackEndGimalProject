@@ -486,8 +486,14 @@ public class AdminController extends HttpServlet {
         long reportId = Long.parseLong(req.getParameter("id"));     // 신고 id
 
         // 1) 유저 차단(탈퇴 처리)
-        int blockResult = adminService.blockUser(userId);
-        System.out.println("[AdminController] deleteUserFromReport blockResult = " + blockResult);
+		/*
+		 * int blockResult = adminService.blockUser(userId);
+		 * System.out.println("[AdminController] deleteUserFromReport blockResult = " +
+		 * blockResult);
+		 */
+         // 1) 유저 삭제
+        int deleteUserResult = adminService.deleteUser(userId);
+        System.out.println("[AdminController] deleteUser result = " + deleteUserResult);
 
         // 2) 신고 데이터 DB에서 삭제
         int delResult = adminService.deleteReport(reportId);

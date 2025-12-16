@@ -134,7 +134,7 @@ public class UserController extends HttpServlet {
 
             } else {
                 req.setAttribute("errorMsg", "아이디 또는 비밀번호를 확인해주세요.");
-                req.getRequestDispatcher("/WEB-INF/views/user/login.jsp").forward(req, resp);
+                resp.sendRedirect(req.getContextPath() + "/page/login");
                 return;
             }
 

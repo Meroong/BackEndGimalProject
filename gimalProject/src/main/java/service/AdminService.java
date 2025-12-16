@@ -79,9 +79,10 @@ public class AdminService {
 
     // 🔥 회원 삭제(탈퇴)
     public int deleteUser(long id) {
+    	System.out.println("SERVICE: deleteUSER");
         try {
-            UserDAO userDao = new UserDAO();
-            return userDao.delete(id);
+            AdminUserDAO dao = new AdminUserDAO();
+            return dao.deleteUser(id);   
         } catch (Exception e) {
             e.printStackTrace();
             return 0;
