@@ -59,7 +59,7 @@ public class DreamEditController extends HttpServlet {
         }
 
         request.setAttribute("post", post);
-        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/dream/edit.jsp");
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/dream/edit.jsp");
         rd.forward(request, response);
     }
 
