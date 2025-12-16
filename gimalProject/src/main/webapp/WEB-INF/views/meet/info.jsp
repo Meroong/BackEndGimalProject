@@ -196,6 +196,27 @@ header {
 .header-spacer1 {
     height: 50px;
 }
+/* 마감 버튼 (비활성) */
+.closed-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background: linear-gradient(180deg, #2c2c2c, #111);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    border-radius: 999px;          /* pill 버튼 */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+    letter-spacing: 0.5px;
+    user-select: none;
+    pointer-events: none;          /* 🔥 클릭 완전 차단 */
+    opacity: 0.95;
+}
+
+/* 카드 안에서 오른쪽 정렬하고 싶을 때 */
+.meeting-meta-bottom .closed-btn {
+    margin-left: auto;
+}
+
 <div class="header-spacer"></div>
 </style>
 </head>
@@ -324,12 +345,26 @@ header {
 
                     <%-- 로그인된 상태에서: 참여/나가기/수정 표시 --%>
 
-                    <% if(!Boolean.TRUE.equals(isParticipant) && !Boolean.TRUE.equals(isCreator)) { %>
-                        <form action="<%= request.getContextPath() %>/meeting/join" method="post" style="display:inline;">
-                            <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
-                            <button class="btn">참여하기</button>
-                        </form>
-                    <% } %>
+					<% if (
+					        Boolean.TRUE.equals(isLogin)
+					        && "OPEN".equals(m.getStatus())          // 🔥 모집중일 때만
+					        && !Boolean.TRUE.equals(isParticipant)
+					        && !Boolean.TRUE.equals(isCreator)
+					    ) { %>
+					
+					    <form action="<%= request.getContextPath() %>/meeting/join"
+					          method="post"
+					          style="display:inline;">
+					        <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
+					        <button class="btn">참여하기</button>
+					    </form>
+					
+					<% } %>
+						<% if (!"OPEN".equals(m.getStatus())) { %>
+						    <div class="closed-btn">
+						        모집 마감
+						    </div>
+						<% } %>
 
                     <% if(Boolean.TRUE.equals(isParticipant) && !Boolean.TRUE.equals(isCreator)) { System.out.println(m.getStatus()); %>
                         <form action="<%= request.getContextPath() %>/meeting/quit" method="post" style="display:inline; margin-left:10px;">

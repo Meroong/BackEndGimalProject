@@ -186,11 +186,13 @@ ${fn:escapeXml(post.content)}
 			  <input type="hidden" name="hostId" value="${post.writerId}">
 			</form>
 			
-			<a href="javascript:void(0)"
-			   class="dream-detail-chat-btn"
-			   onclick="handleChatClick()">
-			   채팅하기
-			</a>
+			<c:if test="${not isOwner}">
+			  <a href="javascript:void(0)"
+			     class="dream-detail-chat-btn"
+			     onclick="handleChatClick()">
+			     채팅하기
+			  </a>
+			</c:if>
 
             <c:if test="${isOwner}">      	
               <div class="dream-detail-owner-actions">
@@ -210,15 +212,17 @@ ${fn:escapeXml(post.content)}
                 </form>
               </div>
             </c:if>
-            <button type="button"
-			        class="dream-detail-report-btn"
-			        onclick="handleReportClick(
-			            'DREAM',
-			            '${post.writerId}',
-			            '${post.dreamId}'
-			        )">
-			    신고하기
-			</button>
+			<c:if test="${not isOwner}">
+			  <button type="button"
+			          class="dream-detail-report-btn"
+			          onclick="handleReportClick(
+			              'DREAM',
+			              '${post.writerId}',
+			              '${post.dreamId}'
+			          )">
+			      신고하기
+			  </button>
+			</c:if>
           </div>
         </div>
       </section>

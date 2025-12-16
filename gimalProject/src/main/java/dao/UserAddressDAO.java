@@ -42,6 +42,7 @@ public class UserAddressDAO {
         return null;
     }
 
+
     // 유저 주소 저장 (없으면 insert, 있으면 update)
     public int saveOrUpdate(UserAddressDTO dto) {
         if (getAddressByUserId(dto.getUserId()) != null) {
@@ -53,18 +54,19 @@ public class UserAddressDAO {
 
     // 주소 삽입
     private int insertAddress(UserAddressDTO dto) {
-        String sql = "INSERT INTO user_address (user_id, road_address, jibun_address, addr_detail) "
-                   + "VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO user_address (user_id, road_address, jibun_address, addr_detail, dong_name, latitude, longitude) "
+                   + "VALUES (?, ?, ?, ?,?, ?, ?)";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
 
             pstmt.setLong(1, dto.getUserId());
             pstmt.setString(2, dto.getRoadAddress());
             pstmt.setString(3, dto.getJibunAddress());
-			pstmt.setString(4, dto.getAddrDetail());/*
-													 * pstmt.setDouble(5, dto.getLatitude()); pstmt.setDouble(6,
-													 * dto.getLongitude());
-													 */
+			pstmt.setString(4, dto.getAddrDetail());
+			pstmt.setString(5, dto.getDongName()); 
+			pstmt.setDouble(6, dto.getLatitude()); 
+			pstmt.setDouble(7,dto.getLongitude());
+													 
 
             return pstmt.executeUpdate();
 
@@ -78,7 +80,7 @@ public class UserAddressDAO {
     // 주소 수정
     private int updateAddress(UserAddressDTO dto) {
     	System.out.println("work DBquery: updateAddress");
-        String sql = "UPDATE user_address SET road_address = ?, jibun_address = ?, addr_detail = ?, "
+        String sql = "UPDATE user_address SET road_address = ?, jibun_address = ?, addr_detail = ?, dong_name = ?, "
                    + "latitude = ?, longitude = ?, updated_at= CURRENT_TIMESTAMP WHERE user_id = ?";
         try (Connection con = JDBCUtil.jdbcCon();
              PreparedStatement pstmt = con.prepareStatement(sql)) {
@@ -86,9 +88,10 @@ public class UserAddressDAO {
             pstmt.setString(1, dto.getRoadAddress());
             pstmt.setString(2, dto.getJibunAddress());
             pstmt.setString(3, dto.getAddrDetail());
-			pstmt.setDouble(4, dto.getLatitude()); 
-			pstmt.setDouble(5, dto.getLongitude());
-			pstmt.setLong(6, dto.getUserId());
+            pstmt.setString(4, dto.getDongName());
+			pstmt.setDouble(5, dto.getLatitude()); 
+			pstmt.setDouble(6, dto.getLongitude());
+			pstmt.setLong(7, dto.getUserId());
 												 
             
 			System.out.println("주소 수정 디비쿼리 성공");

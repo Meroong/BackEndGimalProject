@@ -521,6 +521,7 @@ function needLogin() {
                     </select>
                 </div>
             </div>
+            </form>
             
             <!-- 우측 콘텐츠 -->
             <div class="content">
@@ -535,60 +536,62 @@ function needLogin() {
 			<% } else {
 			       for (MeetingInfoDTO m : list) { %>
 			
-			<div class="meeting-card"
-			     onclick="location.href='<%= request.getContextPath() %>/meeting/info?meetingId=<%= m.getMeetingId() %>'">
+			<div class="meeting-card">
+
+			    <!-- 🔥 카드 클릭 영역 (상세 이동 전용) -->
+			    <div class="card-click"
+			         onclick="location.href='<%= request.getContextPath() %>/meeting/info?meetingId=<%= m.getMeetingId() %>'">
 			
-			    <div class="meeting-title"><%= m.getTitle() %></div>
-			    <div class="meeting-content"><%= m.getContent() %></div>
+			        <div class="meeting-title"><%= m.getTitle() %></div>
+			        <div class="meeting-content"><%= m.getContent() %></div>
 			
-			    <div class="meeting-meta-top">
-				    <span class="meet-date"><%= m.getDateStr() %></span>
-				    <span class="meet-dong"><%= m.getDongName() %></span>
-				</div>
-				
-				<div class="meeting-meta-bottom">
-
-				    <!-- 조회수 -->
-				    <span class="view-wrapper">
-				        <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" class="view-icon">
-				        <span class="view-count"><%= m.getViewCount() %></span>
-				    </span>
-				
-				    <!-- 몇분전 -->
-				    <span class="time-ago"><%= m.getTimeAgo() %></span>
-				
-				    <!-- 모집 인원 -->
-				    <span class="member-count">
-				        <%= m.getCurrentMembers() %> / <%= m.getMaxMembers() %>명
-				    </span>
-				
-				    <!-- 상태 뱃지 -->
-				    <% if ("OPEN".equals(m.getStatus())) { %>
-				        <span class="status-badge open">모집중</span>
-				    <% } else { %>
-				        <span class="status-badge closed">마감</span>
-				    <% } %>
-				
-				    <!-- 참여 버튼 (🔥 조건 엄격) -->
-				    <% if (
-				            isLogin
-				            && "OPEN".equals(m.getStatus())
-				            && !m.isCreator()      /* 👉 DTO에 creator 여부 boolean 있으면 최고 */
-				            && !m.isParticipant()  /* 👉 참여 여부 */
-				        ) { %>
-				
-				        <form action="<%= request.getContextPath() %>/meeting/join"
-				              method="post"
-				              style="margin-left:auto;">
-				            <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
-				            <button type="submit" class="join-btn">참여하기</button>
-				        </form>
-				
-				    <% } %>
-				
-				</div>
-
-
+			        <div class="meeting-meta-top">
+			            <span class="meet-date"><%= m.getDateStr() %></span>
+			            <span class="meet-dong"><%= m.getDongName() %></span>
+			        </div>
+			
+			        <div class="meeting-meta-bottom">
+			
+			            <!-- 조회수 -->
+			            <span class="view-wrapper">
+			                <img src="https://cdn-icons-png.flaticon.com/512/709/709612.png" class="view-icon">
+			                <span class="view-count"><%= m.getViewCount() %></span>
+			            </span>
+			
+			            <!-- 몇분전 -->
+			            <span class="time-ago"><%= m.getTimeAgo() %></span>
+			
+			            <!-- 모집 인원 -->
+			            <span class="member-count">
+			                <%= m.getCurrentMembers() %> / <%= m.getMaxMembers() %>명
+			            </span>
+			
+			            <!-- 상태 뱃지 -->
+			            <% if ("OPEN".equals(m.getStatus())) { %>
+			                <span class="status-badge open">모집중</span>
+			            <% } else { %>
+			                <span class="status-badge closed">마감</span>
+			            <% } %>
+			
+			        </div>
+			    </div>
+			
+			    <!-- 🔥 버튼 영역 (클릭 전파 ❌) -->
+			    <% if (
+			            isLogin
+			            && "OPEN".equals(m.getStatus())
+			            && !m.isCreator()
+			            && !m.isParticipant()
+			        ) { %>
+			
+			        <form action="<%= request.getContextPath() %>/meeting/join"
+			              method="post"
+			              style="margin-top:12px; text-align:right;">
+			            <input type="hidden" name="meetingId" value="<%= m.getMeetingId() %>">
+			            <button type="submit" class="join-btn">참여하기</button>
+			        </form>
+			
+			    <% } %>
 			
 			</div>
 			
@@ -596,7 +599,7 @@ function needLogin() {
 
             </div>
         </div>
-    </form>
+    
 
 </div>
 

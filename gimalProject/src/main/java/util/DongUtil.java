@@ -4,7 +4,7 @@ public class DongUtil {
     public String extractAreaUnit(String jibunAddress) {
     	System.out.println("Service: extractAreaUnit");
         if (jibunAddress == null || jibunAddress.isBlank()) {
-            return "구로동"; // 기본값
+            return "우리동네"; // 기본값
         }
 
         String[] parts = jibunAddress.split(" ");
@@ -19,6 +19,6 @@ public class DongUtil {
                 return p;
             }
         }
-        return "구로동";
+        return "우리동네";
     }
 }

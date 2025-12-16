@@ -506,10 +506,13 @@ public class MeetingController extends HttpServlet {
 				        }
 				    } catch (Exception e) {
 				        e.printStackTrace();
-				        req.setAttribute("errorMsg", e.getMessage());
 
-				        // 에러 메시지와 함께 상세 페이지로 되돌리기
-				        resp.sendRedirect(req.getContextPath() + "/meeting/info?meetingId=" + meetId);
+				        // ❗ 에러 메시지 alert
+				        resp.setContentType("text/html; charset=UTF-8");
+				        resp.getWriter().println(
+				            "<script>alert('" + e.getMessage() + "'); location.href='"
+				            + req.getContextPath() + "/meeting/info?meetingId=" + meetId + "';</script>"
+				        );
 				    }
 				    return;
 				    

@@ -312,6 +312,29 @@ public class MeetingService {
     	MeetingParticipantDTO participateDto = new MeetingParticipantDTO();
     	participateDto.setMeetingId(meetId);
     	participateDto.setUserId(userId);
+    	
+    	 // 모임 상태 조회
+        MeetingDTO meeting = new MeetingParticipantDAO().getMeetingForJoinCheck(meetId);
+        if (meeting == null) {
+            throw new Exception("존재하지 않는 모임입니다.");
+        }
+
+        // 모집 상태 체크 (🔥 핵심)
+        if (!"OPEN".equals(meeting.getStatus())) {
+            throw new Exception("모집이 마감된 모임입니다.");
+        }
+
+        // 중복 참여 방지
+        MeetingParticipantDAO participantDAO = new MeetingParticipantDAO();
+        if (participantDAO.isParticipant(meetId, userId)) {
+            throw new Exception("이미 참여한 모임입니다.");
+        }
+
+        // 정원 초과 방지
+        if (meeting.getCurrentMembers() >= meeting.getMaxMembers()) {
+            throw new Exception("모집 인원이 초과되었습니다.");
+        }
+
     			
     	
     	boolean result = new MeetingParticipantDAO().insertParticipant(participateDto);

@@ -231,7 +231,6 @@ public class UserController extends HttpServlet {
             String upAddrDetail  = req.getParameter("addrDetail");
             String upLatitude    = req.getParameter("latitude");
             String upLongitude   = req.getParameter("longitude");
-            String dongName = null;
             System.out.println(upLatitude);
             if (upLatitude != null && upLatitude.isBlank()) upLatitude = null;
             if (upLongitude != null && upLongitude.isBlank()) upLongitude = null;
@@ -268,7 +267,7 @@ public class UserController extends HttpServlet {
                     upLatitude,
                     upLongitude
                 );
-
+                System.out.println("업데이트 어드레스 진입점");
                 // 세션 갱신
                 UserAddressDTO updatedAddress =
                         userService.getAddressInfo(autoId);

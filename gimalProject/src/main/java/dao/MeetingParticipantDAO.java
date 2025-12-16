@@ -4,6 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import dto.MeetingDTO;
 import dto.MeetingParticipantDTO;
 import util.JDBCUtil;
 
@@ -166,5 +167,34 @@ public class MeetingParticipantDAO {
         }
 
         return false; // 기본값: 안 냄
+    }
+    public MeetingDTO getMeetingForJoinCheck(long meetingId) {
+
+        String sql = """
+            SELECT status, current_members, max_members
+            FROM meeting
+            WHERE id = ?
+        """;
+
+        try (Connection con = JDBCUtil.jdbcCon();
+             PreparedStatement pstmt = con.prepareStatement(sql)) {
+
+            pstmt.setLong(1, meetingId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    MeetingDTO dto = new MeetingDTO();
+                    dto.setStatus(rs.getString("status"));
+                    dto.setCurrentMembers(rs.getInt("current_members"));
+                    dto.setMaxMembers(rs.getInt("max_members"));
+                    return dto;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

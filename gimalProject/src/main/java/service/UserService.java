@@ -174,7 +174,7 @@ public class UserService {
         //동음면리 정보 추출 
         DongUtil dongUtil = new DongUtil();
         String dongName = dongUtil.extractAreaUnit(jibunAddress);
-
+        System.out.println(dongName);
         addr.setDongName(dongName);
 
         addressDAO.saveOrUpdate(addr);
