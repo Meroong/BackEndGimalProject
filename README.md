@@ -6,7 +6,6 @@
 
 DB 세팅
 
-
 DROP DATABASE IF EXISTS dorandoran;
 CREATE DATABASE dorandoran;
 USE dorandoran;
@@ -229,6 +228,18 @@ CREATE TABLE user_wallet (
     FOREIGN KEY (user_id) REFERENCES user(auto_id) ON DELETE CASCADE
 );
 
+CREATE TABLE weather_data (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    temp DOUBLE NOT NULL,              -- 현재 온도
+    weather VARCHAR(20) NOT NULL,      -- 맑음, 흐림, 비 등
+    pm10 INT NOT NULL,                 -- 미세먼지
+    latitude DOUBLE NOT NULL,          -- 위도
+    longitude DOUBLE NOT NULL,         -- 경도
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_weather_location_time (latitude, longitude, created_at)
+);
+
 -- ================================
 -- 💰 WALLET HISTORY
 -- ================================
@@ -285,98 +296,242 @@ SET FOREIGN_KEY_CHECKS = 1;
 -- ================================
 -- 📌 INSERT DATA
 -- ================================
+SET FOREIGN_KEY_CHECKS = 0;
 
-INSERT INTO user (user_id, user_password, user_name, nickname, role) VALUES
-('admin01','1234','관리자','관리자닉','ADMIN'),
-('user01','1234','김철수','철수','USER'),
-('user02','1234','이영희','영희','USER'),
-('user03','1234','박민수','민수','USER'),
-('user04','1234','최지은','지은','USER');
+-- ================================
+-- 🌦 WEATHER_DATA
+-- ================================
+CREATE TABLE IF NOT EXISTS weather_data (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    temp DOUBLE NOT NULL,
+    weather VARCHAR(20) NOT NULL,
+    pm10 INT NOT NULL,
+    latitude DOUBLE NOT NULL,
+    longitude DOUBLE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_weather_location_time (latitude, longitude, created_at)
+);
 
-INSERT INTO user_address (user_id, road_address, jibun_address, addr_detail, dong_name, latitude, longitude) VALUES
-(1,'서울 은평구','역촌동 1','101호','역촌동',37.60,126.92),
-(2,'서울 강남구','삼성동 2','202호','삼성동',37.51,127.06),
-(3,'서울 마포구','공덕동 3','303호','공덕동',37.55,126.95),
-(4,'서울 송파구','잠실동 4','404호','잠실동',37.51,127.10),
-(5,'서울 서초구','반포동 5','505호','반포동',37.50,127.01);
 
-INSERT INTO meeting_location (road_address, jibun_address, addr_detail, dong_name, latitude, longitude) VALUES
-('한강공원','이촌동','1구역','이촌동',37.52,126.97),
-('서울숲','성수동','정문','성수동',37.54,127.04),
-('올림픽공원','방이동','광장','방이동',37.51,127.12),
-('남산공원','회현동','타워','회현동',37.55,126.98),
-('보라매공원','신대방동','중앙','신대방동',37.49,126.92);
 
-INSERT INTO meeting (title, content, date, location_id, max_members, current_members, cost, tag, creator_id, weather) VALUES
-('조깅 모임','아침 조깅','2025-12-20 09:00:00',1,10,3,0,'운동',2,'맑음'),
-('독서 모임','책 읽기','2025-12-21 14:00:00',2,6,2,0,'독서',3,'흐림'),
-('반려견 산책','강아지와 산책','2025-12-22 10:00:00',3,8,4,0,'펫',4,'맑음'),
-('사진 출사','야경 촬영','2025-12-23 18:00:00',4,5,1,0,'사진',5,'맑음'),
-('요가 클래스','야외 요가','2025-12-24 08:00:00',5,7,3,0,'요가',2,'흐림');
+-- ================================
+-- 👤 USER
+-- ================================
+INSERT INTO user
+(user_id, user_password, user_name, nickname, trust_score, role)
+VALUES
+('admin01','1234','관리자','관리자닉',100,'ADMIN'),
+('user01','1234','김철수','철수',30,'USER'),
+('user02','1234','이영희','영희',50,'USER');
 
-INSERT INTO meeting_participant (meeting_id, user_id, paid) VALUES
-(1,2,TRUE),(1,3,FALSE),(1,4,FALSE),
-(2,3,TRUE),(2,5,FALSE),
-(3,4,TRUE),(3,2,FALSE),
-(4,5,TRUE),
-(5,2,FALSE),(5,3,FALSE);
+-- ================================
+-- 🏠 USER_ADDRESS
+-- ================================
 
-INSERT INTO chat_room (item_id, meeting_id, room_type, host_id) VALUES
-(NULL,1,'GROUP',2),
-(NULL,2,'GROUP',3),
-(1,NULL,'PRIVATE',2),
-(2,NULL,'PRIVATE',3),
-(NULL,3,'GROUP',4);
+INSERT INTO user_address
+(user_id, road_address, jibun_address, addr_detail, dong_name, latitude, longitude)
+VALUES
+(1,'서울특별시 은평구 연서로 59','서울특별시 은평구 역촌동 14-63','101호','역촌동',37.606215,126.922028),
+(2,'서울특별시 강남구 테헤란로 521','서울특별시 강남구 삼성동 159','202호','삼성동',37.5157864094542 ,127.051319226082),
+(3,'서울특별시 마포구 마포대로 130','서울특별시 마포구 공덕동 456','303호','공덕동',37.545487,126.951523);
+select * from user_address;
+-- ================================
+-- 📂 FILE_RESOURCE
+-- ================================
+INSERT INTO file_resource
+(file_url, file_name, original_name, file_type, size, used_type, used_id)
+VALUES
+('/upload/profile/saram.png','saram.png','saram.png','image/png',3540,'PROFILE',1),
+('/upload/profile/saram2.png','saram2.png','saram2.png','image/png',3540,'PROFILE',2),
+('/upload/profile/saram3.png','saram3.png','saram3.png','image/png',3540,'PROFILE',3);
 
-INSERT INTO chat_room_user (room_id, user_id) VALUES
-(1,2),(1,3),(1,4),
-(2,3),(2,5),
-(3,2),(3,4),
-(4,3),(4,5),
-(5,2),(5,4);
+INSERT INTO file_resource
+(file_url, file_name, original_name, file_type, size, used_type, used_id)
+VALUES
+('/upload/post/1/jutByeung.jpg','jutByeung.jpg','jutByeung.jpg','image/png',8123,'POST',1),
+('/upload/post/2/bohang.png','bohang.png','bohang.png','image/png',8123,'POST',2);
+-- ('/upload/post/1/jutByeung.jpg','jutByeung.jpg','jutByeung.jpg','image/png',8123,'POST',2),
+-- ('/upload/post/2/bohang.png','bohang.png','bohang.png','image/png',8123,'POST',3);
+UPDATE dream_post
+SET thumbnail_url = '/upload/post/1/jutByeung.jpg'
+WHERE dream_id = 1;
 
-INSERT INTO chat_message (room_id, sender_id, message_type, content) VALUES
-(1,2,'TEXT','조깅 몇 시에 하나요?'),
-(1,3,'TEXT','아침 9시입니다'),
-(2,3,'TEXT','책은 각자 가져오나요?'),
-(3,2,'TEXT','드림 물품 아직 있나요?'),
-(4,5,'TEXT','사진 장비 뭐 쓰세요?');
+UPDATE dream_post
+SET thumbnail_url = '/upload/post/2/bohang.png'
+WHERE dream_id = 2;
 
-INSERT INTO poll (room_id, title, expire_at) VALUES
+INSERT INTO file_resource
+(used_id, used_type, original_name, file_name, file_type, size, file_url)
+VALUES
+-- 역촌 조깅
+(1, 'MEETING', 'running.jpg', 'running.jpg', 'image/png', 2048, '/upload/meeting/running.jpg'),
+
+-- 은평 요가
+(2, 'MEETING', 'yoga.jpg', 'yoga.jpg', 'image/png', 2048, '/upload/meeting/yoga.jpg'),
+
+-- 삼성 산책
+(3, 'MEETING', 'walk.jpg', 'walk.jpg', 'image/png', 2048, '/upload/meeting/walk.jpg'),
+
+-- 코엑스 독서
+(4, 'MEETING', 'reading.jpg', 'reading.jpg', 'image/png', 2048, '/upload/meeting/reading.jpg'),
+
+-- 공덕 러닝
+(5, 'MEETING', 'running2.jpg', 'running2.jpg', 'image/png', 2048, '/upload/meeting/running2.jpg'),
+
+-- 공덕 브런치
+(6, 'MEETING', 'brunch.jpg', 'brunch.jpg', 'image/png', 2048, '/upload/meeting/brunch.jpg');
+
+
+
+-- ================================
+-- 🌙 DREAM_POST
+-- ================================
+INSERT INTO dream_post
+(writer_id, writer_type, title, content, category_code, condition_code, price, dong)
+VALUES
+(2,'USER','젖병 나눔합니다','선물 받아서 안쓰는 젖병 나눔해요! 삼성동까지 직접 와주세요!','ERRAND','흠집없는 중고',10000,'삼성동'),
+(3,'USER','보행기 나눔','보행기 나눔합니다. 아이가 이제 잘 걸어다녀서 필요없어서 나눔합니다!','수유/이유용품','새거',5000,'공덕동');
+
+-- ================================
+-- ⭐ REVIEW
+-- ================================
+INSERT INTO review
+(reviewer_id, reviewee_id, item_id, rating_manner, content)
+VALUES
+(2,3,1,5,'시간 약속 잘 지켜요'),
+(3,2,2,4,'친절했어요');
+
+-- ================================
+-- 📍 MEETING_LOCATION
+-- ================================
+INSERT INTO meeting_location
+(road_address, jibun_address, addr_detail, dong_name, latitude, longitude)
+VALUES
+('서울특별시 은평구 연서로 50','서울특별시 은평구 역촌동 13-45','근린공원','역촌동',37.605512,126.920931),
+('서울특별시 은평구 역말로 37','서울특별시 은평구 역촌동 17-12','체육센터','역촌동',37.607114,126.923554),
+
+('서울특별시 강남구 봉은사로 524','서울특별시 강남구 삼성동 73','봉은사 입구','삼성동',37.514575,127.057152),
+('서울특별시 강남구 영동대로 513','서울특별시 강남구 삼성동 168-1','코엑스','삼성동',37.511823,127.059159),
+
+('서울특별시 마포구 백범로 23','서울특별시 마포구 공덕동 256','오거리','공덕동',37.543971,126.950355),
+('서울특별시 마포구 마포대로 109','서울특별시 마포구 공덕동 404','공덕역','공덕동',37.544706,126.951822);
+
+-- ================================
+-- 🤝 MEETING
+-- ================================
+INSERT INTO meeting
+(title, content, date, location_id, max_members, current_members, cost, tag, creator_id, weather)
+VALUES
+('역촌 조깅','아침 러닝','2025-12-20 07:00:00',1,10,3,0,'운동',1,'맑음'),
+('은평 요가','요가 클래스','2025-12-21 10:00:00',2,8,2,5000,'요가',1,'흐림'),
+
+('삼성 산책','봉은사 산책','2025-12-20 08:00:00',3,10,4,0,'산책',2,'맑음'),
+('코엑스 독서','카페 독서','2025-12-21 14:00:00',4,6,3,0,'독서',2,'맑음'),
+
+('공덕 러닝','오거리 러닝','2025-12-20 06:30:00',5,12,5,0,'운동',3,'흐림'),
+('공덕 브런치','역 근처 브런치','2025-12-22 11:00:00',6,6,2,10000,'식사',3,'맑음');
+
+-- ================================
+-- 👥 MEETING_PARTICIPANT
+-- ================================
+INSERT INTO meeting_participant
+(meeting_id, user_id, paid)
+VALUES
+(1,1,TRUE),(1,2,FALSE),
+(3,2,TRUE),(4,2,FALSE),
+(5,3,TRUE),(6,3,FALSE);
+
+-- ================================
+-- 💬 CHAT_ROOM
+-- ================================
+INSERT INTO chat_room
+(item_id, meeting_id, room_type, host_id)
+VALUES
+(NULL,1,'GROUP',1),
+(NULL,3,'GROUP',2),
+(NULL,5,'GROUP',3);
+
+-- ================================
+-- 💭 CHAT_ROOM_USER
+-- ================================
+INSERT INTO chat_room_user
+(room_id, user_id)
+VALUES
+(1,1),(1,2),
+(2,2),
+(3,3);
+
+-- ================================
+-- 💬 CHAT_MESSAGE
+-- ================================
+INSERT INTO chat_message
+(room_id, sender_id, message_type, content)
+VALUES
+(1,1,'TEXT','안녕하세요!'),
+(1,2,'TEXT','반갑습니다'),
+(2,2,'TEXT','모임 시간 확인해주세요');
+
+-- ================================
+-- 📊 POLL
+-- ================================
+INSERT INTO poll
+(room_id, title, expire_at)
+VALUES
 (1,'모임 시간 투표','2025-12-19 23:59:59');
 
-INSERT INTO poll_option (poll_id, option_text) VALUES
-(1,'오전 9시'),
-(1,'오전 10시'),
-(1,'오후 2시');
+INSERT INTO poll_option
+(poll_id, option_text)
+VALUES
+(1,'오전 7시'),
+(1,'오전 8시'),
+(1,'오전 9시');
 
-INSERT INTO poll_vote (poll_id, user_id, option_id) VALUES
-(1,2,1),
-(1,3,2),
-(1,4,1);
+INSERT INTO poll_vote
+(poll_id, user_id, option_id)
+VALUES
+(1,1,1),
+(1,2,2);
 
-INSERT INTO user_wallet (user_id, balance) VALUES
-(1,100000),(2,50000),(3,30000),(4,20000),(5,15000);
+-- ================================
+-- 💰 USER_WALLET
+-- ================================
+INSERT INTO user_wallet
+(user_id, balance)
+VALUES
+(1,100000),
+(2,50000),
+(3,30000);
 
-INSERT INTO wallet_history (user_id, type, amount, description) VALUES
+-- ================================
+-- 💰 WALLET_HISTORY
+-- ================================
+INSERT INTO wallet_history
+(user_id, type, amount, description)
+VALUES
 (2,'CHARGE',30000,'카드 충전'),
 (3,'CHARGE',20000,'카드 충전'),
-(4,'MEETING_PAY',5000,'모임 참가비'),
-(5,'REFUND',3000,'환불'),
-(2,'MEETING_PAY',10000,'요가 클래스');
+(2,'MEETING_PAY',10000,'요가 클래스 결제');
 
-INSERT INTO mock_card (card_number, cvc, owner_name, valid_until, password, balance) VALUES
+-- ================================
+-- 💳 MOCK_CARD
+-- ================================
+INSERT INTO mock_card
+(card_number, cvc, owner_name, valid_until, password, balance)
+VALUES
 ('1111-2222-3333-4444','123','김철수','12/27','12',100000),
-('2222-3333-4444-5555','234','이영희','11/26','34',80000),
-('3333-4444-5555-6666','345','박민수','10/25','56',50000),
-('4444-5555-6666-7777','456','최지은','09/24','78',120000),
-('5555-6666-7777-8888','567','관리자','08/28','90',999999);
+('2222-3333-4444-5555','234','이영희','11/26','23',80000),
+('5555-6666-7777-8888','567','관리자','08/28','56',999999);
 
-INSERT INTO report (reporter_id, target_user_id, target_type, reason) VALUES
-(2,3,'USER','비매너 언행'),
-(3,4,'DREAM','허위 게시물'),
-(4,5,'MEETING','노쇼'),
-(5,2,'USER','욕설'),
-(1,3,'DREAM','부적절한 내용');
+-- ================================
+-- 🚨 REPORT
+-- ================================
+INSERT INTO report
+(reporter_id, target_user_id, target_type, reason)
+VALUES
+(2,3,'USER','비매너 언행');
 
-SELECT * FROM weather_data;
+SET FOREIGN_KEY_CHECKS = 1;
+
+
+select * from dream_post;
+
